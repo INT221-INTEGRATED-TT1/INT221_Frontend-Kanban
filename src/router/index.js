@@ -1,8 +1,13 @@
-import {createRouter, createWebHistory} from "vue-router"
+import {createRouter, createMemoryHistory} from "vue-router"
+import Table from "@/components/Table.vue"
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [{}],
+  history: createMemoryHistory(),
+  routes,
+})
+
+const routes = createRouter({
+  routes: [{path: "/table", component: Table, name: "table"}],
 })
 
 export default router
