@@ -1,13 +1,23 @@
-import {createRouter, createMemoryHistory} from "vue-router"
-import Table from "@/components/Table.vue"
+import {createRouter, createWebHistory} from "vue-router"
+import Task from "@/components/Task.vue"
+import TaskModalDetail from "@/components/TaskModalDetail.vue"
 
 const router = createRouter({
-  history: createMemoryHistory(),
-  routes,
+  history: createWebHistory(),
+
+  routes: [
+    {path: "/", redirect: "/task"},
+    {
+      path: "/task",
+      component: Task,
+      name: "task",
+      // children: [{path: "/details", component: TaskModalDetail}],
+      children: [{path: "details/:id", component: TaskModalDetail}],
+    },
+    
+    {path: "/details", component: TaskModalDetail}
+  ],
 })
 
-const routes = createRouter({
-  routes: [{path: "/table", component: Table, name: "table"}],
-})
 
 export default router
