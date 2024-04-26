@@ -15,7 +15,7 @@ const router = createRouter({
       name: "task",
       children: [
         {
-          path: "details/:id",
+          path: ":id",
           component: TaskModalDetail,
           async beforeEnter(to, from, next) {
             const id = parseInt(to.params.id)
@@ -37,7 +37,7 @@ const router = createRouter({
     },
 
     {path: "/details", component: TaskModalDetail, name: "task-modal-detail"},
-    {path: "/:pathMatch(.*)*", component: NotFound, name: "not-found"},
+    {path: "/:pathMatch(.*)*", component: NotFound, name: "not-found", redirect:"/task"},
   ],
 })
 

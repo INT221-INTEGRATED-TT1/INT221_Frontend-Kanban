@@ -6,9 +6,15 @@ import router from "@/router/index.js"
 const hasTask = ref(true)
 const hasNoTask = ref(false)
 const tasks = ref([])
+const convertStatus = {
+  NO_STATUS : "No Status",
+  TO_DO : "To Do",
+  DOING : "Doing",
+  DONE : "Done"
+}
 
 const showDetailsTaskId = (id) => {
-  router.push(`/task/details/${id}`)
+  router.push(`/task/${id}`)
 }
 
 onMounted(async () => {
@@ -20,6 +26,7 @@ onMounted(async () => {
       hasNoTask.value = true
       console.log("No task")
     }
+    
 
     tasks.value.forEach((task) => {
       if (task.assignees === null || task.assignees.trim().length === 0) {
@@ -56,21 +63,25 @@ onMounted(async () => {
         </thead>
         <tbody>
           <tr
-            class="itbkk-item text-[#121629] odd:bg-slate-200 even:bg-slate-50 cursor-pointer hover:bg-[#babfdd] hover:scale-95"
+            class="itbkk-item text-[#121629] italic odd:bg-slate-200 even:bg-slate-50 cursor-pointer hover:bg-[#babfdd] hover:scale-95"
             v-for="task in tasks"
             :key="task.id"
             @click="showDetailsTaskId(task.id)"
-            
           >
-            <td class="">{{ task.id }}</td>
+            <td>{{ task.id }}</td>
             <td class="itbkk-title">
               {{ task.title }}
             </td>
-            <td class="itbkk-assignees">
+            <td
+              class="itbkk-assignees"
+              :class="
+                task.assignees === 'Unassigned' ? 'italic text-gray-500' : ''
+              "
+            >
               {{ task.assignees }}
             </td>
             <td class="itbkk-status">
-              {{ task.status }}
+              {{ convertStatus[task.status] }}
             </td>
           </tr>
         </tbody>

@@ -7,13 +7,19 @@ import router from "@/router/index.js"
 const task = ref([])
 // const isOpen = ref(false)
 const route = useRoute()
+const convertStatus = {
+  NO_STATUS : "No Status",
+  TO_DO : "To Do",
+  DOING : "Doing",
+  DONE : "Done"
+}
 
 // const toggleDropdown = () => {
 //   isOpen.value = !isOpen.value
 // }
 
 const selectStatus = (status) => {
-  task.value.status = status
+  task.value.status = convertStatus[status]
   // isOpen.value = false
 }
 
@@ -43,7 +49,7 @@ onMounted(async () => {
       task.value.description.trim().length === 0
     ) {
       // console.log("no desc")
-      task.value.description = "No description provided"
+      task.value.description = "No Description Provided"
     }
 
     if (
@@ -93,20 +99,20 @@ onMounted(async () => {
                     role="button"
                     class="font-normal italic text-gray-500"
                   >
-                    {{ task.status }}
+                    {{ convertStatus[task.status] }}
                   </div>
                   <ul
                     tabindex="0"
                     class="dropdown-content z-[1] menu p-2 shadow bg-slate-300 rounded-box w-52 cursor-pointer"
                   >
-                    <li
+                    <!-- <li
                       v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
                       :key="status"
                       @click="selectStatus(status)"
                       :class="formattedStatus.class"
                     >
                       {{ status }}
-                    </li>
+                    </li> -->
                   </ul>
                 </div>
               </span>
@@ -142,7 +148,7 @@ onMounted(async () => {
             rows="6"
             style="resize: none"
             :class="
-              task.description === 'No description provided'
+              task.description === 'No Description Provided'
                 ? 'italic text-gray-500'
                 : ''
             "
