@@ -13,14 +13,18 @@ const convertStatus = {
   DOING : "Doing",
   DONE : "Done"
 }
-
+const statusConvert = {
+  "No Status" : "NO_STATUS",
+  "To Do" : "TO_DO",
+  "Doing" : "DOING",
+  "Done" : "DONE"
+}
 // const toggleDropdown = () => {
 //   isOpen.value = !isOpen.value
 // }
 
 const selectStatus = (status) => {
-  task.value.status = convertStatus[status]
-  // isOpen.value = false
+  task.value.status = statusConvert[status]
 }
 
 const formatTimezone = () => {
@@ -32,13 +36,27 @@ const formatTimezone = () => {
   return timeZone
 }
 
-const formattedStatus = computed(() => {
-  if (!task.value.status) {
-    return {class: "italic text-gray-500", text: "Unassigned"}
-  } else {
-    return {class: "", text: task.value.status}
+// const formattedStatus = computed(() => {
+//   if (!task.value.status) {
+//     return {class: "italic text-gray-500", text: "Unassigned"}
+//   } else {
+//     return {class: "", text: task.value.status}
+//   }
+// })
+
+const formatDateTime = (baseFormatDate) => {
+  const date = new Date(baseFormatDate)
+  const options = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
   }
-})
+  const formattedDate = date.toLocaleString('en-GB', options).replace(/\//g, '/').replace(',', '')
+  return formattedDate
+}
 
 onMounted(async () => {
   try {
@@ -60,6 +78,8 @@ onMounted(async () => {
     }
 
     console.log(fetchTask)
+    task.value.createdOn = formatDateTime(task.value.createdOn)
+    task.value.updatedOn = formatDateTime(task.value.updatedOn)
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }
@@ -105,14 +125,14 @@ onMounted(async () => {
                     tabindex="0"
                     class="dropdown-content z-[1] menu p-2 shadow bg-slate-300 rounded-box w-52 cursor-pointer"
                   >
-                    <!-- <li
+                    <li
                       v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
                       :key="status"
                       @click="selectStatus(status)"
-                      :class="formattedStatus.class"
+                      
                     >
                       {{ status }}
-                    </li> -->
+                    </li>
                   </ul>
                 </div>
               </span>

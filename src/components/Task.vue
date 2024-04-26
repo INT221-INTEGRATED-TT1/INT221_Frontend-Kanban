@@ -26,15 +26,14 @@ onMounted(async () => {
       hasNoTask.value = true
       console.log("No task")
     }
-    
 
     tasks.value.forEach((task) => {
       if (task.assignees === null || task.assignees.trim().length === 0) {
         task.assignees = "Unassigned"
       }
     })
-
     console.log(fetchTasks)
+
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }
