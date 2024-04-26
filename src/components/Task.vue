@@ -3,7 +3,8 @@ import {ref, onMounted} from "vue"
 import {getTasksData} from "/src/libs/crud.js"
 import router from "@/router/index.js"
 
-const hasData = ref(false)
+const hasTask = ref(true)
+const hasNoTask = ref(false)
 const tasks = ref([])
 
 const showDetailsTaskId = (id) => {
@@ -14,7 +15,18 @@ onMounted(async () => {
   try {
     const fetchTasks = await getTasksData()
     tasks.value = fetchTasks
-    hasData.value = true
+    if (tasks.value.length === 0) {
+      hasTask.value = false
+      hasNoTask.value = true
+      console.log("No task")
+    }
+
+    tasks.value.forEach((task) => {
+      if (task.assignees === null || task.assignees.trim().length === 0) {
+        task.assignees = "Unassigned"
+      }
+    })
+
     console.log(fetchTasks)
   } catch (error) {
     console.log("Error fetching tasks : ", error)
@@ -23,34 +35,43 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="w-screen h-screen bg-[#eaeaea]">
-    <div class="overflow-x-auto">
-      <table class="table text-center bg-slate-100 flex">
+  <main class="w-screen h-screen bg-[#232946]">
+    <div
+      v-if="hasTask"
+      class="overflow-x-auto h-full flex flex-col justify-center items-center gap-y-10"
+    >
+      <h1 class="text-[#fffffe] font-bold text-5xl">
+        IT-Bangmod Kradan Kanban (ITB-KK)
+      </h1>
+      <table
+        class="table-lg border-separate rounded-xl bg-[#b8c1ec] text-center max-w-screen-xl"
+      >
         <thead>
-          <tr class="text-2xl text-[#5c5c5c]">
-            <th></th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Assignees</th>
-            <th>Status</th>
-            <th>Create On</th>
-            <th>Update On</th>
+          <tr class="text-2xl text-[#121629]">
+            <th class=""></th>
+            <th class="">Title</th>
+            <th class="">Assignees</th>
+            <th class="">Status</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="text-[#5c5c5c] odd:bg-slate-200"
+            class="itbkk-item text-[#121629] odd:bg-slate-200 even:bg-slate-50 cursor-pointer hover:bg-[#babfdd] hover:scale-95"
             v-for="task in tasks"
             :key="task.id"
             @click="showDetailsTaskId(task.id)"
+            
           >
-            <th>{{ task.id }}</th>
-            <td>{{ task.title }}</td>
-            <td>{{ task.description }}</td>
-            <td>{{ task.assignees }}</td>
-            <td>{{ task.status }}</td>
-            <td>{{ task.createdOn }}</td>
-            <td>{{ task.updatedOn }}</td>
+            <td class="">{{ task.id }}</td>
+            <td class="itbkk-title">
+              {{ task.title }}
+            </td>
+            <td class="itbkk-assignees">
+              {{ task.assignees }}
+            </td>
+            <td class="itbkk-status">
+              {{ task.status }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -59,24 +80,26 @@ onMounted(async () => {
     <router-view></router-view>
 
     <div
-      v-if="hasData && tasks.length === 0"
+      v-if="hasNoTask"
       class="overflow-x-auto h-full flex justify-center items-center"
     >
-      <table class="text-center max-w-screen-2xl bg-slate-100">
+      <table class="table table-lg text-center bg-slate-100 max-w-screen-xl">
         <thead>
-          <tr class="text-2xl text-[#383838]">
-            <th></th>
-            <th>Title</th>
-            <th>Description</th>
-            <th>Assignees</th>
-            <th>Status</th>
-            <th>Create On</th>
-            <th>Update On</th>
+          <tr class="text-2xl text-[#5c5c5c]">
+            <th class="border border-slate-600"></th>
+            <th class="border border-slate-600">Title</th>
+            <th class="border border-slate-600">Assignees</th>
+            <th class="border border-slate-600">Status</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td colspan="4" class="text-xl text-[#383838]">No Task</td>
+          <tr class="itbkk-item text-[#5c5c5c]">
+            <td
+              colspan="4"
+              class="border border-slate-700 text-gray-500 text-center"
+            >
+              No Task
+            </td>
           </tr>
         </tbody>
       </table>

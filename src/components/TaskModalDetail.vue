@@ -1,33 +1,57 @@
 <script setup>
-import {ref, onMounted} from "vue"
+import {ref, onMounted, computed} from "vue"
 import {getTask} from "/src/libs/crud.js"
 import {useRoute} from "vue-router"
-
-// defineEmits(["closeTask"])
+import router from "@/router/index.js"
 
 const task = ref([])
-const closeModal = ref(true)
-const defaultStatus = ref("Unassigned")
-const isOpen = ref(false)
+// const isOpen = ref(false)
 const route = useRoute()
 
-const disableModal = () => {
-  closeModal.value = !closeModal.value
-}
-
-const toggleDropdown = () => {
-  isOpen.value = !isOpen.value
-}
+// const toggleDropdown = () => {
+//   isOpen.value = !isOpen.value
+// }
 
 const selectStatus = (status) => {
-  defaultStatus.value = status
-  isOpen.value = false
+  task.value.status = status
+  // isOpen.value = false
 }
+
+const formatTimezone = () => {
+  const options = {
+    timeZoneName: "long",
+  }
+  const formatter = new Intl.DateTimeFormat([], options)
+  const {timeZone} = formatter.resolvedOptions()
+  return timeZone
+}
+
+const formattedStatus = computed(() => {
+  if (!task.value.status) {
+    return {class: "italic text-gray-500", text: "Unassigned"}
+  } else {
+    return {class: "", text: task.value.status}
+  }
+})
 
 onMounted(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
+    if (
+      task.value.description === null ||
+      task.value.description.trim().length === 0
+    ) {
+      // console.log("no desc")
+      task.value.description = "No description provided"
+    }
+
+    if (
+      task.value.assignees === null ||
+      task.value.assignees.trim().length === 0
+    ) {
+      task.value.assignees = "Unassigned"
+    }
 
     console.log(fetchTask)
   } catch (error) {
@@ -47,7 +71,7 @@ onMounted(async () => {
     >
       <div class="max-sm:overflow-y-scroll w-2/3 h-3/4 bg-white rounded-md">
         <div class="flex justify-end pr-10 pt-5">
-          <button @click="disableModal" class="text-black">
+          <button @click="router.push('/task')" class="text-black">
             <span class="material-symbols-outlined"> close </span>
           </button>
         </div>
@@ -69,16 +93,20 @@ onMounted(async () => {
                     role="button"
                     class="font-normal italic text-gray-500"
                   >
-                    {{ defaultStatus }}
+                    {{ task.status }}
                   </div>
                   <ul
                     tabindex="0"
                     class="dropdown-content z-[1] menu p-2 shadow bg-slate-300 rounded-box w-52 cursor-pointer"
                   >
-                    <li @click="selectStatus('No-Status')">No-Status</li>
-                    <li @click="selectStatus('To-Do')">To-Do</li>
-                    <li @click="selectStatus('In-Progress')">In-Progress</li>
-                    <li @click="selectStatus('Complete')">Complete</li>
+                    <li
+                      v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
+                      :key="status"
+                      @click="selectStatus(status)"
+                      :class="formattedStatus.class"
+                    >
+                      {{ status }}
+                    </li>
                   </ul>
                 </div>
               </span>
@@ -86,38 +114,55 @@ onMounted(async () => {
             <!-- Assignees -->
             <h2 class="itbkk-assignees text-2xl font-extrabold">
               Assignees :
-              <span class="font-normal text-xl"> {{ task.assignees }}</span>
+              <span
+                class="font-normal text-xl"
+                :class="
+                  task.assignees === 'Unassigned' ? 'italic text-gray-500' : ''
+                "
+              >
+                {{ task.assignees }}</span
+              >
             </h2>
 
             <!-- CreatedOn -->
-            <h2 class="itbkk-timezone text-2xl font-extrabold">
+            <h2 class="itbkk-created-on text-2xl font-extrabold">
               Created On :
               <span class="font-normal text-xl">{{ task.createdOn }}</span>
             </h2>
 
             <!-- UpdatedOn -->
-            <h2 class="itbkk-timezone text-2xl font-extrabold">
+            <h2 class="itbkk-updated-on text-2xl font-extrabold">
               Updated On :
               <span class="font-normal text-xl">{{ task.updatedOn }}</span>
             </h2>
           </div>
 
           <textarea
-            placeholder="No description provided"
             class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-slate-200"
             rows="6"
             style="resize: none"
-          >{{ task.description }}</textarea>
+            :class="
+              task.description === 'No description provided'
+                ? 'italic text-gray-500'
+                : ''
+            "
+            >{{ task.description }}</textarea
+          >
         </div>
         <div class="flex justify-between mx-10 pt-5">
           <!-- timezone -->
           <h2 class="itbkk-timezone text-2xl font-extrabold">
             TimeZone :
-            <span class="font-normal text-xl">{{ }}</span>
+            <span class="font-normal text-xl">{{ formatTimezone() }}</span>
           </h2>
 
           <div class="">
-            <button class="itbkk-button btn btn-success w-[4rem]">OK</button>
+            <button
+              @click="router.push('/task')"
+              class="itbkk-button btn btn-success w-[4rem]"
+            >
+              OK
+            </button>
           </div>
         </div>
       </div>

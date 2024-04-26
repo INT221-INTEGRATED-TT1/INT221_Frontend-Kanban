@@ -1,6 +1,6 @@
 const getTasksData = async () => {
   return await fetch(`${import.meta.env.VITE_DB_URL}/v1/tasks`).then((res) =>
-    res.json()
+    res.json().then(res.status)
   )
 }
 
