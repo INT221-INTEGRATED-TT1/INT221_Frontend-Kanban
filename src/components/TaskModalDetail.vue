@@ -1,6 +1,6 @@
 <script setup>
-import {ref, onMounted, computed} from "vue"
-import {getTask} from "/src/libs/crud.js"
+import {ref, onBeforeMount} from "vue"
+import {getTask} from "@/libs/crud"
 import {useRoute} from "vue-router"
 import router from "@/router/index.js"
 
@@ -8,17 +8,18 @@ const task = ref([])
 // const isOpen = ref(false)
 const route = useRoute()
 const convertStatus = {
-  NO_STATUS : "No Status",
-  TO_DO : "To Do",
-  DOING : "Doing",
-  DONE : "Done"
+  NO_STATUS: "No Status",
+  TO_DO: "To Do",
+  DOING: "Doing",
+  DONE: "Done",
 }
 const statusConvert = {
-  "No Status" : "NO_STATUS",
-  "To Do" : "TO_DO",
-  "Doing" : "DOING",
-  "Done" : "DONE"
+  "No Status": "NO_STATUS",
+  "To Do": "TO_DO",
+  "Doing": "DOING",
+  "Done": "DONE",
 }
+
 // const toggleDropdown = () => {
 //   isOpen.value = !isOpen.value
 // }
@@ -47,33 +48,29 @@ const formatTimezone = () => {
 const formatDateTime = (baseFormatDate) => {
   const date = new Date(baseFormatDate)
   const options = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
   }
-  const formattedDate = date.toLocaleString('en-GB', options).replace(/\//g, '/').replace(',', '')
+  const formattedDate = date
+    .toLocaleString("en-GB", options)
+    .replace(/\//g, "/")
+    .replace(",", "")
   return formattedDate
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
-    if (
-      task.value.description === null ||
-      task.value.description.trim().length === 0
-    ) {
-      // console.log("no desc")
+
+    if (!task.value.description || task.value.description.trim().length === 0) {
       task.value.description = "No Description Provided"
     }
-
-    if (
-      task.value.assignees === null ||
-      task.value.assignees.trim().length === 0
-    ) {
+    if (!task.value.assignees || task.value.assignees.trim().length === 0) {
       task.value.assignees = "Unassigned"
     }
 
@@ -81,7 +78,7 @@ onMounted(async () => {
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
   } catch (error) {
-    console.log("Error fetching tasks : ", error)
+    console.log(`Error fetching task ${route.params.id}: `, error)
   }
 })
 </script>
@@ -91,109 +88,110 @@ onMounted(async () => {
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
   />
-  <main class="w-screen h-screen bg-[#eaeaea]">
-    <section
-      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-    >
-      <div class="max-sm:overflow-y-scroll w-2/3 h-3/4 bg-white rounded-md">
-        <div class="flex justify-end pr-10 pt-5">
-          <button @click="router.push('/task')" class="text-black">
-            <span class="material-symbols-outlined"> close </span>
-          </button>
-        </div>
-        <div class="flex flex-col items-center gap-y-5">
-          <div
-            class="itbkk-title w-full text-3xl font-bold text-[#5c5c5c] pt-4 text-center"
-          >
-            {{ task.title }}
-          </div>
 
-          <div class="text-[#5c5c5c] flex flex-col w-3/4">
-            <!-- Status -->
-            <h2 class="itbkk-status text-2xl font-extrabold">
-              Status :
-              <span>
-                <div class="dropdown dropdown-right" @click="toggleDropdown">
-                  <div
-                    tabindex="0"
-                    role="button"
-                    class="font-normal italic text-gray-500"
-                  >
-                    {{ convertStatus[task.status] }}
-                  </div>
-                  <ul
-                    tabindex="0"
-                    class="dropdown-content z-[1] menu p-2 shadow bg-slate-300 rounded-box w-52 cursor-pointer"
-                  >
-                    <li
-                      v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
-                      :key="status"
-                      @click="selectStatus(status)"
-                      
-                    >
-                      {{ status }}
-                    </li>
-                  </ul>
+  <section
+    class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
+  >
+    <div class="max-sm:overflow-y-scroll w-3/4  py-10 p-10 bg-[#b8c1ec] rounded-md">
+      <div class="flex justify-end pr-10 pt-5">
+        <button @click="router.push('/task')" class="text-black">
+          <span class="material-symbols-outlined"> close </span>
+        </button>
+      </div>
+      <div class="flex flex-col items-center gap-y-5">
+        <div
+          class="itbkk-title w-full text-2xl font-bold text-[#5c5c5c] pt-4 text-center"
+        >
+          {{ task.title }}
+        </div>
+
+        <div class="text-[#5c5c5c] flex flex-col w-3/4">
+          <!-- Status -->
+          <h2 class="itbkk-status text-2xl font-extrabold">
+            Status :
+            <span>
+              <div class="dropdown dropdown-right">
+                <div
+                  tabindex="0"
+                  role="button"
+                  class="font-normal italic text-gray-500"
+                >
+                  {{ convertStatus[task.status] }}
                 </div>
-              </span>
-            </h2>
-            <!-- Assignees -->
-            <h2 class="itbkk-assignees text-2xl font-extrabold">
-              Assignees :
-              <span
-                class="font-normal text-xl"
-                :class="
-                  task.assignees === 'Unassigned' ? 'italic text-gray-500' : ''
-                "
+                <ul
+                  tabindex="0"
+                  class="dropdown-content z-[1] menu p-2 shadow bg-slate-300 rounded-box w-52 cursor-pointer"
+                >
+                  <li
+                    v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
+                    :key="status"
+                    @click="selectStatus(status)"
+                  >
+                    {{ status }}
+                  </li>
+                </ul>
+              </div>
+            </span>
+          </h2>
+          <!-- Assignees -->
+          <h2 class="itbkk-assignees text-2xl font-extrabold">
+            Assignees :
+            <span
+              class="font-normal text-xl"
+              :class="
+                task.assignees === 'Unassigned' ? 'italic text-gray-500' : ''
+              "
+            >
+              <textarea
+                rows="1"
+                class="rounded-md resize-none bg-slate-200 textarea-xs"
+                >{{ task.assignees }}</textarea
               >
-                {{ task.assignees }}</span
-              >
-            </h2>
-
-            <!-- CreatedOn -->
-            <h2 class="itbkk-created-on text-2xl font-extrabold">
-              Created On :
-              <span class="font-normal text-xl">{{ task.createdOn }}</span>
-            </h2>
-
-            <!-- UpdatedOn -->
-            <h2 class="itbkk-updated-on text-2xl font-extrabold">
-              Updated On :
-              <span class="font-normal text-xl">{{ task.updatedOn }}</span>
-            </h2>
-          </div>
-
-          <textarea
-            class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-slate-200"
-            rows="6"
-            style="resize: none"
-            :class="
-              task.description === 'No Description Provided'
-                ? 'italic text-gray-500'
-                : ''
-            "
-            >{{ task.description }}</textarea
-          >
-        </div>
-        <div class="flex justify-between mx-10 pt-5">
-          <!-- timezone -->
-          <h2 class="itbkk-timezone text-2xl font-extrabold">
-            TimeZone :
-            <span class="font-normal text-xl">{{ formatTimezone() }}</span>
+            </span>
           </h2>
 
-          <div class="">
-            <button
-              @click="router.push('/task')"
-              class="itbkk-button btn btn-success w-[4rem]"
-            >
-              OK
-            </button>
-          </div>
+          <!-- CreatedOn -->
+          <h2 class="itbkk-created-on text-2xl font-extrabold">
+            Created On :
+            <span class="font-normal text-xl">{{ task.createdOn }}</span>
+          </h2>
+
+          <!-- UpdatedOn -->
+          <h2 class="itbkk-updated-on text-2xl font-extrabold">
+            Updated On :
+            <span class="font-normal text-xl">{{ task.updatedOn }}</span>
+          </h2>
+        </div>
+
+        <textarea
+          class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-slate-200 p-8 resize-none"
+          rows="6"
+          :class="
+            task.description === 'No Description Provided'
+              ? 'italic text-gray-500'
+              : ''
+          "
+          >{{ task.description }}</textarea
+        >
+      </div>
+      <div class="flex justify-between mx-10 pt-5">
+        <!-- timezone -->
+        <h2 class="itbkk-timezone text-2xl font-extrabold text-[#5c5c5c]">
+          TimeZone :
+          <span class="font-normal text-xl">{{ formatTimezone() }}</span>
+        </h2>
+
+        <div>
+          <button
+            @click="router.push('/')"
+            class="itbkk-button btn btn-success w-[4rem]"
+          >
+            OK
+          </button>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 </template>
 
 <style scoped></style>

@@ -1,16 +1,16 @@
 <script setup>
 import {ref, onMounted} from "vue"
-import {getTasksData} from "/src/libs/crud.js"
+import {getTasksData} from "@/libs/crud.js"
 import router from "@/router/index.js"
 
 const hasTask = ref(true)
 const hasNoTask = ref(false)
 const tasks = ref([])
 const convertStatus = {
-  NO_STATUS : "No Status",
-  TO_DO : "To Do",
-  DOING : "Doing",
-  DONE : "Done"
+  NO_STATUS: "No Status",
+  TO_DO: "To Do",
+  DOING: "Doing",
+  DONE: "Done",
 }
 
 const showDetailsTaskId = (id) => {
@@ -28,12 +28,12 @@ onMounted(async () => {
     }
 
     tasks.value.forEach((task) => {
-      if (task.assignees === null || task.assignees.trim().length === 0) {
+      if (!task.assignees || task.assignees.trim().length === 0) {
         task.assignees = "Unassigned"
       }
     })
-    console.log(fetchTasks)
 
+    console.log(fetchTasks)
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }
@@ -44,13 +44,13 @@ onMounted(async () => {
   <main class="w-screen h-screen bg-[#232946]">
     <div
       v-if="hasTask"
-      class="overflow-x-auto h-full flex flex-col justify-center items-center gap-y-10"
+      class="overflow-x-auto overflow-y-auto h-full flex flex-col justify-center items-center gap-y-10"
     >
       <h1 class="text-[#fffffe] font-bold text-5xl">
         IT-Bangmod Kradan Kanban (ITB-KK)
       </h1>
       <table
-        class="table-lg border-separate rounded-xl bg-[#b8c1ec] text-center max-w-screen-xl"
+        class="table-lg border-separate rounded-xl bg-[#b8c1ec] text-center max-w-screen-xl p-2"
       >
         <thead>
           <tr class="text-2xl text-[#121629]">
@@ -60,7 +60,7 @@ onMounted(async () => {
             <th class="">Status</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="">
           <tr
             class="itbkk-item text-[#121629] italic odd:bg-slate-200 even:bg-slate-50 cursor-pointer hover:bg-[#babfdd] hover:scale-95"
             v-for="task in tasks"
