@@ -28,7 +28,7 @@ onMounted(async () => {
     }
 
     tasks.value.forEach((task) => {
-      if (!task.assignees || task.assignees.trim().length === 0) {
+      if (task.assignees === null || task.assignees.trim().length === 0) {
         task.assignees = "Unassigned"
       }
     })
