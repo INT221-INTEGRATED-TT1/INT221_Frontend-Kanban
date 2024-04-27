@@ -59,6 +59,7 @@ const formatDateTime = (baseFormatDate) => {
     .toLocaleString("en-GB", options)
     .replace(/\//g, "/")
     .replace(",", "")
+
   return formattedDate
 }
 
@@ -67,14 +68,21 @@ onBeforeMount(async () => {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
 
-    if (!task.value.description || task.value.description.trim().length === 0) {
+    if (
+      task.value.description === null ||
+      task.value.description.trim().length === 0
+    ) {
       task.value.description = "No Description Provided"
     }
-    if (!task.value.assignees || task.value.assignees.trim().length === 0) {
+    if (
+      task.value.assignees === null ||
+      task.value.assignees.trim().length === 0
+    ) {
       task.value.assignees = "Unassigned"
     }
+    // console.log(task.value.createdOn)
 
-    console.log(fetchTask)
+    // console.log(fetchTask)
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
   } catch (error) {
@@ -92,7 +100,9 @@ onBeforeMount(async () => {
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
-    <div class="max-sm:overflow-y-scroll w-3/4  py-10 p-10 bg-[#b8c1ec] rounded-md">
+    <div
+      class="max-sm:overflow-y-scroll w-3/4 py-10 p-10 bg-[#b8c1ec] rounded-md"
+    >
       <div class="flex justify-end pr-10 pt-5">
         <button @click="router.push('/task')" class="text-black">
           <span class="material-symbols-outlined"> close </span>
@@ -100,21 +110,21 @@ onBeforeMount(async () => {
       </div>
       <div class="flex flex-col items-center gap-y-5">
         <div
-          class="itbkk-title w-full text-2xl font-bold text-[#5c5c5c] pt-4 text-center"
+          class="itbkk-title w-full text-2xl text-center font-bold text-[#232946] pt-4  "
         >
           {{ task.title }}
         </div>
 
         <div class="text-[#5c5c5c] flex flex-col w-3/4">
           <!-- Status -->
-          <h2 class="itbkk-status text-2xl font-extrabold">
+          <h2 class="itbkk-status text-2xl font-extrabold text-[#232946]">
             Status :
             <span>
               <div class="dropdown dropdown-right">
                 <div
                   tabindex="0"
                   role="button"
-                  class="font-normal italic text-gray-500"
+                  class="font-normal italic text-[#232946]"
                 >
                   {{ convertStatus[task.status] }}
                 </div>
@@ -126,6 +136,7 @@ onBeforeMount(async () => {
                     v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
                     :key="status"
                     @click="selectStatus(status)"
+                    class="text-[#232946]"
                   >
                     {{ status }}
                   </li>
@@ -134,32 +145,37 @@ onBeforeMount(async () => {
             </span>
           </h2>
           <!-- Assignees -->
-          <h2 class="itbkk-assignees text-2xl font-extrabold">
+          <h2 class="itbkk-assignees text-2xl font-extrabold text-[#232946]">
             Assignees :
             <span
-              class="font-normal text-xl"
               :class="
-                task.assignees === 'Unassigned' ? 'italic text-gray-500' : ''
+                task.assignees === 'Unassigned'
+                  ? 'italic text-gray-500'
+                  : 'text-slate-700'
               "
             >
               <textarea
                 rows="1"
-                class="rounded-md resize-none bg-slate-200 textarea-xs"
+                class="rounded-md resize-none w-1/2 bg-slate-200 textarea-xs textarea-ghost "
                 >{{ task.assignees }}</textarea
               >
             </span>
           </h2>
 
           <!-- CreatedOn -->
-          <h2 class="itbkk-created-on text-2xl font-extrabold">
+          <h2 class="itbkk-created-on text-2xl font-extrabold text-[#232946]">
             Created On :
-            <span class="font-normal text-xl">{{ task.createdOn }}</span>
+            <span class="font-normal text-xl text-slate-700">{{
+              task.createdOn
+            }}</span>
           </h2>
 
           <!-- UpdatedOn -->
-          <h2 class="itbkk-updated-on text-2xl font-extrabold">
+          <h2 class="itbkk-updated-on text-2xl font-extrabold text-[#232946]">
             Updated On :
-            <span class="font-normal text-xl">{{ task.updatedOn }}</span>
+            <span class="font-normal text-xl text-slate-700">{{
+              task.updatedOn
+            }}</span>
           </h2>
         </div>
 
@@ -169,16 +185,18 @@ onBeforeMount(async () => {
           :class="
             task.description === 'No Description Provided'
               ? 'italic text-gray-500'
-              : ''
+              : 'text-slate-700'
           "
           >{{ task.description }}</textarea
         >
       </div>
       <div class="flex justify-between mx-10 pt-5">
         <!-- timezone -->
-        <h2 class="itbkk-timezone text-2xl font-extrabold text-[#5c5c5c]">
+        <h2 class="itbkk-timezone text-2xl font-extrabold text-[#232946]">
           TimeZone :
-          <span class="font-normal text-xl">{{ formatTimezone() }}</span>
+          <span class="font-normal text-xl text-slate-700">{{
+            formatTimezone()
+          }}</span>
         </h2>
 
         <div>
