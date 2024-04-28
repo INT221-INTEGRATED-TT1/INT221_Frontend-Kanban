@@ -3,6 +3,12 @@ import {ref, onBeforeMount} from "vue"
 import {getTask} from "@/libs/crud"
 import {useRoute} from "vue-router"
 import router from "@/router/index.js"
+import Xmark from "@/components/icons/Xmark.vue"
+import StatusIcon from "@/components/icons/StatusIcon.vue"
+import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
+import CreateIcon from "@/components/icons/CreateIcon.vue"
+import UpdateIcon from "@/components/icons/UpdateIcon.vue"
+import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 
 const task = ref([])
 // const isOpen = ref(false)
@@ -92,117 +98,136 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
-  />
-
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
     <div
-      class="max-sm:overflow-y-scroll w-3/4 py-10 p-10 bg-[#b8c1ec] rounded-md"
+      class="w-[80rem] py-5 bg-base-bg rounded-2xl border-solid border-2 border-[#b8c1ec]"
     >
-      <div class="flex justify-end pr-10 pt-5">
-        <button @click="router.push('/task')" class="text-black">
-          <span class="material-symbols-outlined"> close </span>
+      <div class="flex justify-end pr-10">
+        <button @click="router.push('/task')">
+          <span><Xmark /></span>
         </button>
       </div>
-      <div class="flex flex-col items-center gap-y-5">
+      <div class="flex flex-col items-center pt-5">
         <div
-          class="itbkk-title w-full text-2xl text-center font-bold text-[#232946] pt-4  "
+          class="itbkk-title text-2xl text-center text-wrapfont-bold text-headline"
         >
           {{ task.title }}
         </div>
 
-        <div class="text-[#5c5c5c] flex flex-col w-3/4">
+        <!-- detail -->
+
+        <div class="p-5 grid grid-cols-1 grid-rows-4 gap-y-5">
           <!-- Status -->
-          <h2 class="itbkk-status text-2xl font-extrabold text-[#232946]">
-            Status :
-            <span>
-              <div class="dropdown dropdown-right">
-                <div
-                  tabindex="0"
-                  role="button"
-                  class="font-normal italic text-[#232946]"
-                >
-                  {{ convertStatus[task.status] }}
-                </div>
-                <ul
-                  tabindex="0"
-                  class="dropdown-content z-[1] menu p-2 shadow bg-slate-300 rounded-box w-52 cursor-pointer"
-                >
-                  <li
-                    v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
-                    :key="status"
-                    @click="selectStatus(status)"
-                    class="text-[#232946]"
-                  >
-                    {{ status }}
-                  </li>
-                </ul>
+          <div class="flex gap-x-10 items-center">
+            <div
+              class="itbkk-status text-xl text-header w-[10rem] flex items-center gap-x-4"
+            >
+              <span><StatusIcon /></span> Status
+            </div>
+            <div class="dropdown dropdown-right">
+              <div
+                tabindex="5"
+                role="button"
+                class="font-normal text-[14px] italic text-normal-text"
+              >
+                {{ convertStatus[task.status] }}
               </div>
-            </span>
-          </h2>
+              <ul
+                tabindex="0"
+                class="dropdown-content z-[1] menu shadow bg-slate-300 rounded-box w-52 cursor-pointer"
+              >
+                <li
+                  v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
+                  :key="status"
+                  @click="selectStatus(status)"
+                  class="text-[#1c213b]"
+                >
+                  {{ status }}
+                </li>
+              </ul>
+            </div>
+          </div>
+
           <!-- Assignees -->
-          <h2 class="itbkk-assignees text-2xl font-extrabold text-[#232946]">
-            Assignees :
-            <span
+          <div class="flex gap-x-10 items-center">
+            <div
+              class="itbkk-assignees text-xl text-header w-[10rem] flex items-center gap-x-4"
+            >
+              <span><AssigneesIcon /></span> Assignees
+            </div>
+
+            <textarea
+              rows="1"
+              class="rounded-md resize-none font-normal text-[14px] bg-secondary-bg textarea-xs italic w-[20rem]"
               :class="
                 task.assignees === 'Unassigned'
                   ? 'italic text-gray-500'
-                  : 'text-slate-700'
+                  : ' text-[#121629]'
               "
+              >{{ task.assignees }}</textarea
             >
-              <textarea
-                rows="1"
-                class="rounded-md resize-none w-1/2 bg-slate-200 textarea-xs textarea-ghost "
-                >{{ task.assignees }}</textarea
-              >
-            </span>
-          </h2>
+          </div>
 
           <!-- CreatedOn -->
-          <h2 class="itbkk-created-on text-2xl font-extrabold text-[#232946]">
-            Created On :
-            <span class="font-normal text-xl text-slate-700">{{
-              task.createdOn
-            }}</span>
-          </h2>
+          <div class="flex gap-x-10 items-center">
+            <div
+              class="text-xl text-header w-[10rem] flex items-center gap-x-4"
+            >
+              <span><CreateIcon /></span> Created On
+            </div>
+            <div
+              class="itbkk-created-on font-normal text-[14px] text-normal-text"
+            >
+              {{ task.createdOn }}
+            </div>
+          </div>
 
           <!-- UpdatedOn -->
-          <h2 class="itbkk-updated-on text-2xl font-extrabold text-[#232946]">
-            Updated On :
-            <span class="font-normal text-xl text-slate-700">{{
-              task.updatedOn
-            }}</span>
-          </h2>
+          <div class="flex gap-x-10 items-center">
+            <div
+              class="text-xl text-header w-[10rem] flex items-center gap-x-4"
+            >
+              <span><UpdateIcon /></span> Updated On
+            </div>
+            <div
+              class="itbkk-updated-on font-normal text-[14px] text-normal-text"
+            >
+              {{ task.updatedOn }}
+            </div>
+          </div>
         </div>
 
+        <!-- detail -->
+
         <textarea
-          class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-slate-200 p-8 resize-none"
+          class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-secondary-bg p-8 resize-none"
           rows="6"
+          placeholder="Description"
           :class="
             task.description === 'No Description Provided'
               ? 'italic text-gray-500'
-              : 'text-slate-700'
+              : 'text-[#121629]'
           "
           >{{ task.description }}</textarea
         >
       </div>
-      <div class="flex justify-between mx-10 pt-5">
+      <div class="flex justify-between mx-10 pt-5 px-20">
         <!-- timezone -->
-        <h2 class="itbkk-timezone text-2xl font-extrabold text-[#232946]">
-          TimeZone :
-          <span class="font-normal text-xl text-slate-700">{{
-            formatTimezone()
-          }}</span>
-        </h2>
+        <div
+          class="itbkk-timezone text-xl font-extrabold text-header flex items-center gap-x-4"
+        >
+          <span><TimezoneIcon /></span>TimeZone 
+          <div class="font-normal text-[14px] text-normal-text">
+            {{ formatTimezone() }}
+          </div>
+        </div>
 
         <div>
           <button
             @click="router.push('/')"
-            class="itbkk-button btn btn-success w-[4rem]"
+            class="itbkk-button btn btn-success w-[4rem] bg-button"
           >
             OK
           </button>
