@@ -3,8 +3,8 @@ import {ref, onMounted} from "vue"
 import {getTasksData} from "@/libs/crud.js"
 import router from "@/router/index.js"
 
-const hasTask = ref(true)
-const hasNoTask = ref(false)
+// const hasTask = ref(true)
+// const hasNoTask = ref(false)
 const tasks = ref([])
 const convertStatus = {
   NO_STATUS: "No Status",
@@ -21,11 +21,11 @@ onMounted(async () => {
   try {
     const fetchTasks = await getTasksData()
     tasks.value = fetchTasks
-    if (tasks.value.length === 0) {
-      hasTask.value = false
-      hasNoTask.value = true
-      console.log("No task")
-    }
+    // if (tasks.value.length === 0) {
+    //   hasTask.value = false
+    //   hasNoTask.value = true
+    //   console.log("No task")
+    // }
 
     tasks.value.forEach((task) => {
       if (task.assignees === null || task.assignees.trim().length === 0) {
@@ -43,7 +43,6 @@ onMounted(async () => {
 <template>
   <main class="w-screen h-screen bg-[#232946]">
     <div
-      v-if="hasTask"
       class="overflow-x-auto overflow-y-auto h-full flex flex-col justify-center items-center gap-y-10"
     >
       <h1 class="text-[#fffffe] font-bold text-5xl">
@@ -60,10 +59,11 @@ onMounted(async () => {
             <th class="">Status</th>
           </tr>
         </thead>
-        <tbody class="">
+        <tbody>
           <tr
             class="itbkk-item text-[#121629] italic odd:bg-slate-200 even:bg-slate-50 cursor-pointer hover:bg-[#babfdd] hover:scale-95"
             v-for="task in tasks"
+            v-if="tasks.length > 0"
             :key="task.id"
             @click="showDetailsTaskId(task.id)"
           >
@@ -83,30 +83,11 @@ onMounted(async () => {
               {{ convertStatus[task.status] }}
             </td>
           </tr>
-        </tbody>
-      </table>
-    </div>
 
-    <router-view></router-view>
-
-    <div
-      v-if="hasNoTask"
-      class="overflow-x-auto h-full flex justify-center items-center"
-    >
-      <table class="table table-lg text-center bg-slate-100 max-w-screen-xl">
-        <thead>
-          <tr class="text-2xl text-[#5c5c5c]">
-            <th class="border border-slate-600"></th>
-            <th class="border border-slate-600">Title</th>
-            <th class="border border-slate-600">Assignees</th>
-            <th class="border border-slate-600">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="itbkk-item text-[#5c5c5c]">
+          <tr v-else>
             <td
               colspan="4"
-              class="border border-slate-700 text-gray-500 text-center"
+              class="w-1/2 bg-slate-200 border text-gray-500 text-center"
             >
               No Task
             </td>
@@ -114,6 +95,8 @@ onMounted(async () => {
         </tbody>
       </table>
     </div>
+
+    <router-view></router-view>
   </main>
 </template>
 
