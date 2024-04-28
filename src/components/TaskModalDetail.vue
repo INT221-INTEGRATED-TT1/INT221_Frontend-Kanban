@@ -101,100 +101,116 @@ onBeforeMount(async () => {
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
     <div
-      class="max-sm:overflow-y-scroll w-3/4 py-10 p-10 bg-[#b8c1ec] rounded-md"
+      class="w-[80rem] py-5 bg-[#232946] rounded-2xl border-solid border-2 border-[#b8c1ec]"
     >
-      <div class="flex justify-end pr-10 pt-5">
-        <button @click="router.push('/task')" class="text-black">
-          <span class="material-symbols-outlined"> close </span>
+      <div class="flex justify-end pr-10">
+        <button
+          @click="router.push('/task')"
+          class="text-[#eebbc3] hover:text-red-700 hover:scale-100"
+        >
+          <span class="material-symbols-outlined font-bold"> close </span>
         </button>
       </div>
-      <div class="flex flex-col items-center gap-y-5">
+      <div class="flex flex-col items-center">
         <div
-          class="itbkk-title w-full text-2xl text-center font-bold text-[#232946] pt-4  "
+          class="itbkk-title text-2xl text-center text-wrapfont-bold text-[#fffffe]"
         >
           {{ task.title }}
         </div>
 
-        <div class="text-[#5c5c5c] flex flex-col w-3/4">
+        <!-- detail -->
+
+        <div class="p-5 grid grid-cols-1 grid-rows-4 gap-y-5">
           <!-- Status -->
-          <h2 class="itbkk-status text-2xl font-extrabold text-[#232946]">
-            Status :
-            <span>
-              <div class="dropdown dropdown-right">
-                <div
-                  tabindex="0"
-                  role="button"
-                  class="font-normal italic text-[#232946]"
-                >
-                  {{ convertStatus[task.status] }}
-                </div>
-                <ul
-                  tabindex="0"
-                  class="dropdown-content z-[1] menu p-2 shadow bg-slate-300 rounded-box w-52 cursor-pointer"
-                >
-                  <li
-                    v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
-                    :key="status"
-                    @click="selectStatus(status)"
-                    class="text-[#232946]"
-                  >
-                    {{ status }}
-                  </li>
-                </ul>
+          <div class="flex gap-x-10 items-center">
+            <div
+              class="itbkk-status text-xl  text-[#fffffed7] w-[10rem]"
+            >
+              Status
+            </div>
+            <div class="dropdown dropdown-right">
+              <div
+                tabindex="5"
+                role="button"
+                class="font-normal text-[14px] italic  text-[#b8c1ec] "
+              >
+                {{ convertStatus[task.status] }}
               </div>
-            </span>
-          </h2>
+              <ul
+                tabindex="0"
+                class="dropdown-content z-[1] menu shadow bg-slate-300 rounded-box w-52 cursor-pointer"
+              >
+                <li
+                  v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
+                  :key="status"
+                  @click="selectStatus(status)"
+                  class="text-[#1c213b]"
+                >
+                  {{ status }}
+                </li>
+              </ul>
+            </div>
+          </div>
+
           <!-- Assignees -->
-          <h2 class="itbkk-assignees text-2xl font-extrabold text-[#232946]">
-            Assignees :
-            <span
+          <div class="flex gap-x-10 items-center">
+            <div
+              class="itbkk-assignees text-2xl font-extrabold text-[#fffffed7] w-[10rem]"
+            >
+              Assignees
+            </div>
+
+            <textarea
+              rows="1"
+              class="rounded-md resize-none font-normal text-[14px] bg-[#b8c1ec] textarea-xs italic w-[20rem]"
               :class="
                 task.assignees === 'Unassigned'
                   ? 'italic text-gray-500'
-                  : 'text-slate-700'
+                  : ' text-[#121629]'
               "
+              >{{ task.assignees }}</textarea
             >
-              <textarea
-                rows="1"
-                class="rounded-md resize-none w-1/2 bg-slate-200 textarea-xs textarea-ghost "
-                >{{ task.assignees }}</textarea
-              >
-            </span>
-          </h2>
+          </div>
 
           <!-- CreatedOn -->
-          <h2 class="itbkk-created-on text-2xl font-extrabold text-[#232946]">
-            Created On :
-            <span class="font-normal text-xl text-slate-700">{{
-              task.createdOn
-            }}</span>
-          </h2>
+          <div class="flex gap-x-10 items-center">
+            <div class="text-xl font-extrabold text-[#fffffed7] w-[10rem]">
+              Created On
+            </div>
+            <div class="itbkk-created-on font-normal text-[14px] text-[#b8c1ec]">
+              {{ task.createdOn }}
+            </div>
+          </div>
 
           <!-- UpdatedOn -->
-          <h2 class="itbkk-updated-on text-2xl font-extrabold text-[#232946]">
-            Updated On :
-            <span class="font-normal text-xl text-slate-700">{{
-              task.updatedOn
-            }}</span>
-          </h2>
+          <div class="flex gap-x-10 items-center">
+            <div class="text-xl font-extrabold text-[#fffffed7] w-[10rem]">
+              Updated On
+            </div>
+            <div class="itbkk-updated-on font-normal text-[14px] text-[#b8c1ec]">
+              {{ task.updatedOn }}
+            </div>
+          </div>
         </div>
 
+        <!-- detail -->
+
         <textarea
-          class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-slate-200 p-8 resize-none"
+          class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-[#b8c1ec] p-8 resize-none"
           rows="6"
           :class="
             task.description === 'No Description Provided'
               ? 'italic text-gray-500'
-              : 'text-slate-700'
+              : 'text-[#121629]'
           "
           >{{ task.description }}</textarea
         >
       </div>
       <div class="flex justify-between mx-10 pt-5">
         <!-- timezone -->
-        <h2 class="itbkk-timezone text-2xl font-extrabold text-[#232946]">
+        <h2 class="itbkk-timezone text-2xl font-extrabold text-[#fffffee3]">
           TimeZone :
-          <span class="font-normal text-xl text-slate-700">{{
+          <span class="font-normal text-xl text-[#b8c1ec]">{{
             formatTimezone()
           }}</span>
         </h2>
@@ -202,7 +218,7 @@ onBeforeMount(async () => {
         <div>
           <button
             @click="router.push('/')"
-            class="itbkk-button btn btn-success w-[4rem]"
+            class="itbkk-button btn btn-success w-[4rem] bg-[#eebbc3]"
           >
             OK
           </button>
