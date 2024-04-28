@@ -28,10 +28,13 @@ const statusConvert = {
 
 const getStatusStyle = (status) => {
   return {
-    "bg-red-500 text-xl": status === "NO_STATUS",
-    "to-do": status === "TO_DO",
-    "doing": status === "Doing",
-    "done": status === "DONE",
+    "bg-gray-500 p-2 text-slate-200 font-extrabold rounded-md":
+      status === "NO_STATUS",
+    "bg-yellow-600 p-2 text-white  font-extrabold rounded-md":
+      status === "TO_DO",
+    "bg-sky-500 opacity-85 p-2 text-white font-extrabold rounded-md":
+      status === "DOING",
+    "bg-green-500 opacity-90 p-2 text-white font-extrabold rounded-md": status === "DONE",
   }
 }
 
@@ -131,7 +134,7 @@ onBeforeMount(async () => {
               <div
                 tabindex="5"
                 role="button"
-                class="font-normal text-[14px] italic text-normal-text"
+                class="text-[14px] italic"
                 :class="getStatusStyle(task.status)"
               >
                 {{ convertStatus[task.status] }}

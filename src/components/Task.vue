@@ -3,8 +3,6 @@ import {ref, onMounted} from "vue"
 import {getTasksData} from "@/libs/crud.js"
 import router from "@/router/index.js"
 
-// const hasTask = ref(true)
-// const hasNoTask = ref(false)
 const tasks = ref([])
 const convertStatus = {
   NO_STATUS: "No Status",
@@ -15,10 +13,10 @@ const convertStatus = {
 
 const getStatusStyle = (status) => {
   return {
-    "no-status": status === "NO_STATUS",
-    "to-do": status === "TO_DO",
-    "doing": status === "Doing",
-    "done": status === "DONE",
+    "bg-gray-500 text-slate-200": status === "NO_STATUS",
+    "bg-yellow-600  text-white  ": status === "TO_DO",
+    "bg-sky-500 opacity-85 text-white ": status === "DOING",
+    "bg-green-500 opacity-90  text-white ": status === "DONE",
   }
 }
 
@@ -30,11 +28,6 @@ onMounted(async () => {
   try {
     const fetchTasks = await getTasksData()
     tasks.value = fetchTasks
-    // if (tasks.value.length === 0) {
-    //   hasTask.value = false
-    //   hasNoTask.value = true
-    //   console.log("No task")
-    // }
 
     tasks.value.forEach((task) => {
       if (task.assignees === null || task.assignees.trim().length === 0) {
@@ -88,8 +81,11 @@ onMounted(async () => {
             >
               {{ task.assignees }}
             </td>
-            <td class="itbkk-status" :class="getStatusStyle(task.sta)">
-              {{ convertStatus[task.status] }}
+            <td
+              class="itbkk-status font-extrabold rounded-lg"
+              :class="getStatusStyle(task.status)"
+            >
+              <div class="">{{ convertStatus[task.status] }}</div>
             </td>
           </tr>
 
@@ -109,20 +105,4 @@ onMounted(async () => {
   </main>
 </template>
 
-<style scoped>
-.no-status {
-  color: gray;
-}
-
-.to-do {
-  color: orange;
-}
-
-.doing {
-  color: blue;
-}
-
-.done {
-  color: green;
-}
-</style>
+<style scoped></style>
