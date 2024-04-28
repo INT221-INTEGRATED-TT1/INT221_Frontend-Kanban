@@ -41,18 +41,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="w-screen h-screen bg-[#232946]">
+  <main class="w-screen h-screen bg-base-bg">
     <div
       class="overflow-x-auto overflow-y-auto h-full flex flex-col justify-center items-center gap-y-10"
     >
-      <h1 class="text-[#fffffe] font-bold text-5xl">
+      <h1 class="text-headline font-bold text-5xl">
         IT-Bangmod Kradan Kanban (ITB-KK)
       </h1>
       <table
-        class="table-lg border-separate rounded-xl bg-[#b8c1ec] text-center max-w-screen-xl p-2"
+        class="table-lg border-separate rounded-xl bg-secondary-bg text-center max-w-screen-xl p-2"
       >
         <thead>
-          <tr class="text-2xl text-[#121629]">
+          <tr class="text-2xl text-table-header">
             <th class=""></th>
             <th class="">Title</th>
             <th class="">Assignees</th>
@@ -61,7 +61,7 @@ onMounted(async () => {
         </thead>
         <tbody>
           <tr
-            class="itbkk-item text-[#121629] italic odd:bg-slate-200 even:bg-slate-50 cursor-pointer hover:bg-[#babfdd] hover:scale-95"
+            class="itbkk-item text-table-body italic odd:bg-slate-200 cursor-pointer hover:scale-95"
             v-for="task in tasks"
             v-if="tasks.length > 0"
             :key="task.id"

@@ -14,3 +14,9 @@
     @apply font-Geist;
   }
 }
+
+.symbol {
+  width: 14px;
+  vertical-align: -0.125em;
+  fill: rgb(188, 189, 189);
+}
