@@ -20,10 +20,6 @@ const getStatusStyle = (status) => {
   }
 }
 
-const showDetailsTaskId = (id) => {
-  router.push(`/task/${id}`)
-}
-
 onMounted(async () => {
   try {
     const fetchTasks = await getTasksData()
@@ -67,7 +63,7 @@ onMounted(async () => {
             v-for="task in tasks"
             v-if="tasks.length > 0"
             :key="task.id"
-            @click="showDetailsTaskId(task.id)"
+            @click="router.push(`/task/${task.id}`)"
           >
             <td>{{ task.id }}</td>
             <td class="itbkk-title">
