@@ -3,6 +3,12 @@ import {ref, onBeforeMount} from "vue"
 import {getTask} from "@/libs/crud"
 import {useRoute} from "vue-router"
 import router from "@/router/index.js"
+import Xmark from "@/components/icons/Xmark.vue"
+import StatusIcon from "@/components/icons/StatusIcon.vue"
+import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
+import CreateIcon from "@/components/icons/CreateIcon.vue"
+import UpdateIcon from "@/components/icons/UpdateIcon.vue"
+import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 
 const task = ref([])
 // const isOpen = ref(false)
@@ -92,28 +98,20 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
-  />
-
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
     <div
-      class="w-[80rem] py-5 bg-[#232946] rounded-2xl border-solid border-2 border-[#b8c1ec]"
+      class="w-[80rem] py-5 bg-base-bg rounded-2xl border-solid border-2 border-[#b8c1ec]"
     >
       <div class="flex justify-end pr-10">
-        <button
-          @click="router.push('/task')"
-          class="text-[#eebbc3] hover:text-red-700 hover:scale-100"
-        >
-          <span class="material-symbols-outlined font-bold"> close </span>
+        <button @click="router.push('/task')">
+          <span><Xmark /></span>
         </button>
       </div>
-      <div class="flex flex-col items-center">
+      <div class="flex flex-col items-center pt-5">
         <div
-          class="itbkk-title text-2xl text-center text-wrapfont-bold text-[#fffffe]"
+          class="itbkk-title text-2xl text-center text-wrapfont-bold text-headline"
         >
           {{ task.title }}
         </div>
@@ -124,15 +122,15 @@ onBeforeMount(async () => {
           <!-- Status -->
           <div class="flex gap-x-10 items-center">
             <div
-              class="itbkk-status text-xl  text-[#fffffed7] w-[10rem]"
+              class="itbkk-status text-xl text-header w-[10rem] flex items-center gap-x-4"
             >
-              Status
+              <span><StatusIcon /></span> Status
             </div>
             <div class="dropdown dropdown-right">
               <div
                 tabindex="5"
                 role="button"
-                class="font-normal text-[14px] italic  text-[#b8c1ec] "
+                class="font-normal text-[14px] italic text-normal-text"
               >
                 {{ convertStatus[task.status] }}
               </div>
@@ -155,14 +153,14 @@ onBeforeMount(async () => {
           <!-- Assignees -->
           <div class="flex gap-x-10 items-center">
             <div
-              class="itbkk-assignees text-2xl font-extrabold text-[#fffffed7] w-[10rem]"
+              class="itbkk-assignees text-xl text-header w-[10rem] flex items-center gap-x-4"
             >
-              Assignees
+              <span><AssigneesIcon /></span> Assignees
             </div>
 
             <textarea
               rows="1"
-              class="rounded-md resize-none font-normal text-[14px] bg-[#b8c1ec] textarea-xs italic w-[20rem]"
+              class="rounded-md resize-none font-normal text-[14px] bg-secondary-bg textarea-xs italic w-[20rem]"
               :class="
                 task.assignees === 'Unassigned'
                   ? 'italic text-gray-500'
@@ -174,20 +172,28 @@ onBeforeMount(async () => {
 
           <!-- CreatedOn -->
           <div class="flex gap-x-10 items-center">
-            <div class="text-xl font-extrabold text-[#fffffed7] w-[10rem]">
-              Created On
+            <div
+              class="text-xl text-header w-[10rem] flex items-center gap-x-4"
+            >
+              <span><CreateIcon /></span> Created On
             </div>
-            <div class="itbkk-created-on font-normal text-[14px] text-[#b8c1ec]">
+            <div
+              class="itbkk-created-on font-normal text-[14px] text-normal-text"
+            >
               {{ task.createdOn }}
             </div>
           </div>
 
           <!-- UpdatedOn -->
           <div class="flex gap-x-10 items-center">
-            <div class="text-xl font-extrabold text-[#fffffed7] w-[10rem]">
-              Updated On
+            <div
+              class="text-xl text-header w-[10rem] flex items-center gap-x-4"
+            >
+              <span><UpdateIcon /></span> Updated On
             </div>
-            <div class="itbkk-updated-on font-normal text-[14px] text-[#b8c1ec]">
+            <div
+              class="itbkk-updated-on font-normal text-[14px] text-normal-text"
+            >
               {{ task.updatedOn }}
             </div>
           </div>
@@ -196,8 +202,9 @@ onBeforeMount(async () => {
         <!-- detail -->
 
         <textarea
-          class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-[#b8c1ec] p-8 resize-none"
+          class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-secondary-bg p-8 resize-none"
           rows="6"
+          placeholder="Description"
           :class="
             task.description === 'No Description Provided'
               ? 'italic text-gray-500'
@@ -206,19 +213,21 @@ onBeforeMount(async () => {
           >{{ task.description }}</textarea
         >
       </div>
-      <div class="flex justify-between mx-10 pt-5">
+      <div class="flex justify-between mx-10 pt-5 px-20">
         <!-- timezone -->
-        <h2 class="itbkk-timezone text-2xl font-extrabold text-[#fffffee3]">
-          TimeZone :
-          <span class="font-normal text-xl text-[#b8c1ec]">{{
-            formatTimezone()
-          }}</span>
-        </h2>
+        <div
+          class="itbkk-timezone text-xl font-extrabold text-header flex items-center gap-x-4"
+        >
+          <span><TimezoneIcon /></span>TimeZone 
+          <div class="font-normal text-[14px] text-normal-text">
+            {{ formatTimezone() }}
+          </div>
+        </div>
 
         <div>
           <button
             @click="router.push('/')"
-            class="itbkk-button btn btn-success w-[4rem] bg-[#eebbc3]"
+            class="itbkk-button btn btn-success w-[4rem] bg-button"
           >
             OK
           </button>
