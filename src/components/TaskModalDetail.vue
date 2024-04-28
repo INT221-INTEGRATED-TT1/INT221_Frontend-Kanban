@@ -26,6 +26,18 @@ const statusConvert = {
   "Done": "DONE",
 }
 
+const getStatusStyle = (status) => {
+  return {
+    "bg-gray-500 p-2 text-slate-200 font-extrabold rounded-md":
+      status === "NO_STATUS",
+    "bg-yellow-600 p-2 text-white  font-extrabold rounded-md":
+      status === "TO_DO",
+    "bg-sky-500 opacity-85 p-2 text-white font-extrabold rounded-md":
+      status === "DOING",
+    "bg-green-500 opacity-90 p-2 text-white font-extrabold rounded-md": status === "DONE",
+  }
+}
+
 // const toggleDropdown = () => {
 //   isOpen.value = !isOpen.value
 // }
@@ -42,14 +54,6 @@ const formatTimezone = () => {
   const {timeZone} = formatter.resolvedOptions()
   return timeZone
 }
-
-// const formattedStatus = computed(() => {
-//   if (!task.value.status) {
-//     return {class: "italic text-gray-500", text: "Unassigned"}
-//   } else {
-//     return {class: "", text: task.value.status}
-//   }
-// })
 
 const formatDateTime = (baseFormatDate) => {
   const date = new Date(baseFormatDate)
@@ -130,7 +134,8 @@ onBeforeMount(async () => {
               <div
                 tabindex="5"
                 role="button"
-                class="font-normal text-[14px] italic text-normal-text"
+                class="text-[14px] italic"
+                :class="getStatusStyle(task.status)"
               >
                 {{ convertStatus[task.status] }}
               </div>
@@ -218,7 +223,7 @@ onBeforeMount(async () => {
         <div
           class="itbkk-timezone text-xl font-extrabold text-header flex items-center gap-x-4"
         >
-          <span><TimezoneIcon /></span>TimeZone 
+          <span><TimezoneIcon /></span>TimeZone
           <div class="font-normal text-[14px] text-normal-text">
             {{ formatTimezone() }}
           </div>
