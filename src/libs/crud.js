@@ -22,7 +22,7 @@ const getTask = async (id) => {
       throw {
         status: response.status,
         message: `The requested Task : ${id} does not exist`,
-        alert:alert(`The requested Task : ${id} does not exist`),
+        // alert:alert(`The requested Task : ${id} does not exist`),
         router: router.push("/task"),
       }
     }
