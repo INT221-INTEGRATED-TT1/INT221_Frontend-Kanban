@@ -1,7 +1,7 @@
 import router from "@/router"
 
 const getTasksData = async () => {
-  const response = await fetch(`${import.meta.env.VITE_DB_URL}/v1/tasks`)
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`)
   {
     if (!response.ok) {
       throw {
@@ -16,7 +16,7 @@ const getTasksData = async () => {
 }
 
 const getTask = async (id) => {
-  const response = await fetch(`${import.meta.env.VITE_DB_URL}/v1/tasks/${id}`)
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`)
   {
     if (!response.ok) {
       throw {
