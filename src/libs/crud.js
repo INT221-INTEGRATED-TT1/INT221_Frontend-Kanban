@@ -5,9 +5,13 @@ const getTasksData = async () => {
 }
 
 const getTask = async (id) => {
-  return await fetch(`${import.meta.env.VITE_DB_URL}/v1/tasks/${id}`).then(
-    (res) => res.json()
-  )
+  const response = await fetch(`${import.meta.env.VITE_DB_URL}/v1/tasks/${id}`)
+  {
+    if (!response.ok) {
+      throw {status: response.status, message: `Task ${id} not found`}
+    }
+  }
+  return response.json()
 }
 
 export {getTasksData, getTask}

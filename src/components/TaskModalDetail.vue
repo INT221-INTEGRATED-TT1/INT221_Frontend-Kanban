@@ -34,7 +34,8 @@ const getStatusStyle = (status) => {
       status === "TO_DO",
     "bg-sky-500 opacity-85 p-2 text-white font-extrabold rounded-md":
       status === "DOING",
-    "bg-green-500 opacity-90 p-2 text-white font-extrabold rounded-md": status === "DONE",
+    "bg-green-500 opacity-90 p-2 text-white font-extrabold rounded-md":
+      status === "DONE",
   }
 }
 
@@ -90,6 +91,7 @@ onBeforeMount(async () => {
     ) {
       task.value.assignees = "Unassigned"
     }
+
     // console.log(task.value.createdOn)
 
     // console.log(fetchTask)
