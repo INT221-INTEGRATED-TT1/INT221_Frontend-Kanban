@@ -17,25 +17,17 @@ const router = createRouter({
         {
           path: ":id",
           component: TaskModalDetail,
-
-          async beforeEnter(to) {
-            const id = parseInt(to.params.id)
-            const tasks = await getTasksData()
-            const taskIdExist = tasks.some((task) => task.id === id)
-            if (!taskIdExist)
-              return {
-                name: "not-found",
-                params: {pathMatch: to.path.substring(1).split("/")},
-                query: to.query,
-                hash: to.hash,
-              }
-          },
         },
       ],
     },
 
     // {path: "/details", component: TaskModalDetail, name: "task-modal-detail"},
-    {path: "/:pathMatch(.*)*", component: NotFound, name: "not-found", },
+    {
+      path: "/:pathMatch(.*)*",
+      component: NotFound,
+      name: "not-found",
+      redirect: "/task",
+    },
   ],
 })
 
