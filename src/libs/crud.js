@@ -24,11 +24,11 @@ const getTask = async (id) => {
         message: `The requested Task : ${id} does not exist`,
         router: router.push("/task"),
         alert: alert("The requested Task does not exist"),
-
       }
     }
   }
   return response.json()
 }
+
 
 export {getTasksData, getTask}
