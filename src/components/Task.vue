@@ -13,15 +13,11 @@ const convertStatus = {
 
 const getStatusStyle = (status) => {
   return {
-    "bg-gray-500 text-slate-200": status === "NO_STATUS",
+    "bg-gray-500 text-slate-200 text-[14px]": status === "NO_STATUS",
     "bg-yellow-600  text-white  ": status === "TO_DO",
     "bg-sky-500 opacity-85 text-white ": status === "DOING",
     "bg-green-500 opacity-90  text-white ": status === "DONE",
   }
-}
-
-const showDetailsTaskId = (id) => {
-  router.push(`/task/${id}`)
 }
 
 onMounted(async () => {
@@ -67,7 +63,7 @@ onMounted(async () => {
             v-for="task in tasks"
             v-if="tasks.length > 0"
             :key="task.id"
-            @click="showDetailsTaskId(task.id)"
+            @click="router.push(`/task/${task.id}`)"
           >
             <td>{{ task.id }}</td>
             <td class="itbkk-title">
@@ -81,11 +77,10 @@ onMounted(async () => {
             >
               {{ task.assignees }}
             </td>
-            <td
-              class="itbkk-status font-extrabold rounded-lg"
-              :class="getStatusStyle(task.status)"
-            >
-              <div class="">{{ convertStatus[task.status] }}</div>
+            <td class="itbkk-status font-extrabold text-[14px]">
+              <div class="rounded-md p-1" :class="getStatusStyle(task.status)">
+                {{ convertStatus[task.status] }}
+              </div>
             </td>
           </tr>
 
