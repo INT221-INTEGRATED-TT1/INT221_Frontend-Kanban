@@ -1,14 +1,30 @@
+import router from "@/router"
+
 const getTasksData = async () => {
-  return await fetch(`${import.meta.env.VITE_DB_URL}/v1/tasks`).then((res) =>
-    res.json().then(res.status)
-  )
+  const response = await fetch(`${import.meta.env.VITE_DB_URL}/v1/tasks`)
+  {
+    if (!response.ok) {
+      throw {
+        status: response.status,
+        message: "The requested does not exist",
+        router: router.push("/task"),
+      }
+    }
+
+    return response.json()
+  }
 }
 
 const getTask = async (id) => {
   const response = await fetch(`${import.meta.env.VITE_DB_URL}/v1/tasks/${id}`)
   {
     if (!response.ok) {
-      throw {status: response.status, message: `Task ${id} not found`}
+      throw {
+        status: response.status,
+        message: `The requested Task : ${id} does not exist`,
+        alert:alert(`The requested Task : ${id} does not exist`),
+        router: router.push("/task"),
+      }
     }
   }
   return response.json()
