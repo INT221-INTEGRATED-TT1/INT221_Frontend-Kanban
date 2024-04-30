@@ -2,6 +2,8 @@
 import {ref, onMounted} from "vue"
 import {getTasksData} from "@/libs/crud.js"
 import router from "@/router/index.js"
+import NotFound from "@/components/NotFound.vue"
+
 
 const tasks = ref([])
 const convertStatus = {
@@ -95,6 +97,9 @@ onMounted(async () => {
         </tbody>
       </table>
     </div>
+
+  <NotFound v-if="tasks.some((task) => task.id !== id)" />
+
 
     <router-view></router-view>
   </main>
