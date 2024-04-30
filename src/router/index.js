@@ -1,14 +1,14 @@
-import {createRouter, createWebHistory} from "vue-router"
+import { createRouter, createWebHistory } from "vue-router"
 import Task from "@/components/Task.vue"
 import TaskModalDetail from "@/components/TaskModalDetail.vue"
 import NotFound from "@/components/NotFound.vue"
-import {getTasksData} from "@/libs/crud"
+import { getTask } from "@/libs/crud"
 
 const router = createRouter({
   history: createWebHistory(),
 
   routes: [
-    {path: "/", redirect: "/task"},
+    { path: "/", redirect: "/task" },
     {
       path: "/task",
       component: Task,
@@ -17,19 +17,26 @@ const router = createRouter({
         {
           path: ":id",
           component: TaskModalDetail,
-          
+          beforeEnter(to, from, next) {
+            getTask(to.params.id)
+              .then((task) => {
+                next()
+              })
+              .catch((error) => {
+                console.log(error);
+                router.push("/task")
+
+                setTimeout(() => {
+                  alert(error.message)
+                }, 1000)
+               
+                         
+              })
+          },
         },
       ],
     },
-    {path: "/notFound", component: NotFound, redirect: "/task"},
-
-    // {path: "/details", component: TaskModalDetail, name: "task-modal-detail"},
-    {
-      path: "/:pathMatch(.*)*",
-      component: NotFound,
-      name: "not-found",
-      // redirect: "/task",
-    },
+  
   ],
 })
 
