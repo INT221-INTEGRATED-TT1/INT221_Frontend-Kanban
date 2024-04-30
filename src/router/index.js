@@ -17,18 +17,26 @@ const router = createRouter({
         {
           path: ":id",
           component: TaskModalDetail,
+          
         },
       ],
     },
+    {path: "/notFound", component: NotFound, redirect: "/task"},
 
     // {path: "/details", component: TaskModalDetail, name: "task-modal-detail"},
     {
       path: "/:pathMatch(.*)*",
       component: NotFound,
       name: "not-found",
-      redirect: "/task",
+      // redirect: "/task",
     },
   ],
 })
+
+// router.beforeEach((to, from) => {
+//   if (to.name === "not-found") {
+//     return {path: "/task"}
+//   }
+// })
 
 export default router
