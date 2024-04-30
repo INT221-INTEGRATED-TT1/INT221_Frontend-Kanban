@@ -2,16 +2,10 @@
 import {ref, onMounted} from "vue"
 import {getTasksData} from "@/libs/crud.js"
 import router from "@/router/index.js"
-import NotFound from "@/components/NotFound.vue"
-
+import {useUtilityStore} from "@/stores/useUtilityStore.js"
 
 const tasks = ref([])
-const convertStatus = {
-  NO_STATUS: "No Status",
-  TO_DO: "To Do",
-  DOING: "Doing",
-  DONE: "Done",
-}
+const utilityStore = useUtilityStore()
 
 const getStatusStyle = (status) => {
   return {
@@ -81,7 +75,7 @@ onMounted(async () => {
             </td>
             <td class="itbkk-status font-extrabold text-[14px]">
               <div class="rounded-md p-1" :class="getStatusStyle(task.status)">
-                {{ convertStatus[task.status] }}
+                {{ utilityStore.convertToStatus[task.status] }}
               </div>
             </td>
           </tr>
@@ -98,8 +92,7 @@ onMounted(async () => {
       </table>
     </div>
 
-  <NotFound v-if="tasks.some((task) => task.id !== id)" />
-
+    <!-- <NotFound v-if="tasks.some((task) => task.id !== id)" /> -->
 
     <router-view></router-view>
   </main>

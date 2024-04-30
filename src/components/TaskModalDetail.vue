@@ -2,6 +2,7 @@
 import {ref, onBeforeMount} from "vue"
 import {getTask} from "@/libs/crud"
 import {useRoute} from "vue-router"
+import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import router from "@/router/index.js"
 import Xmark from "@/components/icons/Xmark.vue"
 import StatusIcon from "@/components/icons/StatusIcon.vue"
@@ -13,18 +14,7 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 const task = ref([])
 // const isOpen = ref(false)
 const route = useRoute()
-const convertStatus = {
-  NO_STATUS: "No Status",
-  TO_DO: "To Do",
-  DOING: "Doing",
-  DONE: "Done",
-}
-const statusConvert = {
-  "No Status": "NO_STATUS",
-  "To Do": "TO_DO",
-  "Doing": "DOING",
-  "Done": "DONE",
-}
+const utilityStore = useUtilityStore()
 
 const getStatusStyle = (status) => {
   return {
@@ -44,7 +34,7 @@ const getStatusStyle = (status) => {
 // }
 
 const selectStatus = (status) => {
-  task.value.status = statusConvert[status]
+  task.value.status = utilityStore.ConvertToEnumStatus[status]
 }
 
 const formatTimezone = () => {
@@ -139,7 +129,7 @@ onBeforeMount(async () => {
                 class="text-[14px] italic"
                 :class="getStatusStyle(task.status)"
               >
-                {{ convertStatus[task.status] }}
+                {{ utilityStore.convertToStatus[task.status] }}
               </div>
               <ul
                 tabindex="0"
@@ -242,7 +232,6 @@ onBeforeMount(async () => {
       </div>
     </div>
   </section>
-
 </template>
 
 <style scoped></style>
