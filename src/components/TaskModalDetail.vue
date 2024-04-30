@@ -156,6 +156,7 @@ onBeforeMount(async () => {
             </div>
 
             <textarea
+             maxlength="30"
               rows="1"
               class="rounded-md resize-none font-normal text-[14px] bg-secondary-bg textarea-xs italic w-[20rem]"
               :class="
@@ -202,6 +203,7 @@ onBeforeMount(async () => {
           class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-secondary-bg p-8 resize-none"
           rows="6"
           placeholder="Description"
+          maxlength="500"
           :class="
             task.description === 'No Description Provided'
               ? 'italic text-gray-500'
