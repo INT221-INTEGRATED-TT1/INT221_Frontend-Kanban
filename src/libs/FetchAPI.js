@@ -1,6 +1,6 @@
 import router from "@/router"
 
-const getTasksData = async () => {
+const getAllTasks = async () => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`)
   {
     if (!response.ok) {
@@ -32,4 +32,4 @@ const getTask = async (id) => {
   return response.json()
 }
 
-export {getTasksData, getTask}
+export {getAllTasks, getTask}

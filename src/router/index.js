@@ -1,8 +1,8 @@
 import {createRouter, createWebHistory} from "vue-router"
 import Task from "@/components/Task.vue"
-import TaskModalDetail from "@/components/TaskModalDetail.vue"
-import NotFound from "@/components/NotFound.vue"
-import {getTask} from "@/libs/crud"
+import TaskModalDetail from "@/views/TaskModalDetail.vue"
+import NotFound from "@/views/NotFound.vue"
+import {getTask} from "@/libs/FetchAPI"
 
 const router = createRouter({
   history: createWebHistory(),
@@ -25,7 +25,7 @@ const router = createRouter({
               .catch((error) => {
                 console.log(error)
                 router.push("/task")
-                // alert(error.message)
+                //  alert(error.message)
 
                 setTimeout(() => {
                   alert(error.message)

@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onMounted} from "vue"
-import {getTasksData} from "@/libs/crud.js"
+import {getAllTasks} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import FilterIcon from "@/components/icons/FilterIcon.vue"
@@ -13,18 +13,9 @@ import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
 const tasks = ref([])
 const utilityStore = useUtilityStore()
 
-const getStatusStyle = (status) => {
-  return {
-    "bg-[#5A5A5A] bg-opacity-30 text-[#D8D8D8] ": status === "NO_STATUS",
-    "bg-[#FF8E25] text-[#FF881B] bg-opacity-30": status === "TO_DO",
-    "bg-[#173CFF] bg-opacity-30 text-[#2697FF] ": status === "DOING",
-    "bg-[#007305] bg-opacity-30 text-[#65EE6C]": status === "DONE",
-  }
-}
-
 onMounted(async () => {
   try {
-    const fetchTasks = await getTasksData()
+    const fetchTasks = await getAllTasks()
     tasks.value = fetchTasks
 
     tasks.value.forEach((task) => {
@@ -72,7 +63,7 @@ onMounted(async () => {
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
           <tr class="">
-            <th class="rounded-tl-xl "></th>
+            <th class="rounded-tl-xl"></th>
             <th class="flex gap-x-3 items-center">
               <span><TitleIcon /></span>
               Title
@@ -116,7 +107,7 @@ onMounted(async () => {
             <td class="itbkk-status">
               <div
                 class="rounded-xl p-2 font-bold text-[16px] text-center tracking-wider"
-                :class="getStatusStyle(task.status)"
+                :class="utilityStore.getStatusStyle(task.status)"
               >
                 {{ utilityStore.convertToStatus[task.status] }}
               </div>
@@ -139,3 +130,4 @@ onMounted(async () => {
 </template>
 
 <style scoped></style>
+@/libs/FetchAPI.js
