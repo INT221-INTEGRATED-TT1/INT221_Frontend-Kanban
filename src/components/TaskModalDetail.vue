@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount} from "vue"
+import {ref, onBeforeMount,onMounted} from "vue"
 import {getTask} from "@/libs/crud"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -10,7 +10,19 @@ import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
 import CreateIcon from "@/components/icons/CreateIcon.vue"
 import UpdateIcon from "@/components/icons/UpdateIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
-
+const text = ref('')
+let textArea = ref('')
+onMounted(() => {
+  console.log(textArea);
+  console.log(textArea.value.style.height);
+  // textArea = document.querySelector('textarea');
+  
+});
+const resizeTextarea = () => {
+  console.log("Resize function execute");
+  textArea.value.style.height = "auto";
+  textArea.value.style.height = textArea.value.scrollHeight + "px";
+};
 const task = ref([])
 // const isOpen = ref(false)
 const route = useRoute()
@@ -106,9 +118,7 @@ onBeforeMount(async () => {
       </div>
 
       <div class="flex pt-5">
-        <span class="textarea" role="textbox" contenteditable>{{
-          task.title
-        }}</span>
+       <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea>
 
         <!-- status -->
       </div>
@@ -117,18 +127,6 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
-.textarea {
-  display: block;
-  width: 100%;
-  overflow: hidden;
-  resize: both;
-  min-height: 40px;
-  line-height: 20px;
-  background: transparent;
-}
 
-.textarea[contenteditable]:empty::before {
-  content: "Placeholder still possible";
-  color: gray;
-}
+
 </style>
