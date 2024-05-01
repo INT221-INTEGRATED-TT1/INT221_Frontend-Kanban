@@ -72,7 +72,7 @@ onMounted(async () => {
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
           <tr class="">
-            <th class="rounded-l-xl"></th>
+            <th class="rounded-tl-xl "></th>
             <th class="flex gap-x-3 items-center">
               <span><TitleIcon /></span>
               Title
@@ -82,7 +82,7 @@ onMounted(async () => {
                 <span><AssigneesIcon /></span>Assignees
               </div>
             </th>
-            <th class="rounded-r-xl">
+            <th class="rounded-tr-xl">
               <div class="flex gap-x-3">
                 <span><StatusIcon /></span>Status
               </div>

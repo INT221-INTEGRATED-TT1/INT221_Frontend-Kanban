@@ -64,6 +64,14 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
+
+const autoResizeTextArea = () => {
+  const textarea = $ref.textarea;
+  textarea.style.height = "auto";
+  textarea.style.height = textarea.scrollHeight + "px";
+};
+
+
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
@@ -97,143 +105,33 @@ onBeforeMount(async () => {
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
-    <div
-      class="w-[80rem] py-5 bg-base-bg rounded-2xl border-solid border-2 border-[#b8c1ec]"
-    >
-      <div class="flex justify-end pr-10">
+    <div class="w-[50rem] h-[38rem] bg-[#1F1F1F] rounded-2xl p-7">
+      <!-- close modal -->
+      <div class="flex justify-end">
         <button @click="router.push('/task')">
           <span><Xmark /></span>
         </button>
       </div>
-      <div class="flex flex-col items-center pt-5">
-        <div
-          class="itbkk-title text-2xl text-center text-wrapfont-bold text-headline"
+
+      <div class="flex pt-5">
+        <!-- title -->
+        <textarea
+          class="itbkk-title resize-none overflow-y-hidden bg-transparent text-headline text-opacity-75 text-[2rem] break-all tracking-wider"
+          @input="autoResizeTextArea"
+          ref="textarea"
+         
         >
           {{ task.title }}
-        </div>
+        </textarea>
 
-        <!-- detail -->
-
-        <div class="p-5 grid grid-cols-1 grid-rows-4 gap-y-5">
-          <!-- Status -->
-          <div class="flex gap-x-10 items-center">
-            <div
-              class="itbkk-status text-xl text-header w-[10rem] flex items-center gap-x-4"
-            >
-              <span><StatusIcon /></span> Status
-            </div>
-            <div class="dropdown dropdown-right">
-              <div
-                tabindex="5"
-                role="button"
-                class="text-[14px] italic"
-                :class="getStatusStyle(task.status)"
-              >
-                {{ utilityStore.convertToStatus[task.status] }}
-              </div>
-              <ul
-                tabindex="0"
-                class="dropdown-content z-[1] menu shadow bg-slate-300 rounded-box w-52 cursor-pointer"
-              >
-                <li
-                  v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
-                  :key="status"
-                  @click="selectStatus(status)"
-                  class="text-[#1c213b]"
-                >
-                  {{ status }}
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Assignees -->
-          <div class="flex gap-x-10 items-center">
-            <div
-              class="itbkk-assignees text-xl text-header w-[10rem] flex items-center gap-x-4"
-            >
-              <span><AssigneesIcon /></span> Assignees
-            </div>
-
-            <textarea
-              maxlength="30"
-              rows="1"
-              class="rounded-md resize-none font-normal text-[14px] bg-secondary-bg textarea-xs italic w-[20rem]"
-              :class="
-                task.assignees === 'Unassigned'
-                  ? 'italic text-gray-500'
-                  : ' text-[#121629]'
-              "
-              >{{ task.assignees }}</textarea
-            >
-          </div>
-
-          <!-- CreatedOn -->
-          <div class="flex gap-x-10 items-center">
-            <div
-              class="text-xl text-header w-[10rem] flex items-center gap-x-4"
-            >
-              <span><CreateIcon /></span> Created On
-            </div>
-            <div
-              class="itbkk-created-on font-normal text-[14px] text-normal-text"
-            >
-              {{ task.createdOn }}
-            </div>
-          </div>
-
-          <!-- UpdatedOn -->
-          <div class="flex gap-x-10 items-center">
-            <div
-              class="text-xl text-header w-[10rem] flex items-center gap-x-4"
-            >
-              <span><UpdateIcon /></span> Updated On
-            </div>
-            <div
-              class="itbkk-updated-on font-normal text-[14px] text-normal-text"
-            >
-              {{ task.updatedOn }}
-            </div>
-          </div>
-        </div>
-
-        <!-- detail -->
-
-        <textarea
-          class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-secondary-bg p-8 resize-none"
-          rows="6"
-          placeholder="Description"
-          maxlength="500"
-          :class="
-            task.description === 'No Description Provided'
-              ? 'italic text-gray-500'
-              : 'text-[#121629]'
-          "
-          >{{ task.description }}</textarea
-        >
-      </div>
-      <div class="flex justify-between mx-10 pt-5 px-20">
-        <!-- timezone -->
-        <div
-          class="itbkk-timezone text-xl font-extrabold text-header flex items-center gap-x-4"
-        >
-          <span><TimezoneIcon /></span>TimeZone
-          <div class="font-normal text-[14px] text-normal-text">
-            {{ formatTimezone() }}
-          </div>
-        </div>
-
-        <div>
-          <button
-            @click="router.push('/')"
-            class="itbkk-button btn btn-success w-[4rem] bg-button"
-          >
-            OK
-          </button>
-        </div>
+        <!-- status -->
       </div>
     </div>
   </section>
 </template>
 
-<style scoped></style>
+<style scoped>
+textarea {
+  width: 100%;
+}
+</style>
