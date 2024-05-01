@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount} from "vue"
+import {ref, onBeforeMount, onMounted} from "vue"
 import {getTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -11,6 +11,20 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
+
+// const text = ref('')
+// let textArea = ref('')
+// onMounted(() => {
+//   console.log(textArea);
+//   console.log(textArea.value.style.height);
+//   // textArea = document.querySelector('textarea');
+  
+// });
+// const resizeTextarea = () => {
+//   console.log("Resize function execute");
+//   textArea.value.style.height = "auto";
+//   textArea.value.style.height = textArea.value.scrollHeight + "px";
+// };
 
 const task = ref([])
 // const isOpen = ref(false)
@@ -205,6 +219,10 @@ onBeforeMount(async () => {
             "
             :value="task.description"
           ></textarea>
+
+
+       <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
+
         </div>
 
         <!-- footer -->
