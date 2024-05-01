@@ -156,7 +156,7 @@ onBeforeMount(async () => {
             </div>
 
             <textarea
-             maxlength="30"
+              maxlength="30"
               rows="1"
               class="rounded-md resize-none font-normal text-[14px] bg-secondary-bg textarea-xs italic w-[20rem]"
               :class="
