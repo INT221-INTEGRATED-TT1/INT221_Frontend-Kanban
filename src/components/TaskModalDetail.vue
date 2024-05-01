@@ -64,14 +64,6 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
-
-const autoResizeTextArea = () => {
-  const textarea = $ref.textarea;
-  textarea.style.height = "auto";
-  textarea.style.height = textarea.scrollHeight + "px";
-};
-
-
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
@@ -114,15 +106,9 @@ onBeforeMount(async () => {
       </div>
 
       <div class="flex pt-5">
-        <!-- title -->
-        <textarea
-          class="itbkk-title resize-none overflow-y-hidden bg-transparent text-headline text-opacity-75 text-[2rem] break-all tracking-wider"
-          @input="autoResizeTextArea"
-          ref="textarea"
-         
-        >
-          {{ task.title }}
-        </textarea>
+        <span class="textarea" role="textbox" contenteditable>{{
+          task.title
+        }}</span>
 
         <!-- status -->
       </div>
@@ -131,7 +117,18 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
-textarea {
+.textarea {
+  display: block;
   width: 100%;
+  overflow: hidden;
+  resize: both;
+  min-height: 40px;
+  line-height: 20px;
+  background: transparent;
+}
+
+.textarea[contenteditable]:empty::before {
+  content: "Placeholder still possible";
+  color: gray;
 }
 </style>
