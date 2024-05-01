@@ -10,7 +10,7 @@ import router from "@/router/index.js"
       <h1 class="text-3xl font-bold text-slate-600 italic">
         The requested task does not exist
       </h1>
-      <button @click="router.back()" class="btn btn-error">Back</button>
+      <button @click="router.push('/task')" class="btn btn-error">Back</button>
     </div>
   </div>
 </template>

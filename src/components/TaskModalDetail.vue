@@ -2,6 +2,7 @@
 import {ref, onBeforeMount} from "vue"
 import {getTask} from "@/libs/crud"
 import {useRoute} from "vue-router"
+import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import router from "@/router/index.js"
 import Xmark from "@/components/icons/Xmark.vue"
 import StatusIcon from "@/components/icons/StatusIcon.vue"
@@ -13,18 +14,7 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 const task = ref([])
 // const isOpen = ref(false)
 const route = useRoute()
-const convertStatus = {
-  NO_STATUS: "No Status",
-  TO_DO: "To Do",
-  DOING: "Doing",
-  DONE: "Done",
-}
-const statusConvert = {
-  "No Status": "NO_STATUS",
-  "To Do": "TO_DO",
-  "Doing": "DOING",
-  "Done": "DONE",
-}
+const utilityStore = useUtilityStore()
 
 const getStatusStyle = (status) => {
   return {
@@ -44,7 +34,7 @@ const getStatusStyle = (status) => {
 // }
 
 const selectStatus = (status) => {
-  task.value.status = statusConvert[status]
+  task.value.status = utilityStore.ConvertToEnumStatus[status]
 }
 
 const formatTimezone = () => {
@@ -139,7 +129,7 @@ onBeforeMount(async () => {
                 class="text-[14px] italic"
                 :class="getStatusStyle(task.status)"
               >
-                {{ convertStatus[task.status] }}
+                {{ utilityStore.convertToStatus[task.status] }}
               </div>
               <ul
                 tabindex="0"
@@ -166,6 +156,7 @@ onBeforeMount(async () => {
             </div>
 
             <textarea
+              maxlength="30"
               rows="1"
               class="rounded-md resize-none font-normal text-[14px] bg-secondary-bg textarea-xs italic w-[20rem]"
               :class="
@@ -212,6 +203,7 @@ onBeforeMount(async () => {
           class="itbkk-description textarea textarea-bordered textarea-lg w-full max-w-3xl bg-secondary-bg p-8 resize-none"
           rows="6"
           placeholder="Description"
+          maxlength="500"
           :class="
             task.description === 'No Description Provided'
               ? 'italic text-gray-500'
