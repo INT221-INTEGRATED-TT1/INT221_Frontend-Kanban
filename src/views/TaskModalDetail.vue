@@ -11,6 +11,7 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
+import { TaskManagement } from "@/libs/TaskManagement"
 
 // const text = ref('')
 // let textArea = ref('')
@@ -30,6 +31,7 @@ const task = ref([])
 // const isOpen = ref(false)
 const route = useRoute()
 const utilityStore = useUtilityStore()
+// const fetchData = ref(new TaskManagement())
 
 const dropdownTextColor = (status) => {
   return {
@@ -78,8 +80,11 @@ const formatDateTime = (baseFormatDate) => {
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
+    // fetchData.value.addTasks(fetchTask);
+    // console.log(utilityStore.tasksManager.getTasks());
     utilityStore.tasksManager.addTasks(fetchTask)
     task.value = utilityStore.tasksManager.getTasks()
+    
 
     if (
       task.value.description === null ||

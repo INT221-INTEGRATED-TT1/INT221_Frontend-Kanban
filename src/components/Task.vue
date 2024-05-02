@@ -25,7 +25,7 @@ onMounted(async () => {
       }
     }
 
-    console.log(tasks.value)
+    // console.log(tasks.value)
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }
@@ -47,7 +47,7 @@ onMounted(async () => {
 
       <div class="flex items-center gap-x-3 cursor-pointer">
         <span><FilterIcon /></span>
-        <router-link to="/createTask">
+        <router-link :to="{name: 'create-task'}">
           <div
             class="border-solid border-[1px] border-secondary px-3 py-1 rounded-lg flex items-center gap-x-2"
           >
@@ -58,7 +58,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="overflow-x-auto pt-14">
+    <div class="overflow-x-auto overflow-y-auto pt-14">
       <table
         class="table border-collapse bg-[#FFFFFF] bg-opacity-[0.08] w-full p-5"
       >
@@ -91,7 +91,7 @@ onMounted(async () => {
             :key="task.id"
             @click="router.push(`/task/${task.id}`)"
           >
-            <td>{{task.id}}</td>
+            <td>{{ task.id }}</td>
             <td class="itbkk-title tracking-wider">
               {{ task.title }}
             </td>

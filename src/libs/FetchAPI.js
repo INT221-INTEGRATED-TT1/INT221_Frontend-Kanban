@@ -1,4 +1,8 @@
 import router from "@/router"
+// import { useUtilityStore } from "@/stores/useUtilityStore"
+import { ConvertToEnumStatus } from "./util"
+
+// const utilityStore = useUtilityStore()
 
 const getAllTasks = async () => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`)
@@ -33,12 +37,13 @@ const getTask = async (id) => {
 }
 
 const createTask = async (task) => {
+  task.status = ConvertToEnumStatus[task.status]
   const response = fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({}),
+    body: JSON.stringify(task),
   })
   return (await response).json()
 }
