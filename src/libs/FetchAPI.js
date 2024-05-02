@@ -38,14 +38,25 @@ const getTask = async (id) => {
 
 const createTask = async (task) => {
   task.status = ConvertToEnumStatus[task.status]
-  const response = fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(task),
-  })
-  return (await response).json()
+  try{
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(task),
+    })
+    return {
+      status: response.status,
+      message: "Task created successfully",
+      data: await response.json()
+    }
+
+  }
+  catch (error) {
+    throw error
+  }
+ 
 }
 
 export {getAllTasks, getTask, createTask}

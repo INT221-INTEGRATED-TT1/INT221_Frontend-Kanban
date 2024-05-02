@@ -40,10 +40,19 @@ const createNewTask = async () => {
   newTask.assignees = newTask.assignees.trim()
 
   try {
-    await createTask(newTask)
-    router.push("/task")
+    // await createTask(newTask)
+    const response = await createTask(newTask)
+    if(response.status === 201){
+      router.push("/task")
+      
+      utilityStore.tasksManager.addTask(response.data)
+    }
+    
     // alert("The task has been successfully added.")
-  } catch {
+  } 
+  
+  catch {
+    alert("Failed to add the task. Please try again later.")
     //   console.error("Error while adding task:", error)
     //   // Optionally, show an error message to the user
     //   alert("Failed to add the task. Please try again later.")

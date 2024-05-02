@@ -6,6 +6,9 @@ class TaskManagement {
   addTasks(newTask) {
     this.tasks = newTask
   }
+  addTask(newTask) {
+    this.tasks.push(newTask)
+  }
 
   getTasks() {
     return this.tasks
