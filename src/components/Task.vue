@@ -16,15 +16,16 @@ const utilityStore = useUtilityStore()
 onMounted(async () => {
   try {
     const fetchTasks = await getAllTasks()
-    tasks.value = fetchTasks
+    utilityStore.tasksManager.addTasks(fetchTasks)
+    tasks.value = utilityStore.tasksManager.getTasks()
 
-    tasks.value.forEach((task) => {
+    for (const task of utilityStore.tasksManager.getTasks()) {
       if (task.assignees === null || task.assignees.trim().length === 0) {
         task.assignees = "Unassigned"
       }
-    })
+    }
 
-    console.log(fetchTasks)
+    console.log(tasks.value)
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }
@@ -90,7 +91,7 @@ onMounted(async () => {
             :key="task.id"
             @click="router.push(`/task/${task.id}`)"
           >
-            <td>{{ task.id }}</td>
+            <td>{{}}</td>
             <td class="itbkk-title tracking-wider">
               {{ task.title }}
             </td>
