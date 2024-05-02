@@ -91,7 +91,7 @@ onMounted(async () => {
             :key="task.id"
             @click="router.push(`/task/${task.id}`)"
           >
-            <td>{{}}</td>
+            <td>{{task.id}}</td>
             <td class="itbkk-title tracking-wider">
               {{ task.title }}
             </td>

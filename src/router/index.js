@@ -16,7 +16,7 @@ const router = createRouter({
       name: "task",
       children: [
         {
-          path: ":id",
+          path: ":id/edit",
           component: TaskModalDetail,
           // beforeEnter(to, from, next) {
           //   getTask(to.params.id)
