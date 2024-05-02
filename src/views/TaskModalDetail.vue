@@ -115,10 +115,11 @@ onBeforeMount(async () => {
       </div>
 
       <div class="flex flex-col gap-y-5">
+        <!-- :value="task.title" -->
         <textarea
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-2xl font-bold text-headline mt-5"
-          :value="task.title"
           maxlength="100"
+          :value="task.title" 
         >
         </textarea>
 
@@ -219,6 +220,7 @@ onBeforeMount(async () => {
             "
             :value="task.description"
           ></textarea>
+          <!-- :value="task.description" -->
 
 
        <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
