@@ -1,4 +1,4 @@
-name: Build and push Nginx image with build file
+name: Build and push Nginx image (FrontEnd) 
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "20"
-      - name: Build file project with yarn
+      - name: Build file project with npm
         run: npm install && npm run build
 
       - name: Build the new Front-End Image
@@ -33,16 +33,10 @@ jobs:
           username: ${{secrets.DOCKER_HUB_USERNAME }}
           password: ${{secrets.DOCKERHUB_TOKEN}}
 
-      - name: push docker image tag:latest
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: xsmity01/hellogoose_webpr:latest
 
       - name: push docker image tag:(version_number)
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: xsmity01/hellogoose_webpr:version${{ github.run_number }}
+          tags: title20306/frontend:version${{ github.run_number }}
