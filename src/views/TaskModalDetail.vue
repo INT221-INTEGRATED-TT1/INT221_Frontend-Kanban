@@ -106,7 +106,7 @@ onBeforeMount(async () => {
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
-    <div class="w-[60rem] h-[42rem] bg-[#1F1F1F] rounded-2xl px-14 pt-10">
+    <div class="w-[60rem] h-[42rem] bg-[#1F1F1F] rounded-2xl px-14 py-10">
       <!-- close modal -->
       <div class="flex justify-end">
         <button @click="router.push('/task')">
@@ -117,7 +117,7 @@ onBeforeMount(async () => {
       <div class="flex flex-col gap-y-5">
         <!-- :value="task.title" -->
         <textarea
-          class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-2xl font-bold text-headline mt-5"
+          class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5"
           maxlength="100"
           :value="task.title"
         >
@@ -226,7 +226,7 @@ onBeforeMount(async () => {
         </div>
 
         <!-- footer -->
-        <div class="flex justify-between pt-8">
+        <div class="flex justify-between">
           <!-- timezone -->
           <div class="itbkk-timezone flex items-center gap-x-2">
             <div
@@ -249,7 +249,7 @@ onBeforeMount(async () => {
             </button>
             <button
               @click="router.push('/')"
-              class="itbkk-button btn btn-outline btn-success hover:bg-red-500 px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+              class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
             >
               SAVE
             </button>
