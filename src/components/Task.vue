@@ -46,12 +46,14 @@ onMounted(async () => {
 
       <div class="flex items-center gap-x-3 cursor-pointer">
         <span><FilterIcon /></span>
-        <div
-          class="border-solid border-[1px] border-secondary px-3 py-1 rounded-lg flex items-center gap-x-2"
-        >
-          <span><CreateTaskIcon /></span>
-          <button class="text-normal text-opacity-75">New Task</button>
-        </div>
+        <router-link to="/createTask">
+          <div
+            class="border-solid border-[1px] border-secondary px-3 py-1 rounded-lg flex items-center gap-x-2"
+          >
+            <span><CreateTaskIcon /></span>
+            <button class="text-normal text-opacity-75">New Task</button>
+          </div>
+        </router-link>
       </div>
     </div>
 

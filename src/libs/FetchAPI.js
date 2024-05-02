@@ -24,12 +24,23 @@ const getTask = async (id) => {
       throw {
         status: response.status,
         message: `The requested Task : ${id} does not exist`,
-        // router: router.push("/task"),
-        // alert: alert("The requested Task does not exist"),
+        router: router.push("/task"),
+        alert: alert("The requested Task does not exist"),
       }
     }
   }
   return response.json()
 }
 
-export {getAllTasks, getTask}
+const createTask = async (task) => {
+  const response = fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({}),
+  })
+  return (await response).json()
+}
+
+export {getAllTasks, getTask, createTask}
