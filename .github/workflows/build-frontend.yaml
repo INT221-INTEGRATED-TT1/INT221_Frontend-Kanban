@@ -2,7 +2,7 @@ name: Build and push Nginx image (FrontEnd)
 
 on:
   push:
-    branches: [auto-deploy]
+    branches: [ main ]
 
 jobs:
   build-and-push:
@@ -34,9 +34,9 @@ jobs:
           password: ${{secrets.DOCKERHUB_TOKEN}}
 
 
-      - name: push docker image tag:(version_number)
+      - name: Push to DOCKER HUB
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: title20306/frontend:version${{ github.run_number }}
+          tags: title20306/frontend:v${{ github.run_number }}
