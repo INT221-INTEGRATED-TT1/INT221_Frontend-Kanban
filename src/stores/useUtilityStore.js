@@ -1,7 +1,10 @@
+import {TaskManagement} from "@/libs/TaskManagement"
 import {defineStore} from "pinia"
 import {ref} from "vue"
 
 export const useUtilityStore = defineStore("utility", () => {
+  const tasksManager = ref(new TaskManagement())
+
   const convertToStatus = ref({
     NO_STATUS: "No Status",
     TO_DO: "To Do",
@@ -25,5 +28,5 @@ export const useUtilityStore = defineStore("utility", () => {
     }
   }
 
-  return {convertToStatus, ConvertToEnumStatus,getStatusStyle}
+  return {convertToStatus, ConvertToEnumStatus, getStatusStyle, tasksManager}
 })

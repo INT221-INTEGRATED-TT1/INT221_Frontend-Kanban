@@ -18,7 +18,7 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 //   console.log(textArea);
 //   console.log(textArea.value.style.height);
 //   // textArea = document.querySelector('textarea');
-  
+
 // });
 // const resizeTextarea = () => {
 //   console.log("Resize function execute");
@@ -78,7 +78,8 @@ const formatDateTime = (baseFormatDate) => {
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
-    task.value = fetchTask
+    utilityStore.tasksManager.addTasks(fetchTask)
+    task.value = utilityStore.tasksManager.getTasks()
 
     if (
       task.value.description === null ||
@@ -93,7 +94,6 @@ onBeforeMount(async () => {
       task.value.assignees = "Unassigned"
     }
 
-    // console.log(fetchTask)
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
   } catch (error) {
@@ -119,7 +119,7 @@ onBeforeMount(async () => {
         <textarea
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-2xl font-bold text-headline mt-5"
           maxlength="100"
-          :value="task.title" 
+          :value="task.title"
         >
         </textarea>
 
@@ -222,9 +222,7 @@ onBeforeMount(async () => {
           ></textarea>
           <!-- :value="task.description" -->
 
-
-       <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
-
+          <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
         </div>
 
         <!-- footer -->
