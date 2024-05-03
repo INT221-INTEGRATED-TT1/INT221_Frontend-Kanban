@@ -4,19 +4,17 @@ import {ref} from "vue"
 
 export const useUtilityStore = defineStore("utility", () => {
   const tasksManager = ref(new TaskManagement())
+  const selectedTaskId = ref("")
+  const taskTitle = ref("")
+  const showDeleteConfirmation = ref(false)
+  const showDeleteSuccess = ref(false)
+  const showErrorMessage = ref(false)
 
   const convertToStatus = ref({
     NO_STATUS: "No Status",
     TO_DO: "To Do",
     DOING: "Doing",
     DONE: "Done",
-  })
-
-  const ConvertToEnumStatus = ref({
-    "No Status": "NO_STATUS",
-    "To Do": "TO_DO",
-    "Doing": "DOING",
-    "Done": "DONE",
   })
 
   const getStatusStyle = (status) => {
@@ -28,5 +26,14 @@ export const useUtilityStore = defineStore("utility", () => {
     }
   }
 
-  return {convertToStatus, ConvertToEnumStatus, getStatusStyle, tasksManager}
+  return {
+    convertToStatus,
+    getStatusStyle,
+    tasksManager,
+    selectedTaskId,
+    showDeleteConfirmation,
+    taskTitle,
+    showDeleteSuccess,
+    showErrorMessage,
+  }
 })

@@ -78,6 +78,8 @@ const formatDateTime = (baseFormatDate) => {
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
+    // fetchData.value.addTasks(fetchTask);
+    // console.log(utilityStore.tasksManager.getTasks());
     utilityStore.tasksManager.addTasks(fetchTask)
     task.value = utilityStore.tasksManager.getTasks()
 
@@ -261,4 +263,4 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped></style>
-@/libs/FetchAPI
+
