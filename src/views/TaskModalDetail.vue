@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount, onMounted} from "vue"
+import {ref, onBeforeMount, computed, reactive} from "vue"
 import {getTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -30,6 +30,7 @@ const task = ref([])
 // const isOpen = ref(false)
 const route = useRoute()
 const utilityStore = useUtilityStore()
+import {ConvertToEnumStatus} from "../libs/util.js"
 
 const dropdownTextColor = (status) => {
   return {
@@ -43,10 +44,10 @@ const dropdownTextColor = (status) => {
 // const toggleDropdown = () => {
 //   isOpen.value = !isOpen.value
 // }
-import {ConvertToEnumStatus} from "../libs/util.js"
 
 const selectStatus = (status) => {
   task.value.status = ConvertToEnumStatus[status]
+  newTask.status = ConvertToEnumStatus[status]
 }
 
 const formatTimezone = () => {
@@ -75,6 +76,29 @@ const formatDateTime = (baseFormatDate) => {
 
   return formattedDate
 }
+
+const newTask = reactive({
+  title: "",
+  description: "",
+  assignees: "",
+  status: "",
+})
+
+const editTask = async () => {
+  try {
+    const response = await updateTask(route.params.id, newTask)
+    if (response.status === 200) {
+      router.push("/task")
+      utilityStore.tasksManager.updateTask(route.params.id, newTask)
+    }
+  } catch (error) {
+    console.log("Error updating task: ", error)
+  }
+}
+
+const isButtonDisabled = computed(() => {
+  return !newTask.title || !newTask.status || !newTask.assignees || !newTask.description
+})
 
 onBeforeMount(async () => {
   try {
@@ -122,7 +146,8 @@ onBeforeMount(async () => {
         <textarea
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5"
           maxlength="100"
-          :value="task.title"
+          :placeholder="task.title"
+          v-model.trim="newTask.title"
         >
         </textarea>
 
@@ -178,6 +203,7 @@ onBeforeMount(async () => {
                   ? 'italic text-gray-500'
                   : ' text-[#F99B1D]'
               "
+              v-model.trim="newTask.assignees"
               >{{ task.assignees }}</textarea
             >
           </div>
@@ -221,9 +247,11 @@ onBeforeMount(async () => {
                 ? 'italic text-gray-500'
                 : 'text-normal text opacity-80'
             "
-            :value="task.description"
-          ></textarea>
+            v-model.trim="newTask.description"
+          >{{ task.description }}</textarea>
           <!-- :value="task.description" -->
+          <!-- :placeholder="task.description" -->
+
 
           <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
         </div>
@@ -251,7 +279,8 @@ onBeforeMount(async () => {
               CANCEL
             </button>
             <button
-              @click="router.push('/')"
+              :disabled="isButtonDisabled"
+              @click="editTask"
               class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
             >
               SAVE
@@ -264,4 +293,3 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped></style>
-

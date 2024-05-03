@@ -95,7 +95,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="overflow-y-auto w-full h-full pt-14">
+    <div class="overflow-y-scroll w-full h-full pt-14">
       <table class="table border-collapse bg-[#FFFFFF] bg-opacity-[0.08] p-5">
         <thead
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
