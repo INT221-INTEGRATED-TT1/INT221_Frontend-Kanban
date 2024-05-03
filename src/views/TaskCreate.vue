@@ -47,6 +47,7 @@ const createNewTask = async () => {
       
       utilityStore.tasksManager.addTask(response.data)
     }
+    else(console.log(response))
   } catch(error) {
     alert("Failed to add the task. Please try again later.")
     console.log(error);

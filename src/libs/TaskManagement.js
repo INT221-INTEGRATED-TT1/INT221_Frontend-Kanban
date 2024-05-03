@@ -18,8 +18,9 @@ class TaskManagement {
     }
   }
 
-  editTask(index, newTask) {
-    this.tasks.splice(index, 1, newTask)
+  editTask(taskId, newTask) {
+    const filterId = this.tasks.findIndex((task) => task.id === taskId)
+    this.tasks.splice(filterId, 1, newTask)
   }
 
   getTasks() {

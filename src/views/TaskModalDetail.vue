@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, computed, reactive} from "vue"
-import {getTask} from "@/libs/FetchAPI.js"
+import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import router from "@/router/index.js"
@@ -47,7 +47,7 @@ const dropdownTextColor = (status) => {
 
 const selectStatus = (status) => {
   task.value.status = ConvertToEnumStatus[status]
-  newTask.status = ConvertToEnumStatus[status]
+  updateTask.status = ConvertToEnumStatus[status]
 }
 
 const formatTimezone = () => {
@@ -77,27 +77,20 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
-const newTask = reactive({
+const updateTask = reactive({
   title: "",
   description: "",
   assignees: "",
   status: "",
 })
 
-const editTask = async () => {
-  try {
-    const response = await updateTask(route.params.id, newTask)
-    if (response.status === 200) {
-      router.push("/task")
-      utilityStore.tasksManager.updateTask(route.params.id, newTask)
-    }
-  } catch (error) {
-    console.log("Error updating task: ", error)
-  }
-}
-
 const isButtonDisabled = computed(() => {
-  return !newTask.title || !newTask.status || !newTask.assignees || !newTask.description
+  return (
+    !updateTask.title &&
+    !updateTask.status &&
+    !updateTask.assignees &&
+    !updateTask.description
+  )
 })
 
 onBeforeMount(async () => {
@@ -107,6 +100,7 @@ onBeforeMount(async () => {
     // console.log(utilityStore.tasksManager.getTasks());
     utilityStore.tasksManager.addTasks(fetchTask)
     task.value = utilityStore.tasksManager.getTasks()
+    console.log(utilityStore.tasksManager.getTasks())
 
     if (
       task.value.description === null ||
@@ -123,10 +117,29 @@ onBeforeMount(async () => {
 
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
+
+    updateTask.title = task.value.title
+    updateTask.description = task.value.description
+    updateTask.assignees = task.value.assignees
+    updateTask.status = task.value.status
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
 })
+
+const editTaskData = async (newTask) => {
+  console.log(newTask)
+  console.log(route.params.id)
+  try {
+    const response = await editTask(route.params.id, newTask)
+    if (response.status === 200) {
+      router.push("/task")
+      utilityStore.tasksManager.editTask(route.params.id, newTask)
+    }
+  } catch (error) {
+    console.log("Error updating task: ", error)
+  }
+}
 </script>
 
 <template>
@@ -147,7 +160,7 @@ onBeforeMount(async () => {
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5"
           maxlength="100"
           :placeholder="task.title"
-          v-model.trim="newTask.title"
+          v-model.trim="updateTask.title"
         >
         </textarea>
 
@@ -203,7 +216,8 @@ onBeforeMount(async () => {
                   ? 'italic text-gray-500'
                   : ' text-[#F99B1D]'
               "
-              v-model.trim="newTask.assignees"
+              v-model.trim="updateTask.assignees"
+              :placeholder="task.assignees"
               >{{ task.assignees }}</textarea
             >
           </div>
@@ -240,18 +254,17 @@ onBeforeMount(async () => {
           <textarea
             class="itbkk-description textarea textarea-bordered w-[90%] mx-auto resize-none mt-8"
             rows="6"
-            placeholder="Description"
             maxlength="500"
             :class="
               task.description === 'No Description Provided'
                 ? 'italic text-gray-500'
                 : 'text-normal text opacity-80'
             "
-            v-model.trim="newTask.description"
-          >{{ task.description }}</textarea>
+            v-model.trim="updateTask.description"
+            :placeholder="task.description"
+          ></textarea>
           <!-- :value="task.description" -->
           <!-- :placeholder="task.description" -->
-
 
           <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
         </div>
@@ -280,7 +293,7 @@ onBeforeMount(async () => {
             </button>
             <button
               :disabled="isButtonDisabled"
-              @click="editTask"
+              @click="editTaskData(updateTask)"
               class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
             >
               SAVE
