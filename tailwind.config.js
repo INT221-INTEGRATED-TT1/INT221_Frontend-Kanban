@@ -4,14 +4,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        "base-bg": "#232946",
-        "secondary-bg": "#b8c1ec",
-        "headline": "#fffffe",
-        "header": "#fffffed7",
-        "normal-text": "#b8c1ec",
-        "table-header": "#121629",
-        "table-body": "#232946",
-        "button":"#eebbc3"
+        "base": "#000000",
+        "headline": "#FFFFFF",
+        "secondary": "#E3E3E3",
+        "normal": "#FFFFFF",
+        "gradient":""
       },
     },
 
