@@ -4,6 +4,11 @@ import {ref} from "vue"
 
 export const useUtilityStore = defineStore("utility", () => {
   const tasksManager = ref(new TaskManagement())
+  const selectedTaskId = ref("")
+  const taskTitle = ref("")
+  const showDeleteConfirmation = ref(false)
+  const showDeleteSuccess = ref(false)
+  const showErrorMessage = ref(false)
 
   const convertToStatus = ref({
     NO_STATUS: "No Status",
@@ -11,8 +16,6 @@ export const useUtilityStore = defineStore("utility", () => {
     DOING: "Doing",
     DONE: "Done",
   })
-
-  
 
   const getStatusStyle = (status) => {
     return {
@@ -23,6 +26,14 @@ export const useUtilityStore = defineStore("utility", () => {
     }
   }
 
-  return {convertToStatus, getStatusStyle, tasksManager}
+  return {
+    convertToStatus,
+    getStatusStyle,
+    tasksManager,
+    selectedTaskId,
+    showDeleteConfirmation,
+    taskTitle,
+    showDeleteSuccess,
+    showErrorMessage,
+  }
 })
-

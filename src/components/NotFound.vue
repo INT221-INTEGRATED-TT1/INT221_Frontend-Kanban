@@ -12,7 +12,7 @@ import router from "@/router/index.js"
       </h1>
       <button
         @click="router.push('/')"
-        class="btn text-xs font-bold px-[3rem] bg-[#007305] bg-opacity-35 text-[#13FF80] bg-button"
+        class="btn text-xs font-bold px-[3rem] bg-[#007305] bg-opacity-35 text-[#13FF80] "
       >
         GO BACK HOME
       </button>

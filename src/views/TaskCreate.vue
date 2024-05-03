@@ -42,16 +42,12 @@ const createNewTask = async () => {
   try {
     // await createTask(newTask)
     const response = await createTask(newTask)
-    if(response.status === 201){
+    if (response.status === 201) {
       router.push("/task")
-      
+      alert("The task has been successfully added.")
       utilityStore.tasksManager.addTask(response.data)
     }
-    
-    // alert("The task has been successfully added.")
-  } 
-  
-  catch {
+  } catch {
     alert("Failed to add the task. Please try again later.")
     //   console.error("Error while adding task:", error)
     //   // Optionally, show an error message to the user
@@ -114,7 +110,7 @@ onBeforeMount(async () => {
 
               <select
                 v-model="newTask.status"
-                class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider bg-[#5A5A5A] bg-opacity-30 text-[#D8D8D8]"
+                class="rounded-xl p-2 font-bold text-[16px] text-center tracking-wider bg-[#5A5A5A] bg-opacity-30 text-[#D8D8D8]"
               >
                 <option
                   v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"

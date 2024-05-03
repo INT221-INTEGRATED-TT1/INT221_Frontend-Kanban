@@ -1,6 +1,6 @@
 import router from "@/router"
 // import { useUtilityStore } from "@/stores/useUtilityStore"
-import { ConvertToEnumStatus } from "./util"
+import {ConvertToEnumStatus} from "./util"
 
 // const utilityStore = useUtilityStore()
 
@@ -38,25 +38,57 @@ const getTask = async (id) => {
 
 const createTask = async (task) => {
   task.status = ConvertToEnumStatus[task.status]
-  try{
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(task),
-    })
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v1/tasks`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(task),
+      }
+    )
     return {
       status: response.status,
       message: "Task created successfully",
-      data: await response.json()
+      data: await response.json(),
     }
-
-  }
-  catch (error) {
+  } catch (error) {
     throw error
   }
- 
 }
 
-export {getAllTasks, getTask, createTask}
+const deleteTasks = async (id) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`,
+      {
+        method: "DELETE",
+      }
+    )
+    return {
+      status: response.status,
+      message: "Task deleted successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const editTask = async (id, newTask) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newTask),
+    }
+  )
+  return response.json()
+}
+
+export {getAllTasks, getTask, createTask, deleteTasks, editTask}

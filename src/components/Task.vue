@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onMounted} from "vue"
-import {getAllTasks} from "@/libs/FetchAPI.js"
+import {getAllTasks, deleteTasks} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import FilterIcon from "@/components/icons/FilterIcon.vue"
@@ -9,6 +9,7 @@ import GroupCode from "@/components/icons/GroupCode.vue"
 import TitleIcon from "@/components/icons/TitleIcon.vue"
 import StatusIcon from "@/components/icons/StatusIcon.vue"
 import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
+import MoreIcon from "@/components/icons/MoreIcon.vue"
 
 const tasks = ref([])
 const utilityStore = useUtilityStore()
@@ -30,6 +31,40 @@ onMounted(async () => {
     console.log("Error fetching tasks : ", error)
   }
 })
+
+const deleteTask = async (deleteId) => {
+  try {
+    const response = await deleteTasks(deleteId)
+    if (response.status === 200) {
+      utilityStore.showDeleteConfirmation = false
+      utilityStore.showDeleteSuccess = true
+      closeToast()
+      // alert("Task has been deleted")
+      utilityStore.tasksManager.deleteTask(deleteId)
+    }
+  } catch (error) {
+    if (error.response.status === 404) {
+      utilityStore.showDeleteConfirmation = false
+      // utilityStore.showDeleteSuccess = true
+      utilityStore.showErrorMessage = true
+      closeToast()
+    } else {
+      console.log("Error deleting task : ", error)
+    }
+  }
+}
+
+const confirmDeleteTask = (taskId, taskTitle) => {
+  utilityStore.selectedTaskId = taskId
+  utilityStore.taskTitle = taskTitle
+  utilityStore.showDeleteConfirmation = true
+}
+
+const closeToast = () => {
+  setTimeout(() => {
+    utilityStore.showDeleteSuccess = false
+  }, 2000)
+}
 </script>
 
 <template>
@@ -52,7 +87,9 @@ onMounted(async () => {
             class="border-solid border-[1px] border-secondary px-3 py-1 rounded-lg flex items-center gap-x-2"
           >
             <span><CreateTaskIcon /></span>
-            <button class="text-normal text-opacity-75">New Task</button>
+            <button class="itbkk-button-add text-normal text-opacity-75">
+              New Task
+            </button>
           </div>
         </router-link>
       </div>
@@ -76,23 +113,26 @@ onMounted(async () => {
                 <span><AssigneesIcon /></span>Assignees
               </div>
             </th>
-            <th class="rounded-tr-xl">
+            <th class="">
               <div class="flex gap-x-3">
                 <span><StatusIcon /></span>Status
               </div>
             </th>
+            <th class="rounded-tr-xl"></th>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="itbkk-item cursor-pointer"
+            class="itbkk-item"
             v-for="task in tasks"
             v-if="tasks.length > 0"
             :key="task.id"
-            @click="router.push(`/task/${task.id}`)"
           >
             <td>{{ task.id }}</td>
-            <td class="itbkk-title tracking-wider">
+            <td
+              class="itbkk-title tracking-wider cursor-pointer"
+              @click="router.push(`/task/${task.id}`)"
+            >
               {{ task.title }}
             </td>
             <td
@@ -115,6 +155,30 @@ onMounted(async () => {
                 {{ utilityStore.convertToStatus[task.status] }}
               </div>
             </td>
+            <td class="text-center">
+              <div class="dropdown dropdown-top">
+                <div tabindex="0" role="button" class="itbkk-button-action btn">
+                  <MoreIcon />
+                </div>
+                <ul
+                  tabindex="0"
+                  class="dropdown-content z-[1] menu shadow bg-base-100 rounded-box w-20"
+                >
+                  <li
+                    class="itbkk-button-edit cursor-pointer hover:text-blue-500"
+                    @click="router.push(`/task/${task.id}`)"
+                  >
+                    Edit
+                  </li>
+                  <li
+                    class="itbkk-button-delete cursor-pointer mt-2 hover:rounded-xl hover:bg-[#ec3c3c] hover:bg-opacity-35 text-[#ff3939]"
+                    @click="confirmDeleteTask(task.id, task.title)"
+                  >
+                    Delete
+                  </li>
+                </ul>
+              </div>
+            </td>
           </tr>
 
           <tr v-else>
@@ -129,8 +193,56 @@ onMounted(async () => {
       </table>
     </div>
     <router-view></router-view>
+
+    <!-- delete confirmation -->
+    <div>
+      <div
+        class="fixed inset-0 backdrop-blur-md flex justify-center items-center"
+        v-if="utilityStore.showDeleteConfirmation"
+      >
+        <div
+          class="itbkk-message bg-[#1F1F1F] rounded-lg p-10 w-[30rem] h-[15rem] flex flex-col items-center gap-y-5"
+        >
+          <h1 class="text-headline font-bold text-2xl text-opacity-75">
+            Delete a Task
+          </h1>
+          <p class="text-normal text-opacity-75">
+            Do you want to delete task "{{ utilityStore.taskTitle }}"?
+          </p>
+          <div class="flex gap-x-5">
+            <button
+              class="itbkk-button-cancel btn text-xs font-bold px-[3rem] bg-[#ec3c3c] bg-opacity-35 text-[#ff3939]"
+              @click="utilityStore.showDeleteConfirmation = false"
+            >
+              Cancel
+            </button>
+            <button
+              class="itbkk-button-confirm btn text-xs font-bold px-[3rem] bg-[#007305] bg-opacity-35 text-[#13FF80]"
+              @click="deleteTask(utilityStore.selectedTaskId)"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- delete confirmation -->
+
+    <!-- toast -->
+    <div v-if="utilityStore.showDeleteSuccess" class="toast">
+      <div class="alert alert-success">
+        <span>The task has been deleted</span>
+      </div>
+    </div>
+
+    <div v-if="utilityStore.showErrorMessage" class="toast">
+      <div class="alert alert-error">
+        <span>An error has occurred, the task does not exist.</span>
+      </div>
+    </div>
+
+    <!-- toast -->
   </main>
 </template>
 
 <style scoped></style>
-@/libs/FetchAPI.js
