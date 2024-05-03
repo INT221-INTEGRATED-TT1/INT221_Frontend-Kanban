@@ -9,6 +9,7 @@ import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
+import {ConvertToEnumStatus} from "../libs/util.js"
 
 const utilityStore = useUtilityStore()
 // const route = useRoute()
@@ -98,29 +99,29 @@ onBeforeMount(async () => {
               <span><StatusDetail /></span> Status
             </div>
             <div class="dropdown dropdown-right">
-              <!-- <select
+              <div
                 tabindex="0"
                 role="button"
-                class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3 bg-[#5A5A5A] bg-opacity-30 text-[#D8D8D8]"
-                :class="utilityStore.getStatusStyle()"
-                v-model="newTask.Status"
+                class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
+                :class="utilityStore.getStatusStyle(ConvertToEnumStatus[newTask.status])"
               >
-                <span > <DropdownIcon /></span>
-              </select> -->
+                {{newTask.status}}
+                <span><DropdownIcon /></span>
+              </div>
 
-              <select
-                v-model="newTask.status"
-                class="rounded-xl p-2 font-bold text-[16px] text-center tracking-wider bg-[#5A5A5A] bg-opacity-30 text-[#D8D8D8]"
+              <ul
+                tabindex="0"
+                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 cursor-pointer"
               >
-                <option
+                <li
                   v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
                   :key="status"
                   @click="selectStatus(status)"
                   :class="dropdownTextColor(status)"
                 >
                   {{ status }}
-                </option>
-              </select>
+                </li>
+              </ul>
             </div>
           </div>
           <!-- Status -->

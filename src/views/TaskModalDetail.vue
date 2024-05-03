@@ -43,9 +43,10 @@ const dropdownTextColor = (status) => {
 // const toggleDropdown = () => {
 //   isOpen.value = !isOpen.value
 // }
+import {ConvertToEnumStatus} from "../libs/util.js"
 
 const selectStatus = (status) => {
-  task.value.status = utilityStore.ConvertToEnumStatus[status]
+  task.value.status = ConvertToEnumStatus[status]
 }
 
 const formatTimezone = () => {
