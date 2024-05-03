@@ -36,23 +36,20 @@ const newTask = reactive({
 })
 
 const createNewTask = async () => {
-  newTask.title = newTask.title.trim()
-  newTask.description = newTask.description.trim()
-  newTask.assignees = newTask.assignees.trim()
+  // newTask.title = newTask.title.trim()
+  // newTask.description = newTask.description.trim()
+  // newTask.assignees = newTask.assignees.trim()
 
   try {
-    // await createTask(newTask)
     const response = await createTask(newTask)
     if (response.status === 201) {
       router.push("/task")
-      alert("The task has been successfully added.")
+      
       utilityStore.tasksManager.addTask(response.data)
     }
-  } catch {
+  } catch(error) {
     alert("Failed to add the task. Please try again later.")
-    //   console.error("Error while adding task:", error)
-    //   // Optionally, show an error message to the user
-    //   alert("Failed to add the task. Please try again later.")
+    console.log(error);
   }
 }
 
@@ -140,7 +137,7 @@ onBeforeMount(async () => {
               maxlength="30"
               rows="1"
               placeholder="Empty"
-              v-model="newTask.assignees"
+              v-model.trim="newTask.assignees"
               class="rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
             ></textarea>
           </div>
@@ -153,7 +150,7 @@ onBeforeMount(async () => {
             class="itbkk-description textarea textarea-bordered w-[90%] mx-auto resize-none mt-8"
             rows="6"
             placeholder="Description"
-            v-model="newTask.description"
+            v-model.trim="newTask.description"
             maxlength="500"
           ></textarea>
           <!-- :value="task.description" -->
@@ -164,7 +161,7 @@ onBeforeMount(async () => {
             <div class="flex gap-x-3">
               <button
                 @click="router.push('/')"
-                class="ibkk-button-cancel btn btn-outline px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+                class="itbkk-button-cancel btn btn-outline px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
               >
                 CANCEL
               </button>

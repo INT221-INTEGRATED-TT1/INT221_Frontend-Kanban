@@ -18,6 +18,10 @@ class TaskManagement {
     }
   }
 
+  editTask(index, newTask) {
+    this.tasks.splice(index, 1, newTask)
+  }
+
   getTasks() {
     return this.tasks
   }

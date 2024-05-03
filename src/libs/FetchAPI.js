@@ -78,17 +78,25 @@ const deleteTasks = async (id) => {
 }
 
 const editTask = async (id, newTask) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newTask),
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newTask),
+      }
+    )
+    return {
+      status: response.status,
+      message: "Task updated successfully",
+      data: await response.json(),
     }
-  )
-  return response.json()
+  } catch (error) {
+    throw error
+  }
 }
 
 export {getAllTasks, getTask, createTask, deleteTasks, editTask}
