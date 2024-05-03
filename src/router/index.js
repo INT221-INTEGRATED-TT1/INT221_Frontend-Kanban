@@ -35,6 +35,10 @@ const router = createRouter({
 
           // }
         },
+        {
+          path: ":id/edit",
+          component: TaskModalDetail,
+        },
         {path: "add", component: TaskCreate, name: "create-task"},
       ],
     },

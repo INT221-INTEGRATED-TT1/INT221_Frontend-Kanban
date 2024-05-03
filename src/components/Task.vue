@@ -14,6 +14,40 @@ import MoreIcon from "@/components/icons/MoreIcon.vue"
 const tasks = ref([])
 const utilityStore = useUtilityStore()
 
+const deleteTask = async (deleteId) => {
+  try {
+    const response = await deleteTasks(deleteId)
+    if (response.status === 200) {
+      utilityStore.showDeleteConfirmation = false
+      utilityStore.showDeleteSuccess = true
+      closeToast()
+      // alert("Task has been deleted")
+      utilityStore.tasksManager.deleteTask(deleteId)
+    }
+
+    if (response.status === 404) {
+      utilityStore.showDeleteConfirmation = false
+      utilityStore.showErrorMessage = true
+      closeToast
+    }
+  } catch (error) {
+    console.log("Error deleting task : ", error)
+  }
+}
+
+const confirmDeleteTask = (taskId, taskTitle) => {
+  utilityStore.selectedTaskId = taskId
+  utilityStore.taskTitle = taskTitle
+  utilityStore.showDeleteConfirmation = true
+}
+
+const closeToast = () => {
+  setTimeout(() => {
+    utilityStore.showDeleteSuccess = false
+    utilityStore.showErrorMessage = false
+  }, 2000)
+}
+
 onMounted(async () => {
   try {
     const fetchTasks = await getAllTasks()
@@ -31,40 +65,6 @@ onMounted(async () => {
     console.log("Error fetching tasks : ", error)
   }
 })
-
-const deleteTask = async (deleteId) => {
-  try {
-    const response = await deleteTasks(deleteId)
-    if (response.status === 200) {
-      utilityStore.showDeleteConfirmation = false
-      utilityStore.showDeleteSuccess = true
-      closeToast()
-      // alert("Task has been deleted")
-      utilityStore.tasksManager.deleteTask(deleteId)
-    }
-  } catch (error) {
-    if (error.response.status === 404) {
-      utilityStore.showDeleteConfirmation = false
-      // utilityStore.showDeleteSuccess = true
-      utilityStore.showErrorMessage = true
-      closeToast()
-    } else {
-      console.log("Error deleting task : ", error)
-    }
-  }
-}
-
-const confirmDeleteTask = (taskId, taskTitle) => {
-  utilityStore.selectedTaskId = taskId
-  utilityStore.taskTitle = taskTitle
-  utilityStore.showDeleteConfirmation = true
-}
-
-const closeToast = () => {
-  setTimeout(() => {
-    utilityStore.showDeleteSuccess = false
-  }, 2000)
-}
 </script>
 
 <template>
@@ -95,10 +95,8 @@ const closeToast = () => {
       </div>
     </div>
 
-    <div class="overflow-x-auto overflow-y-auto pt-14">
-      <table
-        class="table border-collapse bg-[#FFFFFF] bg-opacity-[0.08] w-full p-5"
-      >
+    <div class="overflow-y-auto w-full h-full pt-14">
+      <table class="table border-collapse bg-[#FFFFFF] bg-opacity-[0.08] p-5">
         <thead
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
@@ -166,7 +164,7 @@ const closeToast = () => {
                 >
                   <li
                     class="itbkk-button-edit cursor-pointer hover:text-blue-500"
-                    @click="router.push(`/task/${task.id}`)"
+                    @click="router.push(`/task/${task.id}/edit`)"
                   >
                     Edit
                   </li>
