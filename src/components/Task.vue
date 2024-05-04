@@ -1,6 +1,6 @@
 <script setup>
-import {ref, onMounted} from "vue"
-import {getAllTasks, deleteTasks} from "@/libs/FetchAPI.js"
+import {ref, onMounted, onBeforeMount} from "vue"
+import {getAllTasks, deleteTasks, createTask} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import FilterIcon from "@/components/icons/FilterIcon.vue"
@@ -10,6 +10,8 @@ import TitleIcon from "@/components/icons/TitleIcon.vue"
 import StatusIcon from "@/components/icons/StatusIcon.vue"
 import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
 import MoreIcon from "@/components/icons/MoreIcon.vue"
+import {toast} from "vue3-toastify"
+import "vue3-toastify/dist/index.css"
 
 const tasks = ref([])
 const utilityStore = useUtilityStore()
@@ -18,17 +20,16 @@ const deleteTask = async (deleteId) => {
   try {
     const response = await deleteTasks(deleteId)
     if (response.status === 200) {
+      utilityStore.tasksManager.deleteTask(response.data)
       utilityStore.showDeleteConfirmation = false
-      utilityStore.showDeleteSuccess = true
-      closeToast()
-      // alert("Task has been deleted")
-      utilityStore.tasksManager.deleteTask(deleteId)
+      toast("Task has been deleted", {type: "success", timeout: 2000})
     }
 
     if (response.status === 404) {
-      utilityStore.showDeleteConfirmation = false
-      utilityStore.showErrorMessage = true
-      closeToast
+      toast("An error has occurred, the task does not exist.", {
+        type: "error",
+        timeout: 2000,
+      })
     }
   } catch (error) {
     console.log("Error deleting task : ", error)
@@ -41,23 +42,26 @@ const confirmDeleteTask = (taskId, taskTitle) => {
   utilityStore.showDeleteConfirmation = true
 }
 
-const closeToast = () => {
-  setTimeout(() => {
-    utilityStore.showDeleteSuccess = false
-    utilityStore.showErrorMessage = false
-  }, 2000)
-}
-
-onMounted(async () => {
+onBeforeMount(async () => {
   try {
     const fetchTasks = await getAllTasks()
     utilityStore.tasksManager.addTasks(fetchTasks)
-    tasks.value = utilityStore.tasksManager.getTasks()
+    console.log(utilityStore.tasksManager.getTasks())
+    // tasks.value = utilityStore.tasksManager.getTasks()
+    // console.log(tasks.value);
+    // const fetchData = JSON.parse(
+    //   JSON.stringify(utilityStore.tasksManager.getTasks())
+    // )
+
+    // tasks.value = fetchData
+    // console.log(fetchData);
+    // console.log(tasks.value);
 
     for (const task of utilityStore.tasksManager.getTasks()) {
       if (task.assignees === null || task.assignees.trim().length === 0) {
         task.assignees = "Unassigned"
       }
+      
     }
 
     // console.log(tasks.value)
@@ -122,9 +126,9 @@ onMounted(async () => {
         <tbody>
           <tr
             class="itbkk-item"
-            v-for="task in tasks"
-            v-if="tasks.length > 0"
+            v-for="task in utilityStore.tasksManager.getTasks()"
             :key="task.id"
+            v-if="utilityStore.tasksManager.getTasks().length > 0"
           >
             <td>{{ task.id }}</td>
             <td
@@ -133,15 +137,15 @@ onMounted(async () => {
             >
               {{ task.title }}
             </td>
-            <td
-              class="itbkk-assignees text-opacity-90 text-center"
-              :class="
-                task.assignees === 'Unassigned'
-                  ? 'italic text-gray-500'
-                  : 'text-[#F99B1D]'
-              "
-            >
-              <div class="bg-[#1A1B1D] rounded-md px-1 py-2 tracking-wide">
+            <td class="itbkk-assignees text-opacity-90 text-center">
+              <div
+                class="bg-[#1A1B1D] rounded-md px-1 py-2 tracking-wide"
+                :class="
+                  task.assignees === 'Unassigned'
+                    ? 'italic text-gray-500'
+                    : 'text-[#F99B1D]'
+                "
+              >
                 {{ task.assignees }}
               </div>
             </td>
@@ -204,7 +208,7 @@ onMounted(async () => {
           <h1 class="text-headline font-bold text-2xl text-opacity-75">
             Delete a Task
           </h1>
-          <p class="text-normal text-opacity-75">
+          <p class="text-normal text-opacity-75 break-all">
             Do you want to delete task "{{ utilityStore.taskTitle }}"?
           </p>
           <div class="flex gap-x-5">
@@ -225,21 +229,6 @@ onMounted(async () => {
       </div>
     </div>
     <!-- delete confirmation -->
-
-    <!-- toast -->
-    <div v-if="utilityStore.showDeleteSuccess" class="toast">
-      <div class="alert alert-success">
-        <span>The task has been deleted</span>
-      </div>
-    </div>
-
-    <div v-if="utilityStore.showErrorMessage" class="toast">
-      <div class="alert alert-error">
-        <span>An error has occurred, the task does not exist.</span>
-      </div>
-    </div>
-
-    <!-- toast -->
   </main>
 </template>
 

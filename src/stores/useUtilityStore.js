@@ -1,14 +1,13 @@
 import {TaskManagement} from "@/libs/TaskManagement"
 import {defineStore} from "pinia"
-import {ref} from "vue"
+import {computed, ref} from "vue"
 
 export const useUtilityStore = defineStore("utility", () => {
   const tasksManager = ref(new TaskManagement())
   const selectedTaskId = ref("")
   const taskTitle = ref("")
   const showDeleteConfirmation = ref(false)
-  const showDeleteSuccess = ref(false)
-  const showErrorMessage = ref(false)
+  const tasks = ref([])
 
   const convertToStatus = ref({
     NO_STATUS: "No Status",
@@ -26,6 +25,10 @@ export const useUtilityStore = defineStore("utility", () => {
     }
   }
 
+  const tasksData = computed(() => {
+    return tasks.value = tasksManager.value.getTasks()
+  })
+
   return {
     convertToStatus,
     getStatusStyle,
@@ -33,7 +36,7 @@ export const useUtilityStore = defineStore("utility", () => {
     selectedTaskId,
     showDeleteConfirmation,
     taskTitle,
-    showDeleteSuccess,
-    showErrorMessage,
+    tasksData,
+    tasks
   }
 })

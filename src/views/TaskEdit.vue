@@ -1,6 +1,6 @@
 <script setup>
-import {ref, onBeforeMount, onMounted} from "vue"
-import {getTask} from "@/libs/FetchAPI.js"
+import {ref, onBeforeMount, computed, reactive} from "vue"
+import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import router from "@/router/index.js"
@@ -11,6 +11,7 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
+import {ConvertToEnumStatus} from "../libs/util.js"
 import {TaskManagement} from "@/libs/TaskManagement"
 
 // const text = ref('')
@@ -31,24 +32,25 @@ const task = ref([])
 // const isOpen = ref(false)
 const route = useRoute()
 const utilityStore = useUtilityStore()
-// const fetchData = ref(new TaskManagement())
+const fetchData = ref(new TaskManagement())
 
-// const dropdownTextColor = (status) => {
-//   return {
-//     "text-[#D8D8D8]": status === "No Status",
-//     "text-[#FF881B]": status === "To Do",
-//     "text-[#2697FF]": status === "Doing",
-//     "text-[#65EE6C]": status === "Done",
-//   }
-// }
+const dropdownTextColor = (status) => {
+  return {
+    "text-[#D8D8D8]": status === "No Status",
+    "text-[#FF881B]": status === "To Do",
+    "text-[#2697FF]": status === "Doing",
+    "text-[#65EE6C]": status === "Done",
+  }
+}
 
 // const toggleDropdown = () => {
 //   isOpen.value = !isOpen.value
 // }
 
-// const selectStatus = (status) => {
-//   utilityStore.tasksManager.getTasks().status = utilityStore.ConvertToEnumStatus[status]
-// }
+const selectStatus = (status) => {
+  task.value.status = ConvertToEnumStatus[status]
+  updateTask.status = ConvertToEnumStatus[status]
+}
 
 const formatTimezone = () => {
   const options = {
@@ -77,20 +79,69 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
+const updateTask = reactive({
+  title: "",
+  description: "",
+  assignees: "",
+  status: "",
+})
+
+const isButtonDisabled = computed(() => {
+  return (
+    !updateTask.title &&
+    !updateTask.status &&
+    !updateTask.assignees &&
+    !updateTask.description
+  )
+})
+
+const editTaskData = async (newTask) => {
+  console.log(newTask)
+  console.log(route.params.id)
+  try {
+    const response = await editTask(route.params.id, newTask)
+    if (response.status === 200) {
+      router.push("/task")
+      utilityStore.tasksManager.editTask(route.params.id, newTask)
+      task.value = utilityStore.tasksManager.getTasks()
+      utilityStore
+    }
+  } catch (error) {
+    console.log("Error updating task: ", error)
+  }
+}
+
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
+    // fetchData.value.addTasks(fetchTask)
+    // console.log(fetchData.value.getTasks())
+    // console.log(utilityStore.tasksManager.getTasks());
     utilityStore.tasksManager.addTasks(fetchTask)
-    
-    const fetchData = JSON.parse(JSON.stringify(utilityStore.tasksManager.getTasks()))
-    task.value = fetchData
-    console.log(utilityStore.tasksManager.getTasks());
-    // console.log(task.value);
-    
-    utilityStore.tasksManager.getTasks().createdOn = formatDateTime(task.value.createdOn)
-    utilityStore.tasksManager.getTasks().updatedOn = formatDateTime(task.value.updatedOn)
-    // console.log(utilityStore.tasksManager.getTasks().createdOn);
-    // console.log(utilityStore.tasksManager.getTasks().updatedOn);
+    task.value = utilityStore.tasksManager.getTasks()
+    // console.log(utilityStore.tasksManager.getTasks())
+    // console.log(task.value)
+
+    if (
+      task.value.description === null ||
+      task.value.description.trim().length === 0
+    ) {
+      task.value.description = "No Description Provided"
+    }
+    if (
+      task.value.assignees === null ||
+      task.value.assignees.trim().length === 0
+    ) {
+      task.value.assignees = "Unassigned"
+    }
+
+    task.value.createdOn = formatDateTime(task.value.createdOn)
+    task.value.updatedOn = formatDateTime(task.value.updatedOn)
+
+    updateTask.title = task.value.title
+    updateTask.description = task.value.description
+    updateTask.assignees = task.value.assignees
+    updateTask.status = task.value.status
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
@@ -110,11 +161,14 @@ onBeforeMount(async () => {
       </div>
 
       <div class="flex flex-col gap-y-5">
-        <div
-          class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5 break-all"
+        <!-- :value="task.title" -->
+        <textarea
+          class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5"
+          maxlength="100"
+          :placeholder="task.title"
+          v-model.trim="updateTask.title"
         >
-          {{ utilityStore.tasksManager.getTasks().title }}
-        </div>
+        </textarea>
 
         <div class="grid grid-cols-1 grid-rows-4 gap-y-4">
           <!-- Status -->
@@ -122,16 +176,32 @@ onBeforeMount(async () => {
             <div
               class="itbkk-status text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-3"
             >
-              <span clas><StatusDetail /></span> Status
+              <span><StatusDetail /></span> Status
             </div>
-            <div>
+            <div class="dropdown dropdown-right">
               <div
+                tabindex="0"
+                role="button"
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.getStatusStyle(utilityStore.tasksManager.getTasks().status)"
+                :class="utilityStore.getStatusStyle(task.status)"
               >
-                {{ utilityStore.tasksManager.getTasks().status }}
-                <!-- <span><DropdownIcon /></span> -->
+                {{ utilityStore.convertToStatus[task.status] }}
+                <span><DropdownIcon /></span>
               </div>
+
+              <ul
+                tabindex="0"
+                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 cursor-pointer"
+              >
+                <li
+                  v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
+                  :key="status"
+                  @click="selectStatus(status)"
+                  :class="dropdownTextColor(status)"
+                >
+                  {{ status }}
+                </li>
+              </ul>
             </div>
           </div>
 
@@ -148,12 +218,13 @@ onBeforeMount(async () => {
               rows="1"
               class="rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
               :class="
-                utilityStore.tasksManager.getTasks().assignees === 'Unassigned'
+                task.assignees === 'Unassigned'
                   ? 'italic text-gray-500'
                   : ' text-[#F99B1D]'
               "
-              readonly
-              >{{ utilityStore.tasksManager.getTasks().assignees }}</textarea
+              v-model.trim="updateTask.assignees"
+              :placeholder="task.assignees"
+              >{{ task.assignees }}</textarea
             >
           </div>
 
@@ -167,7 +238,7 @@ onBeforeMount(async () => {
             <div
               class="itbkk-created-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
             >
-              {{ utilityStore.tasksManager.getTasks().createdOn }}
+              {{ task.createdOn }}
             </div>
           </div>
 
@@ -181,7 +252,7 @@ onBeforeMount(async () => {
             <div
               class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
             >
-              {{ utilityStore.tasksManager.getTasks().updatedOn }}
+              {{ task.updatedOn }}
             </div>
           </div>
 
@@ -189,17 +260,17 @@ onBeforeMount(async () => {
           <textarea
             class="itbkk-description textarea textarea-bordered w-[90%] mx-auto resize-none mt-8"
             rows="6"
-            placeholder="Description"
             maxlength="500"
-            readonly
             :class="
-              utilityStore.tasksManager.getTasks().description === 'No Description Provided'
+              task.description === 'No Description Provided'
                 ? 'italic text-gray-500'
                 : 'text-normal text opacity-80'
             "
-            :value="utilityStore.tasksManager.getTasks().description"
+            v-model.trim="updateTask.description"
+            :placeholder="task.description"
           ></textarea>
           <!-- :value="task.description" -->
+          <!-- :placeholder="task.description" -->
 
           <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
         </div>
@@ -220,17 +291,18 @@ onBeforeMount(async () => {
           </div>
 
           <div class="flex gap-x-3">
-            <!-- <button
+            <button
               @click="router.push('/')"
               class="btn btn-outline px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
             >
               CANCEL
-            </button> -->
+            </button>
             <button
-              @click="router.push('/')"
+              :disabled="isButtonDisabled"
+              @click="editTaskData(updateTask)"
               class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
             >
-              OK
+              SAVE
             </button>
           </div>
         </div>
@@ -240,4 +312,3 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped></style>
-@/libs/FetchAPI
