@@ -42,11 +42,11 @@ const confirmDeleteTask = (taskId, taskTitle) => {
   utilityStore.showDeleteConfirmation = true
 }
 
-onBeforeMount(async () => {
+onMounted(async () => {
   try {
     const fetchTasks = await getAllTasks()
     utilityStore.tasksManager.addTasks(fetchTasks)
-    console.log(utilityStore.tasksManager.getTasks())
+    // console.log(utilityStore.tasksManager.getTasks())
 
     for (const task of utilityStore.tasksManager.getTasks()) {
       if (task.assignees === null || task.assignees.trim().length === 0) {
@@ -62,7 +62,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <main class="w-screen h-screen bg-base p-[4rem]">
+  <main class="w-screen h-screen overflow-y-auto bg-base p-[4rem]">
     <div class="flex justify-between">
       <div class="">
         <h1 class="text-headline font-extrabold text-3xl text-opacity-70">
@@ -89,8 +89,8 @@ onBeforeMount(async () => {
       </div>
     </div>
 
-    <div class="overflow-y-scroll w-full h-full pt-14">
-      <table class="table border-collapse bg-[#FFFFFF] bg-opacity-[0.08] p-5">
+    <div class="w-full h-full pt-14">
+      <table class="table border-collapse overscroll-y-none bg-[#FFFFFF] bg-opacity-[0.08] p-5">
         <thead
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
@@ -148,8 +148,8 @@ onBeforeMount(async () => {
               </div>
             </td>
             <td class="text-center">
-              <div class="dropdown dropdown-top">
-                <div tabindex="0" role="button" class="itbkk-button-action btn">
+              <div class="dropdown dropdown-bottom">
+                <div tabindex="0" role="button" class="itbkk-button-action btn bg-transparent outline-none">
                   <MoreIcon />
                 </div>
                 <ul

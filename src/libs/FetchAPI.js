@@ -1,5 +1,7 @@
 import router from "@/router"
 import {ConvertToEnumStatus} from "./util"
+import {toast} from "vue3-toastify"
+import "vue3-toastify/dist/index.css"
 
 const getAllTasks = async () => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`)
@@ -7,7 +9,8 @@ const getAllTasks = async () => {
     if (!response.ok) {
       throw {
         status: response.status,
-        message: "The requested does not exist",
+        toast: toast.error("The requested does not exist"),
+        // message: "The requested does not exist",
         router: router.push("/task"),
       }
     }
@@ -24,9 +27,10 @@ const getTask = async (id) => {
     if (!response.ok) {
       throw {
         status: response.status,
-        message: `The requested Task : ${id} does not exist`,
+        toast: toast.error(`The requested Task : ${id} does not exist`),
+        // message: `The requested Task : ${id} does not exist`,
         router: router.push("/task"),
-        alert: alert("The requested Task does not exist"),
+        // alert: alert("The requested Task does not exist"),
       }
     }
   }
