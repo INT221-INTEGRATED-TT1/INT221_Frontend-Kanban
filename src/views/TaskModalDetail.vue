@@ -33,22 +33,22 @@ const route = useRoute()
 const utilityStore = useUtilityStore()
 // const fetchData = ref(new TaskManagement())
 
-// const dropdownTextColor = (status) => {
-//   return {
-//     "text-[#D8D8D8]": status === "No Status",
-//     "text-[#FF881B]": status === "To Do",
-//     "text-[#2697FF]": status === "Doing",
-//     "text-[#65EE6C]": status === "Done",
-//   }
-// }
+const dropdownTextColor = (status) => {
+  return {
+    "text-[#D8D8D8]": status === "No Status",
+    "text-[#FF881B]": status === "To Do",
+    "text-[#2697FF]": status === "Doing",
+    "text-[#65EE6C]": status === "Done",
+  }
+}
 
 // const toggleDropdown = () => {
 //   isOpen.value = !isOpen.value
 // }
 
-// const selectStatus = (status) => {
-//   utilityStore.tasksManager.getTasks().status = utilityStore.ConvertToEnumStatus[status]
-// }
+const selectStatus = (status) => {
+  task.value.status = utilityStore.ConvertToEnumStatus[status]
+}
 
 const formatTimezone = () => {
   const options = {
@@ -80,17 +80,27 @@ const formatDateTime = (baseFormatDate) => {
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
-    utilityStore.tasksManager.addTasks(fetchTask)
-    
-    const fetchData = JSON.parse(JSON.stringify(utilityStore.tasksManager.getTasks()))
-    task.value = fetchData
-    console.log(utilityStore.tasksManager.getTasks());
-    // console.log(task.value);
-    
-    utilityStore.tasksManager.getTasks().createdOn = formatDateTime(task.value.createdOn)
-    utilityStore.tasksManager.getTasks().updatedOn = formatDateTime(task.value.updatedOn)
-    // console.log(utilityStore.tasksManager.getTasks().createdOn);
-    // console.log(utilityStore.tasksManager.getTasks().updatedOn);
+    // fetchData.value.addTasks(fetchTask);
+    // console.log(utilityStore.tasksManager.getTasks());
+    // utilityStore.tasksManager.addTasks(fetchTask)
+    // task.value = utilityStore.tasksManager.getTasks()
+    task.value = fetchTask
+
+    if (
+      task.value.description === null ||
+      task.value.description.trim().length === 0
+    ) {
+      task.value.description = "No Description Provided"
+    }
+    if (
+      task.value.assignees === null ||
+      task.value.assignees.trim().length === 0
+    ) {
+      task.value.assignees = "Unassigned"
+    }
+
+    task.value.createdOn = formatDateTime(task.value.createdOn)
+    task.value.updatedOn = formatDateTime(task.value.updatedOn)
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
@@ -113,7 +123,7 @@ onBeforeMount(async () => {
         <div
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5 break-all"
         >
-          {{ utilityStore.tasksManager.getTasks().title }}
+          {{ task.title }}
         </div>
 
         <div class="grid grid-cols-1 grid-rows-4 gap-y-4">
@@ -127,9 +137,9 @@ onBeforeMount(async () => {
             <div>
               <div
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.getStatusStyle(utilityStore.tasksManager.getTasks().status)"
+                :class="utilityStore.getStatusStyle(task.status)"
               >
-                {{ utilityStore.tasksManager.getTasks().status }}
+                {{ task.status }}
                 <!-- <span><DropdownIcon /></span> -->
               </div>
             </div>
@@ -148,12 +158,12 @@ onBeforeMount(async () => {
               rows="1"
               class="rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
               :class="
-                utilityStore.tasksManager.getTasks().assignees === 'Unassigned'
+                task.assignees === 'Unassigned'
                   ? 'italic text-gray-500'
                   : ' text-[#F99B1D]'
               "
               readonly
-              >{{ utilityStore.tasksManager.getTasks().assignees }}</textarea
+              >{{ task.assignees }}</textarea
             >
           </div>
 
@@ -167,7 +177,7 @@ onBeforeMount(async () => {
             <div
               class="itbkk-created-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
             >
-              {{ utilityStore.tasksManager.getTasks().createdOn }}
+              {{ task.createdOn }}
             </div>
           </div>
 
@@ -181,7 +191,7 @@ onBeforeMount(async () => {
             <div
               class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
             >
-              {{ utilityStore.tasksManager.getTasks().updatedOn }}
+              {{ task.updatedOn }}
             </div>
           </div>
 
@@ -193,11 +203,11 @@ onBeforeMount(async () => {
             maxlength="500"
             readonly
             :class="
-              utilityStore.tasksManager.getTasks().description === 'No Description Provided'
+              task.description === 'No Description Provided'
                 ? 'italic text-gray-500'
                 : 'text-normal text opacity-80'
             "
-            :value="utilityStore.tasksManager.getTasks().description"
+            :value="task.description"
           ></textarea>
           <!-- :value="task.description" -->
 

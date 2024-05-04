@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount, computed, reactive} from "vue"
+import {ref, onBeforeMount, computed, reactive, watch} from "vue"
 import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -11,8 +11,6 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
-import {ConvertToEnumStatus} from "../libs/util.js"
-import {TaskManagement} from "@/libs/TaskManagement"
 
 // const text = ref('')
 // let textArea = ref('')
@@ -28,11 +26,21 @@ import {TaskManagement} from "@/libs/TaskManagement"
 //   textArea.value.style.height = textArea.value.scrollHeight + "px";
 // };
 
-const task = ref([])
+const task = ref()
+const updateTask = reactive({
+  title: "",
+  description: "",
+  assignees: "",
+  status: "",
+})
+
+// watch(updateTask,(newvalue)=>{
+//   console.log(newvalue);
+// },{deep:true})
 // const isOpen = ref(false)
 const route = useRoute()
 const utilityStore = useUtilityStore()
-const fetchData = ref(new TaskManagement())
+import {ConvertToEnumStatus} from "../libs/util.js"
 
 const dropdownTextColor = (status) => {
   return {
@@ -79,13 +87,6 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
-const updateTask = reactive({
-  title: "",
-  description: "",
-  assignees: "",
-  status: "",
-})
-
 const isButtonDisabled = computed(() => {
   return (
     !updateTask.title &&
@@ -95,32 +96,13 @@ const isButtonDisabled = computed(() => {
   )
 })
 
-const editTaskData = async (newTask) => {
-  console.log(newTask)
-  console.log(route.params.id)
-  try {
-    const response = await editTask(route.params.id, newTask)
-    if (response.status === 200) {
-      router.push("/task")
-      utilityStore.tasksManager.editTask(route.params.id, newTask)
-      task.value = utilityStore.tasksManager.getTasks()
-      utilityStore
-    }
-  } catch (error) {
-    console.log("Error updating task: ", error)
-  }
-}
-
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
-    // fetchData.value.addTasks(fetchTask)
-    // console.log(fetchData.value.getTasks())
+    // utilityStore.tasksManager.addTasks(fetchTask)
+    task.value = fetchTask
     // console.log(utilityStore.tasksManager.getTasks());
-    utilityStore.tasksManager.addTasks(fetchTask)
-    task.value = utilityStore.tasksManager.getTasks()
-    // console.log(utilityStore.tasksManager.getTasks())
-    // console.log(task.value)
+    // console.log(task.value);
 
     if (
       task.value.description === null ||
@@ -146,6 +128,20 @@ onBeforeMount(async () => {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
 })
+
+const editTaskData = async (newTask) => {
+  console.log(newTask)
+  console.log(route.params.id)
+  try {
+    const response = await editTask(route.params.id, newTask)
+    if (response.status === 200) {
+      router.push("/task")
+      utilityStore.tasksManager.editTask(route.params.id, newTask)
+    }
+  } catch (error) {
+    console.log("Error updating task: ", error)
+  }
+}
 </script>
 
 <template>
@@ -176,7 +172,7 @@ onBeforeMount(async () => {
             <div
               class="itbkk-status text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-3"
             >
-              <span><StatusDetail /></span> Status
+              <span clas><StatusDetail /></span> Status
             </div>
             <div class="dropdown dropdown-right">
               <div

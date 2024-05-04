@@ -1,8 +1,5 @@
 import router from "@/router"
-// import { useUtilityStore } from "@/stores/useUtilityStore"
 import {ConvertToEnumStatus} from "./util"
-
-// const utilityStore = useUtilityStore()
 
 const getAllTasks = async () => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`)
