@@ -26,7 +26,7 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 //   textArea.value.style.height = textArea.value.scrollHeight + "px";
 // };
 
-const task = ref()
+const task = ref([])
 const updateTask = reactive({
   title: "",
   description: "",

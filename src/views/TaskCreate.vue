@@ -37,18 +37,12 @@ const newTask = reactive({
   status: "No Status",
 })
 
-const validateInput = computed(() => {
-  // if (newTask.title.trim().length === 0 || newTask.title === null) {
-  //   toast("Title is required", {type: "error", timeout: 1500})
-  // }
-  // if (newTask.description.trim().length === 0) {
-  //   newTask.description = "No Description Provided"
-  // }
-  if(newTask.assignees.trim().length === 0) {
+const validateInput = () => {
+  if (newTask.assignees.trim().length === 0) {
     newTask.assignees = "Unassigned"
   }
   createNewTask()
-})
+}
 
 const createNewTask = async () => {
   // newTask.title = newTask.title.trim()
@@ -73,13 +67,6 @@ const createNewTask = async () => {
 
 const isButtonDisabled = computed(() => {
   return !newTask.title
-})
-
-onBeforeMount(async () => {
-  const fetchTask = await getAllTasks()
-  utilityStore.tasksManager.addTasks(fetchTask)
-  // task.value = utilityStore.tasksManager.getTasks()
-  // task.value.forEach((task) => {})
 })
 </script>
 
