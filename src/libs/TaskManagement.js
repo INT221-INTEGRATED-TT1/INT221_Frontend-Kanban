@@ -8,18 +8,19 @@ class TaskManagement {
   }
 
   addTask(newTask) {
+    console.log(this.tasks)
     this.tasks.push(newTask)
   }
 
   deleteTask(deleteId) {
-    const taskIndex = this.tasks.findIndex((task) => task.id === deleteId)
-    if (taskIndex !== -1) {
-      this.tasks.splice(deleteId, 1)
-    }
+    this.tasks.splice(
+      this.tasks.findIndex((task) => task.id === deleteId),
+      1
+    )
   }
 
   editTask(taskId, newTask) {
-    console.log(this.tasks);
+    console.log(this.tasks)
     const filterId = this.tasks.findIndex((task) => task.id === taskId)
     this.tasks.splice(filterId, 1, newTask)
   }

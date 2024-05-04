@@ -13,14 +13,14 @@ import MoreIcon from "@/components/icons/MoreIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
-const tasks = ref([])
+// const tasks = ref([])
 const utilityStore = useUtilityStore()
 
 const deleteTask = async (deleteId) => {
   try {
     const response = await deleteTasks(deleteId)
     if (response.status === 200) {
-      utilityStore.tasksManager.deleteTask(response.data)
+      utilityStore.tasksManager.deleteTask(deleteId)
       utilityStore.showDeleteConfirmation = false
       toast("Task has been deleted", {type: "success", timeout: 2000})
     }
@@ -47,21 +47,11 @@ onBeforeMount(async () => {
     const fetchTasks = await getAllTasks()
     utilityStore.tasksManager.addTasks(fetchTasks)
     console.log(utilityStore.tasksManager.getTasks())
-    // tasks.value = utilityStore.tasksManager.getTasks()
-    // console.log(tasks.value);
-    // const fetchData = JSON.parse(
-    //   JSON.stringify(utilityStore.tasksManager.getTasks())
-    // )
-
-    // tasks.value = fetchData
-    // console.log(fetchData);
-    // console.log(tasks.value);
 
     for (const task of utilityStore.tasksManager.getTasks()) {
       if (task.assignees === null || task.assignees.trim().length === 0) {
         task.assignees = "Unassigned"
       }
-      
     }
 
     // console.log(tasks.value)
