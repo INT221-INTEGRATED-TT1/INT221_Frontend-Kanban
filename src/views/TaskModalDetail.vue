@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount, computed, reactive} from "vue"
+import {ref, onBeforeMount, computed, reactive, watch} from "vue"
 import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -26,7 +26,17 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 //   textArea.value.style.height = textArea.value.scrollHeight + "px";
 // };
 
-const task = ref([])
+const task = ref()
+const updateTask = reactive({
+  title: "",
+  description: "",
+  assignees: "",
+  status: "",
+})
+
+// watch(updateTask,(newvalue)=>{
+//   console.log(newvalue);
+// },{deep:true})
 // const isOpen = ref(false)
 const route = useRoute()
 const utilityStore = useUtilityStore()
@@ -77,12 +87,6 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
-const updateTask = reactive({
-  title: "",
-  description: "",
-  assignees: "",
-  status: "",
-})
 
 const isButtonDisabled = computed(() => {
   return (
@@ -96,11 +100,9 @@ const isButtonDisabled = computed(() => {
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
-    // fetchData.value.addTasks(fetchTask);
-    // console.log(utilityStore.tasksManager.getTasks());
-    utilityStore.tasksManager.addTasks(fetchTask)
-    task.value = utilityStore.tasksManager.getTasks()
-    console.log(utilityStore.tasksManager.getTasks())
+   
+    task.value = fetchTask
+  
 
     if (
       task.value.description === null ||
