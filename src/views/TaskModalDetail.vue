@@ -1,6 +1,6 @@
 <script setup>
-import {ref, onBeforeMount, onMounted} from "vue"
-import {getTask} from "@/libs/FetchAPI.js"
+import {ref, onBeforeMount, computed, reactive} from "vue"
+import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import router from "@/router/index.js"
@@ -27,7 +27,17 @@ import {TaskManagement} from "@/libs/TaskManagement"
 //   textArea.value.style.height = textArea.value.scrollHeight + "px";
 // };
 
-const task = ref([])
+const task = ref()
+const updateTask = reactive({
+  title: "",
+  description: "",
+  assignees: "",
+  status: "",
+})
+
+// watch(updateTask,(newvalue)=>{
+//   console.log(newvalue);
+// },{deep:true})
 // const isOpen = ref(false)
 const route = useRoute()
 const utilityStore = useUtilityStore()
@@ -77,20 +87,51 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
+const updateTask = reactive({
+  title: "",
+  description: "",
+  assignees: "",
+  status: "",
+})
+
+const isButtonDisabled = computed(() => {
+  return (
+    !updateTask.title &&
+    !updateTask.status &&
+    !updateTask.assignees &&
+    !updateTask.description
+  )
+})
+
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
+    // fetchData.value.addTasks(fetchTask);
+    // console.log(utilityStore.tasksManager.getTasks());
     utilityStore.tasksManager.addTasks(fetchTask)
-    
-    const fetchData = JSON.parse(JSON.stringify(utilityStore.tasksManager.getTasks()))
-    task.value = fetchData
-    console.log(utilityStore.tasksManager.getTasks());
-    // console.log(task.value);
-    
-    utilityStore.tasksManager.getTasks().createdOn = formatDateTime(task.value.createdOn)
-    utilityStore.tasksManager.getTasks().updatedOn = formatDateTime(task.value.updatedOn)
-    // console.log(utilityStore.tasksManager.getTasks().createdOn);
-    // console.log(utilityStore.tasksManager.getTasks().updatedOn);
+    task.value = utilityStore.tasksManager.getTasks()
+    console.log(utilityStore.tasksManager.getTasks())
+
+    if (
+      task.value.description === null ||
+      task.value.description.trim().length === 0
+    ) {
+      task.value.description = "No Description Provided"
+    }
+    if (
+      task.value.assignees === null ||
+      task.value.assignees.trim().length === 0
+    ) {
+      task.value.assignees = "Unassigned"
+    }
+
+    task.value.createdOn = formatDateTime(task.value.createdOn)
+    task.value.updatedOn = formatDateTime(task.value.updatedOn)
+
+    updateTask.title = task.value.title
+    updateTask.description = task.value.description
+    updateTask.assignees = task.value.assignees
+    updateTask.status = task.value.status
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
