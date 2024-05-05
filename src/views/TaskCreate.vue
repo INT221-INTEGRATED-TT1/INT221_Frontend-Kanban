@@ -70,7 +70,7 @@ const isButtonDisabled = computed(() => {
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-m "
   >
-    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10">
+    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 transition ease-in-out">
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider "
       >
@@ -131,6 +131,7 @@ const isButtonDisabled = computed(() => {
                   :key="status"
                   @click="selectStatus(status)"
                   :class="dropdownTextColor(status)"
+                  class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md"
                 >
                   {{ status }}
                 </li>

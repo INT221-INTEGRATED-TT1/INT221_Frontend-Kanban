@@ -50,10 +50,10 @@ const dropdownTextColor = (status) => {
 }
 
 const selectStatus = (status) => {
-  console.log("TasK : ",task.value.status);
+  console.log("TasK : ", task.value.status)
   updateTask.status = utilityStore.ConvertToEnumStatus[status]
-  console.log("updateTasK : ",updateTask.status);
-  console.log("TasK : ",task.value.status);
+  console.log("updateTasK : ", updateTask.status)
+  console.log("TasK : ", task.value.status)
 }
 
 // const isOpen = ref(false)
@@ -92,11 +92,12 @@ const formatDateTime = (baseFormatDate) => {
 
 const isButtonDisabled = computed(() => {
   return (
-    updateTask.title === task.value.title &&
-    updateTask.description === task.value.description &&
-    updateTask.assignees === task.value.assignees &&
-    updateTask.status === task.value.status
-  ) || !updateTask.title 
+    (updateTask.title === task.value.title &&
+      updateTask.description === task.value.description &&
+      updateTask.assignees === task.value.assignees &&
+      updateTask.status === task.value.status) ||
+    !updateTask.title
+  )
 })
 
 const editTaskData = async (newTask) => {
@@ -155,14 +156,18 @@ onBeforeMount(async () => {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
 })
-
 </script>
 
 <template>
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
-    <div class="w-[60rem] h-[42rem] bg-[#1F1F1F] rounded-2xl px-14 py-10">
+    <div class="w-[60rem]  bg-[#1F1F1F] rounded-2xl px-14 py-12">
+      <h1
+        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
+      >
+        Editing
+      </h1>
       <!-- close modal -->
       <div class="flex justify-end">
         <button @click="router.push('/task')">
@@ -207,6 +212,7 @@ onBeforeMount(async () => {
                   :key="status"
                   @click="selectStatus(status)"
                   :class="dropdownTextColor(status)"
+                  class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md"
                 >
                   {{ status }}
                 </li>
