@@ -1,8 +1,10 @@
 import {createRouter, createWebHistory} from "vue-router"
 import Task from "@/components/Task.vue"
-import TaskModalDetail from "@/components/TaskModalDetail.vue"
+import TaskModalDetail from "@/views/TaskModalDetail.vue"
 import NotFound from "@/components/NotFound.vue"
-import {getTask} from "@/libs/crud"
+import {getAllTasks, getTask} from "@/libs/FetchAPI.js"
+import TaskCreate from "@/views/TaskCreate.vue"
+import TaskEdit from "@/views/TaskEdit.vue"
 
 const router = createRouter({
   history: createWebHistory(),
@@ -17,22 +19,12 @@ const router = createRouter({
         {
           path: ":id",
           component: TaskModalDetail,
-          beforeEnter(to, from, next) {
-            getTask(to.params.id)
-              .then((task) => {
-                next()
-              })
-              .catch((error) => {
-                console.log(error)
-                router.push("/task")
-                // alert(error.message)
-
-                setTimeout(() => {
-                  alert(error.message)
-                }, 1000)
-              })
-          },
         },
+        {
+          path: ":id/edit",
+          component: TaskEdit,
+        },
+        {path: "add", component: TaskCreate, name: "create-task"},
       ],
     },
 
@@ -44,11 +36,5 @@ const router = createRouter({
     },
   ],
 })
-
-// router.beforeEach((to, from) => {
-//   if (to.name === "not-found") {
-//     return {path: "/task"}
-//   }
-// })
 
 export default router
