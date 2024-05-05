@@ -125,7 +125,7 @@ onBeforeMount(async () => {
           >
             <td>{{ task.id }}</td>
             <td
-              class="itbkk-title tracking-wider cursor-pointer"
+              class="itbkk-title tracking-wider cursor-pointer hover:text-[#dcc6c6] hover:scale-90 transition ease-in-ou duration-300"
               @click="router.push(`/task/${task.id}`)"
             >
               {{ task.title }}
