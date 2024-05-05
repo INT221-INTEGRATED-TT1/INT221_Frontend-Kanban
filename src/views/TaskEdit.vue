@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount, computed, reactive, onMounted, watch} from "vue"
+import {ref, onBeforeMount, computed, reactive} from "vue"
 import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -31,24 +31,11 @@ import "vue3-toastify/dist/index.css"
 const task = ref([])
 const route = useRoute()
 const utilityStore = useUtilityStore()
-// const updateTask = reactive({
-//   title: "",
-//   description: "",
-//   assignees: "",
-//   status: "",
-// })
-
-
 const updateTask = reactive({
-  title: task.value.title,
-  description: task.value.description,
-  assignees: task.value.assignees,
-  status: task.value.status,
-})
-
-
-watch((updateTask),newTask => {
-  console.log(newTask.title)
+  title: "",
+  description: "",
+  assignees: "",
+  status: "",
 })
 
 // const isOpen = ref(false)
@@ -63,8 +50,10 @@ const dropdownTextColor = (status) => {
 }
 
 const selectStatus = (status) => {
-  task.value.status = utilityStore.ConvertToEnumStatus[status]
+  console.log("TasK : ",task.value.status);
   updateTask.status = utilityStore.ConvertToEnumStatus[status]
+  console.log("updateTasK : ",updateTask.status);
+  console.log("TasK : ",task.value.status);
 }
 
 // const isOpen = ref(false)
@@ -101,38 +90,16 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
-// const isButtonDisabled = computed(() => {
-//   return (
-//     !updateTask.title &&
-//     !updateTask.status &&
-//     !updateTask.assignees &&
-//     !updateTask.description
-//   )
-// })
-
-// const disableButton = ref(false)
-
 const isButtonDisabled = computed(() => {
-  // disableButton.value = true
   return (
     updateTask.title === task.value.title &&
     updateTask.description === task.value.description &&
     updateTask.assignees === task.value.assignees &&
     updateTask.status === task.value.status
-    // !updateTask.status
-  )
+  ) || !updateTask.title 
 })
 
-const populateFormWithOldData = () => {
-  updateTask.title = task.value.title
-  updateTask.description = task.value.description
-  updateTask.assignees = task.value.assignees
-  updateTask.status = task.value.status
-}
-
 const editTaskData = async (newTask) => {
-  // console.log(newTask)
-  // console.log(route.params.id)
   try {
     const response = await editTask(route.params.id, newTask)
     if (response.status === 200) {
@@ -157,21 +124,10 @@ const editTaskData = async (newTask) => {
   }
 }
 
-
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
-    // utilityStore.tasksManager.addTasks(fetchTask)
     task.value = fetchTask
-
-    // console.log(utilityStore.tasksManager.getTasks());
-    console.log(task.value.title);
-
-    if (task.value.title.trim().length === 0) {
-      // disableButton.value = true
-    }
-
-    console.log(task.value.title.length)
 
     if (
       task.value.description === null ||
@@ -193,16 +149,12 @@ onBeforeMount(async () => {
     updateTask.description = task.value.description
     updateTask.assignees = task.value.assignees
     updateTask.status = task.value.status
+
+    // console.log(updateTask.status.length)
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
 })
-onMounted(() => {
-  populateFormWithOldData()
-console.log(updateTask)
-
-})
-
 
 </script>
 
@@ -240,9 +192,9 @@ console.log(updateTask)
                 tabindex="0"
                 role="button"
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.getStatusStyle(task.status)"
+                :class="utilityStore.getStatusStyle(updateTask.status)"
               >
-                {{ utilityStore.convertToStatus[task.status] }}
+                {{ utilityStore.convertToStatus[updateTask.status] }}
                 <span><DropdownIcon /></span>
               </div>
 
