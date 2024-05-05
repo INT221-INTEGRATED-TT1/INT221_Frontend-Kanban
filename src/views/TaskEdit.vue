@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount, computed, reactive, watch} from "vue"
+import {ref, onBeforeMount, computed, reactive, onMounted, watch} from "vue"
 import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -11,6 +11,8 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
+import {toast} from "vue3-toastify"
+import "vue3-toastify/dist/index.css"
 
 // const text = ref('')
 // let textArea = ref('')
@@ -27,20 +29,29 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 // };
 
 const task = ref([])
-const updateTask = reactive({
-  title: "",
-  description: "",
-  assignees: "",
-  status: "",
-})
-
-// watch(updateTask,(newvalue)=>{
-//   console.log(newvalue);
-// },{deep:true})
-// const isOpen = ref(false)
 const route = useRoute()
 const utilityStore = useUtilityStore()
-import {ConvertToEnumStatus} from "../libs/util.js"
+// const updateTask = reactive({
+//   title: "",
+//   description: "",
+//   assignees: "",
+//   status: "",
+// })
+
+
+const updateTask = reactive({
+  title: task.value.title,
+  description: task.value.description,
+  assignees: task.value.assignees,
+  status: task.value.status,
+})
+
+
+watch((updateTask),newTask => {
+  console.log(newTask.title)
+})
+
+// const isOpen = ref(false)
 
 const dropdownTextColor = (status) => {
   return {
@@ -51,14 +62,17 @@ const dropdownTextColor = (status) => {
   }
 }
 
+const selectStatus = (status) => {
+  task.value.status = utilityStore.ConvertToEnumStatus[status]
+  updateTask.status = utilityStore.ConvertToEnumStatus[status]
+}
+
+// const isOpen = ref(false)
+
 // const toggleDropdown = () => {
+//   // selectStatus(status)
 //   isOpen.value = !isOpen.value
 // }
-
-const selectStatus = (status) => {
-  task.value.status = ConvertToEnumStatus[status]
-  updateTask.status = ConvertToEnumStatus[status]
-}
 
 const formatTimezone = () => {
   const options = {
@@ -87,22 +101,77 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
+// const isButtonDisabled = computed(() => {
+//   return (
+//     !updateTask.title &&
+//     !updateTask.status &&
+//     !updateTask.assignees &&
+//     !updateTask.description
+//   )
+// })
+
+// const disableButton = ref(false)
+
 const isButtonDisabled = computed(() => {
+  // disableButton.value = true
   return (
-    !updateTask.title &&
-    !updateTask.status &&
-    !updateTask.assignees &&
-    !updateTask.description
+    updateTask.title === task.value.title &&
+    updateTask.description === task.value.description &&
+    updateTask.assignees === task.value.assignees &&
+    updateTask.status === task.value.status
+    // !updateTask.status
   )
 })
+
+const populateFormWithOldData = () => {
+  updateTask.title = task.value.title
+  updateTask.description = task.value.description
+  updateTask.assignees = task.value.assignees
+  updateTask.status = task.value.status
+}
+
+const editTaskData = async (newTask) => {
+  // console.log(newTask)
+  // console.log(route.params.id)
+  try {
+    const response = await editTask(route.params.id, newTask)
+    if (response.status === 200) {
+      utilityStore.tasksManager.editTask(route.params.id, newTask)
+      router.push("/task")
+      setTimeout(() => {
+        toast("The task has been updated", {
+          type: "success",
+          timeout: 2000,
+        })
+      })
+    }
+
+    if (response.status === 404) {
+      toast("An error has occurred, the task does not exist.", {
+        type: "error",
+        timeout: 2000,
+      })
+    }
+  } catch (error) {
+    console.log("Error updating task: ", error)
+  }
+}
+
 
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
     // utilityStore.tasksManager.addTasks(fetchTask)
     task.value = fetchTask
+
     // console.log(utilityStore.tasksManager.getTasks());
-    // console.log(task.value);
+    console.log(task.value.title);
+
+    if (task.value.title.trim().length === 0) {
+      // disableButton.value = true
+    }
+
+    console.log(task.value.title.length)
 
     if (
       task.value.description === null ||
@@ -128,20 +197,13 @@ onBeforeMount(async () => {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
 })
+onMounted(() => {
+  populateFormWithOldData()
+console.log(updateTask)
 
-const editTaskData = async (newTask) => {
-  console.log(newTask)
-  console.log(route.params.id)
-  try {
-    const response = await editTask(route.params.id, newTask)
-    if (response.status === 200) {
-      router.push("/task")
-      utilityStore.tasksManager.editTask(route.params.id, newTask)
-    }
-  } catch (error) {
-    console.log("Error updating task: ", error)
-  }
-}
+})
+
+
 </script>
 
 <template>
@@ -157,7 +219,6 @@ const editTaskData = async (newTask) => {
       </div>
 
       <div class="flex flex-col gap-y-5">
-        <!-- :value="task.title" -->
         <textarea
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5"
           maxlength="100"
@@ -254,7 +315,7 @@ const editTaskData = async (newTask) => {
 
           <!-- Description -->
           <textarea
-            class="itbkk-description textarea textarea-bordered w-[90%] mx-auto resize-none mt-8"
+            class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-8"
             rows="6"
             maxlength="500"
             :class="
@@ -265,13 +326,11 @@ const editTaskData = async (newTask) => {
             v-model.trim="updateTask.description"
             :placeholder="task.description"
           ></textarea>
-          <!-- :value="task.description" -->
-          <!-- :placeholder="task.description" -->
 
           <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
         </div>
 
-        <!-- footer -->
+        <!-- Button Operation -->
         <div class="flex justify-between">
           <!-- timezone -->
           <div class="itbkk-timezone flex items-center gap-x-2">
@@ -302,6 +361,7 @@ const editTaskData = async (newTask) => {
             </button>
           </div>
         </div>
+        <!-- Button Operation -->
       </div>
     </div>
   </section>

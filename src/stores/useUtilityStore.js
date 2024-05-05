@@ -24,6 +24,13 @@ export const useUtilityStore = defineStore("utility", () => {
     }
   }
 
+  const ConvertToEnumStatus = ref({
+    "No Status": "NO_STATUS",
+    "To Do": "TO_DO",
+    "Doing": "DOING",
+    "Done": "DONE",
+  })
+
   return {
     convertToStatus,
     getStatusStyle,
@@ -31,5 +38,6 @@ export const useUtilityStore = defineStore("utility", () => {
     selectedTaskId,
     showDeleteConfirmation,
     taskTitle,
+    ConvertToEnumStatus
   }
 })

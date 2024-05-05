@@ -16,13 +16,9 @@
 }
 
 .symbol {
-  width: 14px;
-  height: 14px;
   fill: rgb(188, 189, 189);
 }
 
 .scroll::-webkit-scrollbar {
   display: none;
 }
-
-

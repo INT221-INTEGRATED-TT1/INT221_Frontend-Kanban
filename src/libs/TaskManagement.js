@@ -19,15 +19,15 @@ class TaskManagement {
   }
 
   editTask(taskId, newTask) {
-    console.log("Task id is", taskId)
+    // console.log("Task id is", taskId)
     const newTaskWithId = {
       id: taskId,
       ...newTask,
     }
     taskId = parseInt(taskId)
-    console.log(this.tasks)
+    // console.log(this.tasks)
     const filterId = this.tasks.findIndex((task) => task.id === taskId)
-    console.log("Remove id is", filterId)
+    // console.log("Remove id is", filterId)
     this.tasks.splice(filterId, 1, newTaskWithId)
   }
 

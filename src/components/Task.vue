@@ -10,6 +10,8 @@ import TitleIcon from "@/components/icons/TitleIcon.vue"
 import StatusIcon from "@/components/icons/StatusIcon.vue"
 import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
 import MoreIcon from "@/components/icons/MoreIcon.vue"
+import DeleteIcon from "@/components/icons/DeleteIcon.vue"
+import EditTaskIcon from "@/components/icons/EditTaskIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
@@ -30,6 +32,8 @@ const deleteTask = async (deleteId) => {
         type: "error",
         timeout: 2000,
       })
+      utilityStore.showDeleteConfirmation = false
+
     }
   } catch (error) {
     console.log("Error deleting task : ", error)
@@ -42,7 +46,7 @@ const confirmDeleteTask = (taskId, taskTitle) => {
   utilityStore.showDeleteConfirmation = true
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   try {
     const fetchTasks = await getAllTasks()
     utilityStore.tasksManager.addTasks(fetchTasks)
@@ -53,8 +57,6 @@ onMounted(async () => {
         task.assignees = "Unassigned"
       }
     }
-
-    // console.log(tasks.value)
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }
@@ -62,9 +64,9 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="w-screen h-screen overflow-y-auto bg-base p-[4rem]">
+  <main class="w-screen h-screen overflow-y-auto bg-base p-[4rem] ">
     <div class="flex justify-between">
-      <div class="">
+      <div>
         <h1 class="text-headline font-extrabold text-3xl text-opacity-70">
           IT-BangMod Kradan Kanban
         </h1>
@@ -78,11 +80,11 @@ onMounted(async () => {
         <span><FilterIcon /></span>
         <router-link :to="{name: 'create-task'}">
           <div
-            class="border-solid border-[1px] border-secondary px-3 py-1 rounded-lg flex items-center gap-x-2"
+            class="border-solid border-[1px] border-secondary px-3 py-1 rounded-lg flex items-center gap-x-2 hover:drop-shadow-2xl"
           >
             <span><CreateTaskIcon /></span>
             <button class="itbkk-button-add text-normal text-opacity-75">
-              New Task
+              Add Task
             </button>
           </div>
         </router-link>
@@ -90,11 +92,13 @@ onMounted(async () => {
     </div>
 
     <div class="w-full h-full pt-14">
-      <table class="table border-collapse overscroll-y-none bg-[#FFFFFF] bg-opacity-[0.08] p-5">
+      <table
+        class="table border-collapse overscroll-y-none bg-[#FFFFFF] bg-opacity-[0.08]"
+      >
         <thead
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
-          <tr class="">
+          <tr>
             <th class="rounded-tl-xl"></th>
             <th class="flex gap-x-3 items-center">
               <span><TitleIcon /></span>
@@ -105,7 +109,7 @@ onMounted(async () => {
                 <span><AssigneesIcon /></span>Assignees
               </div>
             </th>
-            <th class="">
+            <th>
               <div class="flex gap-x-3">
                 <span><StatusIcon /></span>Status
               </div>
@@ -141,32 +145,39 @@ onMounted(async () => {
             </td>
             <td class="itbkk-status">
               <div
-                class="rounded-xl p-2 font-bold text-[16px] text-center tracking-wider"
+                class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] text-center tracking-wide font-Inter"
                 :class="utilityStore.getStatusStyle(task.status)"
               >
                 {{ utilityStore.convertToStatus[task.status] }}
               </div>
             </td>
-            <td class="text-center">
+            <td>
               <div class="dropdown dropdown-bottom">
-                <div tabindex="0" role="button" class="itbkk-button-action btn bg-transparent outline-none">
+                <div
+                  tabindex="0"
+                  role="button"
+                  class="itbkk-button-action btn bg-transparent outline-none border-none hover:bg-white hover:bg-opacity-[0.07]"
+                >
                   <MoreIcon />
                 </div>
                 <ul
                   tabindex="0"
-                  class="dropdown-content z-[1] menu shadow bg-base-100 rounded-box w-20"
+                  class="dropdown-content z-[1] menu shadow border-[0.5px] border-[#CCB6B6]  bg-[#18181B] rounded-box w-32"
                 >
                   <li
-                    class="itbkk-button-edit cursor-pointer hover:text-blue-500"
+                    class="itbkk-button-edit cursor-pointer p-1 hover:rounded-md"
                     @click="router.push(`/task/${task.id}/edit`)"
                   >
-                    Edit
+                    <span class="font-Inter"><EditTaskIcon />Edit</span>
                   </li>
+                  <div class="divider m-0 h-0"></div>
                   <li
-                    class="itbkk-button-delete cursor-pointer mt-2 hover:rounded-xl hover:bg-[#ec3c3c] hover:bg-opacity-35 text-[#ff3939]"
+                    class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
                     @click="confirmDeleteTask(task.id, task.title)"
                   >
-                    Delete
+                    <span class="font-Inter text-[#DB1058] text-opacity-60"
+                      ><DeleteIcon />Delete</span
+                    >
                   </li>
                 </ul>
               </div>
@@ -193,27 +204,32 @@ onMounted(async () => {
         v-if="utilityStore.showDeleteConfirmation"
       >
         <div
-          class="itbkk-message bg-[#1F1F1F] rounded-lg p-10 w-[30rem] h-[15rem] flex flex-col items-center gap-y-5"
+          class="itbkk-message bg-[#18181B] rounded-lg w-[30rem] h-[15rem] flex flex-col"
         >
-          <h1 class="text-headline font-bold text-2xl text-opacity-75">
+          <h1
+            class="text-[#DB1058] font-bold text-2xl text-opacity-80 flex px-10 pt-6"
+          >
             Delete a Task
           </h1>
-          <p class="text-normal text-opacity-75 break-all">
-            Do you want to delete task "{{ utilityStore.taskTitle }}"?
-          </p>
-          <div class="flex gap-x-5">
-            <button
-              class="itbkk-button-cancel btn text-xs font-bold px-[3rem] bg-[#ec3c3c] bg-opacity-35 text-[#ff3939]"
-              @click="utilityStore.showDeleteConfirmation = false"
-            >
-              Cancel
-            </button>
-            <button
-              class="itbkk-button-confirm btn text-xs font-bold px-[3rem] bg-[#007305] bg-opacity-35 text-[#13FF80]"
-              @click="deleteTask(utilityStore.selectedTaskId)"
-            >
-              Delete
-            </button>
+          <div class="divider m-0"></div>
+          <div class="p-10 flex flex-col gap-y-6">
+            <p class="text-[#ECECEC] text-opacity-75 break-all">
+              Do you want to delete task "{{ utilityStore.taskTitle }}"?
+            </p>
+            <div class="flex justify-end">
+              <button
+                class="itbkk-button-cancel btn text-xs font-semibold px-[2rem] text-[#FFFFFF] bg-transparent text-opacity-70 border-none hover:bg-transparent"
+                @click="utilityStore.showDeleteConfirmation = false"
+              >
+                Cancel
+              </button>
+              <button
+                class="itbkk-button-confirm btn btn-outline btn-error text-xs font-bold px-[2rem] bg-[#730000] hover:bg-opacity-85 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
+                @click="deleteTask(utilityStore.selectedTaskId)"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -222,4 +238,38 @@ onMounted(async () => {
   </main>
 </template>
 
-<style scoped></style>
+<style scoped>
+.slide-fwd-center {
+  -webkit-animation: slide-fwd-center 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+    both;
+  animation: slide-fwd-center 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* ----------------------------------------------
+ * Generated by Animista on 2024-5-5 13:6:54
+ * Licensed under FreeBSD License.
+ * See http://animista.net/license for more info. 
+ * w: http://animista.net, t: @cssanimista
+ * ---------------------------------------------- */
+
+@-webkit-keyframes slide-fwd-center {
+  0% {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  100% {
+    -webkit-transform: translateZ(160px);
+    transform: translateZ(160px);
+  }
+}
+@keyframes slide-fwd-center {
+  0% {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  100% {
+    -webkit-transform: translateZ(160px);
+    transform: translateZ(160px);
+  }
+}
+</style>

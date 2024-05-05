@@ -19,22 +19,6 @@ const router = createRouter({
         {
           path: ":id",
           component: TaskModalDetail,
-          // beforeEnter(to, from, next) {
-          //   getTask(to.params.id)
-          //   .then((task) => {
-          //     next()
-          //   })
-          //   .catch((error) => {
-          //     console.log(error)
-          //     router.push("/task")
-          //     //  alert(error.message)
-
-          //     setTimeout(() => {
-          //       alert(error.message)
-          //     }, 1000)
-          //   })
-
-          // }
         },
         {
           path: ":id/edit",
