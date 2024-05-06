@@ -1,21 +1,16 @@
 <script setup>
-import {ref, reactive, onBeforeMount, computed} from "vue"
+import {ref, reactive, computed, watchEffect} from "vue"
 import {createTask} from "@/libs/FetchAPI"
 import router from "@/router"
-// import {useRoute} from "vue-router"
 import Xmark from "@/components/icons/Xmark.vue"
-import {getAllTasks} from "@/libs/FetchAPI"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
-import {ConvertToEnumStatus} from "../libs/util.js"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
-// const route = useRoute()
-// const task = ref([])
 
 const dropdownTextColor = (status) => {
   return {
@@ -45,16 +40,19 @@ const validateInput = () => {
 }
 
 const createNewTask = async () => {
-  // newTask.title = newTask.title.trim()
-  // newTask.description = newTask.description.trim()
-  // newTask.assignees = newTask.assignees.trim()
-
   try {
     const response = await createTask(newTask)
     if (response.status === 201) {
       utilityStore.tasksManager.addTask(response.data)
-      // toast("Task has been added", {type: "success", timeout: 2000})
       router.push("/task")
+      setTimeout(() => {
+        toast("The task has been successfully added", {
+          type: "success",
+          timeout: 2000,
+          theme: "dark",
+          transition: "flip",
+        })
+      })
     }
   } catch (error) {
     // toast("An error has occurred, please try again", {
@@ -72,9 +70,16 @@ const isButtonDisabled = computed(() => {
 
 <template>
   <section
-    class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
+    class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
   >
-    <div class="w-[60rem] h-[42rem] bg-[#1F1F1F] rounded-2xl px-14 pt-10">
+    <div
+      class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 transition ease-in-out"
+    >
+      <h1
+        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
+      >
+        Create Task
+      </h1>
       <!-- close modal -->
       <div class="flex justify-end">
         <button @click="router.push('/task')">
@@ -82,15 +87,21 @@ const isButtonDisabled = computed(() => {
         </button>
       </div>
 
-      <div class="flex flex-col gap-y-14">
+      <div class="flex flex-col gap-y-7">
         <!-- Title -->
-        <textarea
-          class="itbkk-title bg-[#1A1B1D] rounded-xl outline-none resize-none w-full text-3xl font-bold text-headline mt-5 p-2"
-          maxlength="100"
-          placeholder="Empty"
-          required
-          v-model.trim="newTask.title"
-        ></textarea>
+        <div>
+          <textarea
+            class="itbkk-title bg-[#1A1B1D] rounded-xl outline-none resize-none w-full text-2xl font-semibold text-headline mt-5 p-4 pl-6"
+            maxlength="100"
+            placeholder="Enter Task Title"
+            required
+            v-model.trim="newTask.title"
+          >
+          </textarea>
+          <span class="required flex justify-end text-xs text-normal opacity-45"
+            >{{ newTask.title.length }} / 100</span
+          >
+        </div>
 
         <div class="grid grid-cols-1 grid-rows-2 gap-y-8">
           <!-- Status -->
@@ -107,7 +118,7 @@ const isButtonDisabled = computed(() => {
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
                 :class="
                   utilityStore.getStatusStyle(
-                    ConvertToEnumStatus[newTask.status]
+                    utilityStore.ConvertToEnumStatus[newTask.status]
                   )
                 "
               >
@@ -124,6 +135,7 @@ const isButtonDisabled = computed(() => {
                   :key="status"
                   @click="selectStatus(status)"
                   :class="dropdownTextColor(status)"
+                  class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md"
                 >
                   {{ status }}
                 </li>
@@ -140,36 +152,42 @@ const isButtonDisabled = computed(() => {
               <span><AssigneeDetail /></span> Assignees
             </div>
 
-            <!-- :class=" task.assignees === 'Unassigned' ? 'italic text-gray-500' :
-            ' text-[#F99B1D]' " -->
-            <textarea
-              maxlength="30"
-              rows="1"
-              v-model.trim="newTask.assignees"
-              class="rounded-md bg-[#1A1B1D] text-[#F99B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
-            ></textarea>
+            <div class="flex items-end gap-x-5">
+              <textarea
+                maxlength="30"
+                rows="1"
+                placeholder="Enter Assignees"
+                v-model.trim="newTask.assignees"
+                class="rounded-md bg-[#1A1B1D] text-[#F99B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem] outline-none"
+              ></textarea>
+              <span class="text-xs text-normal opacity-45"
+                >{{ newTask.assignees.length }} / 30</span
+              >
+            </div>
           </div>
           <!-- Assignees -->
 
           <!-- Description -->
-          <!-- :class=" task.description === 'No Description Provided' ? 'italic
-          text-gray-500' : 'text-normal text opacity-80' " -->
-          <textarea
-            class="itbkk-description textarea text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-8"
-            rows="6"
-            placeholder="Description"
-            v-model.trim="newTask.description"
-            maxlength="500"
-          ></textarea>
-          <!-- :value="task.description" -->
+          <div class="flex flex-col">
+            <textarea
+              class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-5"
+              rows="6"
+              placeholder="Enter Task Description"
+              v-model.trim="newTask.description"
+              maxlength="500"
+            ></textarea>
+            <span class="text-xs text-normal opacity-45 flex justify-end pt-2"
+              >{{ newTask.description.length }} / 500</span
+            >
+          </div>
           <!-- Description -->
 
-          <!-- footer -->
+          <!-- button operation -->
           <div class="flex justify-end">
             <div class="flex gap-x-3">
               <button
                 @click="router.push('/')"
-                class="itbkk-button-cancel btn btn-outline px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+                class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
               >
                 CANCEL
               </button>
@@ -182,11 +200,23 @@ const isButtonDisabled = computed(() => {
               </button>
             </div>
           </div>
-          <!-- footer -->
+          <!-- button operation -->
         </div>
       </div>
     </div>
   </section>
 </template>
 
-<style scoped></style>
+<style scoped>
+textarea:placeholder-shown {
+  font-style: italic;
+  font-weight: 300;
+  font-size: medium;
+}
+
+.required:after {
+  content: " *";
+  color: red;
+  font-size: 1.5rem;
+}
+</style>

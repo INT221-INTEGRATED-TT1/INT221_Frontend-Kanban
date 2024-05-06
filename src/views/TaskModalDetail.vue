@@ -9,9 +9,7 @@ import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
 import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
-import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
-import {TaskManagement} from "@/libs/TaskManagement"
 
 // const text = ref('')
 // let textArea = ref('')
@@ -28,27 +26,14 @@ import {TaskManagement} from "@/libs/TaskManagement"
 // };
 
 const task = ref([])
-// const isOpen = ref(false)
 const route = useRoute()
 const utilityStore = useUtilityStore()
-// const fetchData = ref(new TaskManagement())
 
-const dropdownTextColor = (status) => {
-  return {
-    "text-[#D8D8D8]": status === "No Status",
-    "text-[#FF881B]": status === "To Do",
-    "text-[#2697FF]": status === "Doing",
-    "text-[#65EE6C]": status === "Done",
-  }
-}
+// const isOpen = ref(false)
 
 // const toggleDropdown = () => {
 //   isOpen.value = !isOpen.value
 // }
-
-const selectStatus = (status) => {
-  task.value.status = utilityStore.ConvertToEnumStatus[status]
-}
 
 const formatTimezone = () => {
   const options = {
@@ -80,10 +65,6 @@ const formatDateTime = (baseFormatDate) => {
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
-    // fetchData.value.addTasks(fetchTask);
-    // console.log(utilityStore.tasksManager.getTasks());
-    // utilityStore.tasksManager.addTasks(fetchTask)
-    // task.value = utilityStore.tasksManager.getTasks()
     task.value = fetchTask
 
     if (
@@ -109,9 +90,14 @@ onBeforeMount(async () => {
 
 <template>
   <section
-    class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
+    class="fixed inset-0 flex items-center justify-center backdrop-blur-md "
   >
-    <div class="w-[60rem] h-[42rem] bg-[#1F1F1F] rounded-2xl px-14 py-10">
+    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 flip-in-hor-bottom">
+      <h1
+        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-widest"
+      >
+      Task Details
+      </h1>
       <!-- close modal -->
       <div class="flex justify-end">
         <button @click="router.push('/task')">
@@ -136,11 +122,10 @@ onBeforeMount(async () => {
             </div>
             <div>
               <div
-                class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
+                class="rounded-xl px-2 py-1 font-semibold font-Inter text-[14px] text-center tracking-wider flex items-center gap-x-3"
                 :class="utilityStore.getStatusStyle(task.status)"
               >
-                {{ task.status }}
-                <!-- <span><DropdownIcon /></span> -->
+                {{ utilityStore.convertToStatus[task.status] }}
               </div>
             </div>
           </div>
@@ -148,7 +133,7 @@ onBeforeMount(async () => {
           <!-- Assignees -->
           <div class="flex gap-x-10 items-center">
             <div
-              class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
+              class=" text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
             >
               <span><AssigneeDetail /></span> Assignees
             </div>
@@ -156,7 +141,7 @@ onBeforeMount(async () => {
             <textarea
               maxlength="30"
               rows="1"
-              class="rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
+              class="itbkk-assignees rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
               :class="
                 task.assignees === 'Unassigned'
                   ? 'italic text-gray-500'
@@ -197,7 +182,7 @@ onBeforeMount(async () => {
 
           <!-- Description -->
           <textarea
-            class="itbkk-description textarea textarea-bordered w-[90%] mx-auto resize-none mt-8"
+            class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-8"
             rows="6"
             placeholder="Description"
             maxlength="500"
@@ -207,14 +192,13 @@ onBeforeMount(async () => {
                 ? 'italic text-gray-500'
                 : 'text-normal text opacity-80'
             "
-            :value="task.description"
-          ></textarea>
+          >{{ task.description }}</textarea>
           <!-- :value="task.description" -->
 
           <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
         </div>
 
-        <!-- footer -->
+        <!-- Button Operation -->
         <div class="flex justify-between">
           <!-- timezone -->
           <div class="itbkk-timezone flex items-center gap-x-2">
@@ -230,12 +214,6 @@ onBeforeMount(async () => {
           </div>
 
           <div class="flex gap-x-3">
-            <!-- <button
-              @click="router.push('/')"
-              class="btn btn-outline px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
-            >
-              CANCEL
-            </button> -->
             <button
               @click="router.push('/')"
               class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
@@ -244,10 +222,56 @@ onBeforeMount(async () => {
             </button>
           </div>
         </div>
+        <!-- Button Operation -->
       </div>
     </div>
   </section>
 </template>
 
-<style scoped></style>
-@/libs/FetchAPI
+<style scoped>
+
+.flip-in-hor-bottom {
+	-webkit-animation: flip-in-hor-bottom 0.7s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+	        animation: flip-in-hor-bottom 0.7s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+/* ----------------------------------------------
+ * Generated by Animista on 2024-5-6 12:22:48
+ * Licensed under FreeBSD License.
+ * See http://animista.net/license for more info. 
+ * w: http://animista.net, t: @cssanimista
+ * ---------------------------------------------- */
+
+/**
+ * ----------------------------------------
+ * animation flip-in-hor-bottom
+ * ----------------------------------------
+ */
+ @-webkit-keyframes flip-in-hor-bottom {
+  0% {
+    -webkit-transform: rotateX(80deg);
+            transform: rotateX(80deg);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: rotateX(0);
+            transform: rotateX(0);
+    opacity: 1;
+  }
+}
+@keyframes flip-in-hor-bottom {
+  0% {
+    -webkit-transform: rotateX(80deg);
+            transform: rotateX(80deg);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: rotateX(0);
+            transform: rotateX(0);
+    opacity: 1;
+  }
+}
+
+
+
+</style>

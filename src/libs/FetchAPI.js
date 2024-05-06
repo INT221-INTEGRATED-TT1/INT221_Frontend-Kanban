@@ -1,7 +1,13 @@
 import router from "@/router"
-import {ConvertToEnumStatus} from "./util"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
+
+const ConvertToEnumStatus = {
+  "No Status": "NO_STATUS",
+  "To Do": "TO_DO",
+  "Doing": "DOING",
+  "Done": "DONE",
+}
 
 const getAllTasks = async () => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`)
@@ -9,12 +15,9 @@ const getAllTasks = async () => {
     if (!response.ok) {
       throw {
         status: response.status,
-        toast: toast.error("The requested does not exist"),
-        // message: "The requested does not exist",
         router: router.push("/task"),
       }
     }
-
     return response.json()
   }
 }
@@ -27,10 +30,15 @@ const getTask = async (id) => {
     if (!response.ok) {
       throw {
         status: response.status,
-        toast: toast.error(`The requested Task : ${id} does not exist`),
-        // message: `The requested Task : ${id} does not exist`,
         router: router.push("/task"),
-        // alert: alert("The requested Task does not exist"),
+        timeout: setTimeout(() => {
+          toast(`The requested Task : ${id} does not exist`, {
+            type: "error",
+            timeout: 2000,
+            theme: "dark", transition:"flip",
+            position:"top-center"
+          })
+        }),
       }
     }
   }
@@ -50,6 +58,7 @@ const createTask = async (task) => {
         body: JSON.stringify({...task}),
       }
     )
+
     return {
       status: response.status,
       message: "Task created successfully",
@@ -90,6 +99,7 @@ const editTask = async (id, newTask) => {
         body: JSON.stringify(newTask),
       }
     )
+
     return {
       status: response.status,
       message: "Task updated successfully",

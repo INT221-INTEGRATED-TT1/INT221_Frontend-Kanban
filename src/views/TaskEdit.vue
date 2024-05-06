@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount, computed, reactive, watch} from "vue"
+import {ref, onBeforeMount, computed, reactive} from "vue"
 import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -11,6 +11,8 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
+import {toast} from "vue3-toastify"
+import "vue3-toastify/dist/index.css"
 
 // const text = ref('')
 // let textArea = ref('')
@@ -27,6 +29,8 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 // };
 
 const task = ref([])
+const route = useRoute()
+const utilityStore = useUtilityStore()
 const updateTask = reactive({
   title: "",
   description: "",
@@ -34,13 +38,7 @@ const updateTask = reactive({
   status: "",
 })
 
-// watch(updateTask,(newvalue)=>{
-//   console.log(newvalue);
-// },{deep:true})
 // const isOpen = ref(false)
-const route = useRoute()
-const utilityStore = useUtilityStore()
-import {ConvertToEnumStatus} from "../libs/util.js"
 
 const dropdownTextColor = (status) => {
   return {
@@ -51,14 +49,19 @@ const dropdownTextColor = (status) => {
   }
 }
 
+const selectStatus = (status) => {
+  console.log("TasK : ", task.value.status)
+  updateTask.status = utilityStore.ConvertToEnumStatus[status]
+  // console.log("updateTasK : ", updateTask.status)
+  // console.log("TasK : ", task.value.status)
+}
+
+// const isOpen = ref(false)
+
 // const toggleDropdown = () => {
+//   // selectStatus(status)
 //   isOpen.value = !isOpen.value
 // }
-
-const selectStatus = (status) => {
-  task.value.status = ConvertToEnumStatus[status]
-  updateTask.status = ConvertToEnumStatus[status]
-}
 
 const formatTimezone = () => {
   const options = {
@@ -89,20 +92,47 @@ const formatDateTime = (baseFormatDate) => {
 
 const isButtonDisabled = computed(() => {
   return (
-    !updateTask.title &&
-    !updateTask.status &&
-    !updateTask.assignees &&
-    !updateTask.description
+    (updateTask.title === task.value.title &&
+      updateTask.description === task.value.description &&
+      updateTask.assignees === task.value.assignees &&
+      updateTask.status === task.value.status) ||
+    !updateTask.title
   )
 })
+
+const editTaskData = async (newTask) => {
+  try {
+    const response = await editTask(route.params.id, newTask)
+    if (response.status === 200) {
+      utilityStore.tasksManager.editTask(route.params.id, newTask)
+      router.push("/task")
+      setTimeout(() => {
+        toast("The task has been updated", {
+          type: "success",
+          timeout: 2000,
+          theme: "dark",
+          transition: "flip",
+        })
+      })
+    }
+
+    if (response.status === 404) {
+      toast("An error has occurred, the task does not exist.", {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+      })
+    }
+  } catch (error) {
+    console.log("Error updating task: ", error)
+  }
+}
 
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
-    // utilityStore.tasksManager.addTasks(fetchTask)
     task.value = fetchTask
-    // console.log(utilityStore.tasksManager.getTasks());
-    // console.log(task.value);
 
     if (
       task.value.description === null ||
@@ -124,31 +154,24 @@ onBeforeMount(async () => {
     updateTask.description = task.value.description
     updateTask.assignees = task.value.assignees
     updateTask.status = task.value.status
+
+    // console.log(updateTask.status.length)
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
 })
-
-const editTaskData = async (newTask) => {
-  console.log(newTask)
-  console.log(route.params.id)
-  try {
-    const response = await editTask(route.params.id, newTask)
-    if (response.status === 200) {
-      router.push("/task")
-      utilityStore.tasksManager.editTask(route.params.id, newTask)
-    }
-  } catch (error) {
-    console.log("Error updating task: ", error)
-  }
-}
 </script>
 
 <template>
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
-    <div class="w-[60rem] h-[42rem] bg-[#1F1F1F] rounded-2xl px-14 py-10">
+    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-12">
+      <h1
+        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
+      >
+        Task Editing
+      </h1>
       <!-- close modal -->
       <div class="flex justify-end">
         <button @click="router.push('/task')">
@@ -157,7 +180,6 @@ const editTaskData = async (newTask) => {
       </div>
 
       <div class="flex flex-col gap-y-5">
-        <!-- :value="task.title" -->
         <textarea
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5"
           maxlength="100"
@@ -179,9 +201,9 @@ const editTaskData = async (newTask) => {
                 tabindex="0"
                 role="button"
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.getStatusStyle(task.status)"
+                :class="utilityStore.getStatusStyle(updateTask.status)"
               >
-                {{ utilityStore.convertToStatus[task.status] }}
+                {{ utilityStore.convertToStatus[updateTask.status] }}
                 <span><DropdownIcon /></span>
               </div>
 
@@ -194,6 +216,7 @@ const editTaskData = async (newTask) => {
                   :key="status"
                   @click="selectStatus(status)"
                   :class="dropdownTextColor(status)"
+                  class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md"
                 >
                   {{ status }}
                 </li>
@@ -204,7 +227,7 @@ const editTaskData = async (newTask) => {
           <!-- Assignees -->
           <div class="flex gap-x-10 items-center">
             <div
-              class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
+              class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
             >
               <span><AssigneeDetail /></span> Assignees
             </div>
@@ -212,7 +235,7 @@ const editTaskData = async (newTask) => {
             <textarea
               maxlength="30"
               rows="1"
-              class="rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
+              class="itbkk-assignees rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
               :class="
                 task.assignees === 'Unassigned'
                   ? 'italic text-gray-500'
@@ -254,7 +277,7 @@ const editTaskData = async (newTask) => {
 
           <!-- Description -->
           <textarea
-            class="itbkk-description textarea textarea-bordered w-[90%] mx-auto resize-none mt-8"
+            class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-8"
             rows="6"
             maxlength="500"
             :class="
@@ -265,13 +288,11 @@ const editTaskData = async (newTask) => {
             v-model.trim="updateTask.description"
             :placeholder="task.description"
           ></textarea>
-          <!-- :value="task.description" -->
-          <!-- :placeholder="task.description" -->
 
           <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
         </div>
 
-        <!-- footer -->
+        <!-- Button Operation -->
         <div class="flex justify-between">
           <!-- timezone -->
           <div class="itbkk-timezone flex items-center gap-x-2">
@@ -289,19 +310,20 @@ const editTaskData = async (newTask) => {
           <div class="flex gap-x-3">
             <button
               @click="router.push('/')"
-              class="btn btn-outline px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+              class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
             >
               CANCEL
             </button>
             <button
               :disabled="isButtonDisabled"
               @click="editTaskData(updateTask)"
-              class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+              class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
             >
               SAVE
             </button>
           </div>
         </div>
+        <!-- Button Operation -->
       </div>
     </div>
   </section>
