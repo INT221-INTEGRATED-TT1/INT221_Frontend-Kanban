@@ -49,6 +49,8 @@ const createNewTask = async () => {
         toast("The task has been successfully added", {
           type: "success",
           timeout: 2000,
+          theme: "dark",
+          transition: "flip",
         })
       })
     }
@@ -68,11 +70,13 @@ const isButtonDisabled = computed(() => {
 
 <template>
   <section
-    class="fixed inset-0 flex items-center justify-center backdrop-blur-m "
+    class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
   >
-    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 transition ease-in-out">
+    <div
+      class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 transition ease-in-out"
+    >
       <h1
-        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider "
+        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
       >
         Create Task
       </h1>
@@ -183,7 +187,7 @@ const isButtonDisabled = computed(() => {
             <div class="flex gap-x-3">
               <button
                 @click="router.push('/')"
-                class="itbkk-button-cancel btn btn-outline px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+                class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
               >
                 CANCEL
               </button>
@@ -215,6 +219,4 @@ textarea:placeholder-shown {
   color: red;
   font-size: 1.5rem;
 }
-
-
 </style>
