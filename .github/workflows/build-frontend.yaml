@@ -41,7 +41,7 @@ jobs:
           push: true
 
           tags: |
-            tiitle20306/frontend:latest
+            title20306/frontend:latest
 
             title20306/frontend:v1.0.${{ github.run_number }}
       # - name: Connect to Virtual machine
