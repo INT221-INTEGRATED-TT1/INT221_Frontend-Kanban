@@ -2,7 +2,7 @@ name: Build and push Nginx image (FrontEnd)
 
 on:
   push:
-    branches: [ automate ]
+    branches: [ main ]
 
 jobs:
   build-and-push:
@@ -40,17 +40,17 @@ jobs:
           context: .
           push: true
           tags: title20306/frontend:v${{ github.run_number }}
-      - name: Connect to Virtual machine
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VM_IP }}
-          username: ${{ secrets.VM_USERNAME }}
-          password: ${{ secrets.VM_PASSWORD }}
-          port: ${{secrets.VM_PORT}}
-          script: |
+      # - name: Connect to Virtual machine
+      #   uses: appleboy/ssh-action@v1.0.3
+      #   with:
+      #     host: ${{ secrets.VM_IP }}
+      #     username: ${{ secrets.VM_USERNAME }}
+      #     password: ${{ secrets.VM_PASSWORD }}
+      #     port: ${{secrets.VM_PORT}}
+      #     script: |
             
           
-            docker stop frontend
-            docker rm frontend
-            docker run -d -p 80:1449 --name frontend title20306/frontend:v${{ github.run_number }}
-            echo "Frontend container deployed!"
+      #       docker stop frontend
+      #       docker rm frontend
+      #       docker run -d -p 80:1449 --name frontend title20306/frontend:v${{ github.run_number }}
+      #       echo "Frontend container deployed!"
