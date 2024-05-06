@@ -188,8 +188,7 @@ onBeforeMount(async () => {
                     @click="confirmDeleteTask(task.id, task.title)"
                   >
                     <span class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold"
-                      ><DeleteIcon />Delete</span
-                    >
+                      ><DeleteIcon />Delete</span>
                   </li>
                 </ul>
               </div>
