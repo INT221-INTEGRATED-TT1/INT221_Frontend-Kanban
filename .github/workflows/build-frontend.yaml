@@ -48,5 +48,6 @@ jobs:
           password: ${{ secrets.VM_PASSWORD }}
           script: |
           
-          git pull https://github.com/INT221-INTEGRATED-TT1/INT221_Frontend-Kanban.git
-          ls
+            git pull https://github.com/INT221-INTEGRATED-TT1/INT221_Frontend-Kanban.git
+          
+            ls
