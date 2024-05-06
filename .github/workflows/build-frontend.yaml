@@ -2,7 +2,7 @@ name: Build and push Nginx image (FrontEnd)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ automate ]
 
 jobs:
   build-and-push:
