@@ -48,6 +48,7 @@ jobs:
           password: ${{ secrets.VM_PASSWORD }}
           port: ${{secrets.VM_PORT}}
           script: |
+            cd /home/automate
           
             git pull https://github.com/INT221-INTEGRATED-TT1/INT221_Frontend-Kanban.git
           
