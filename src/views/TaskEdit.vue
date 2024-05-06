@@ -112,6 +112,8 @@ const editTaskData = async (newTask) => {
           timeout: 2000,
           theme: "dark",
           transition: "flip",
+        position:"bottom-right"
+
         })
       })
     }
@@ -122,6 +124,8 @@ const editTaskData = async (newTask) => {
         timeout: 2000,
         theme: "dark",
         transition: "flip",
+        position:"bottom-right"
+
       })
     }
   } catch (error) {

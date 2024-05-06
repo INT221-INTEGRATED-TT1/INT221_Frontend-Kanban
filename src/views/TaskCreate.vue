@@ -51,6 +51,7 @@ const createNewTask = async () => {
           timeout: 2000,
           theme: "dark",
           transition: "flip",
+          position: "bottom-right",
         })
       })
     }
