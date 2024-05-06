@@ -46,6 +46,7 @@ jobs:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.VM_USERNAME }}
           password: ${{ secrets.VM_PASSWORD }}
+          port: ${{secrets.VM_PORT}}
           script: |
           
             git pull https://github.com/INT221-INTEGRATED-TT1/INT221_Frontend-Kanban.git
