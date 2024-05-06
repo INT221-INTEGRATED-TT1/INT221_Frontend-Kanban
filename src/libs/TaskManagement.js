@@ -8,6 +8,9 @@ class TaskManagement {
   }
 
   addTask(newTask) {
+    if (newTask.assignees === null) {
+      newTask.assignees = "Unassigned"
+    }
     this.tasks.push(newTask)
   }
 

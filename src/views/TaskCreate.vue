@@ -32,13 +32,6 @@ const newTask = reactive({
   status: "No Status",
 })
 
-const validateInput = () => {
-  if (newTask.assignees.trim().length === 0) {
-    newTask.assignees = "Unassigned"
-  }
-  createNewTask()
-}
-
 const createNewTask = async () => {
   try {
     const response = await createTask(newTask)
@@ -51,7 +44,18 @@ const createNewTask = async () => {
           timeout: 2000,
           theme: "dark",
           transition: "flip",
+          position: "bottom-right",
         })
+      })
+    }
+
+    if (response.status === 400) {
+      toast("Please fill in the required fields", {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
       })
     }
   } catch (error) {
@@ -192,7 +196,7 @@ const isButtonDisabled = computed(() => {
                 CANCEL
               </button>
               <button
-                @click="validateInput()"
+                @click="createNewTask()"
                 :disabled="isButtonDisabled"
                 class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
               >

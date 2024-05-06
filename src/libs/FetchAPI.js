@@ -35,8 +35,9 @@ const getTask = async (id) => {
           toast(`The requested Task : ${id} does not exist`, {
             type: "error",
             timeout: 2000,
-            theme: "dark", transition:"flip",
-            position:"top-center"
+            theme: "dark",
+            transition: "flip",
+            position: "bottom-right",
           })
         }),
       }
@@ -45,8 +46,15 @@ const getTask = async (id) => {
   return response.json()
 }
 
-const createTask = async (task) => {
-  task.status = ConvertToEnumStatus[task.status]
+const createTask = async (newTask) => {
+  let createTask = {...newTask}
+  createTask.status = ConvertToEnumStatus[createTask.status]
+  if (createTask.assignees.trim().length === 0) {
+    createTask.assignees = null
+  }
+  if (createTask.description.trim().length === 0) {
+    createTask.description = null
+  }
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v1/tasks`,
@@ -55,7 +63,7 @@ const createTask = async (task) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({...task}),
+        body: JSON.stringify({...createTask}),
       }
     )
 

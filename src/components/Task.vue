@@ -29,6 +29,7 @@ const deleteTask = async (deleteId) => {
         timeout: 2000,
         theme: "dark",
         transition: "flip",
+        position:"bottom-right"
       })
     }
 
@@ -38,6 +39,7 @@ const deleteTask = async (deleteId) => {
         timeout: 2000,
         theme: "dark",
         transition: "flip",
+        position:"bottom-right"
       })
       utilityStore.showDeleteConfirmation = false
     }
@@ -62,6 +64,8 @@ onBeforeMount(async () => {
       if (task.assignees === null || task.assignees.trim().length === 0) {
         task.assignees = "Unassigned"
       }
+
+      // console.log(task.assignees);
     }
   } catch (error) {
     console.log("Error fetching tasks : ", error)
@@ -176,14 +180,14 @@ onBeforeMount(async () => {
                     class="itbkk-button-edit cursor-pointer p-1 hover:rounded-md"
                     @click="router.push(`/task/${task.id}/edit`)"
                   >
-                    <span class="font-Inter"><EditTaskIcon />Edit</span>
+                    <span class="font-Inter tracking-wider font-semibold"><EditTaskIcon />Edit</span>
                   </li>
                   <div class="divider m-0 h-0"></div>
                   <li
                     class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
                     @click="confirmDeleteTask(task.id, task.title)"
                   >
-                    <span class="font-Inter text-[#DB1058] text-opacity-60"
+                    <span class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold"
                       ><DeleteIcon />Delete</span
                     >
                   </li>
