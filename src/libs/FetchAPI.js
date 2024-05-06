@@ -35,6 +35,8 @@ const getTask = async (id) => {
           toast(`The requested Task : ${id} does not exist`, {
             type: "error",
             timeout: 2000,
+            theme: "dark", transition:"flip",
+            position:"top-center"
           })
         }),
       }

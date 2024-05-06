@@ -52,8 +52,8 @@ const dropdownTextColor = (status) => {
 const selectStatus = (status) => {
   console.log("TasK : ", task.value.status)
   updateTask.status = utilityStore.ConvertToEnumStatus[status]
-  console.log("updateTasK : ", updateTask.status)
-  console.log("TasK : ", task.value.status)
+  // console.log("updateTasK : ", updateTask.status)
+  // console.log("TasK : ", task.value.status)
 }
 
 // const isOpen = ref(false)
@@ -110,6 +110,8 @@ const editTaskData = async (newTask) => {
         toast("The task has been updated", {
           type: "success",
           timeout: 2000,
+          theme: "dark",
+          transition: "flip",
         })
       })
     }
@@ -118,6 +120,8 @@ const editTaskData = async (newTask) => {
       toast("An error has occurred, the task does not exist.", {
         type: "error",
         timeout: 2000,
+        theme: "dark",
+        transition: "flip",
       })
     }
   } catch (error) {
@@ -162,11 +166,11 @@ onBeforeMount(async () => {
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
-    <div class="w-[60rem]  bg-[#1F1F1F] rounded-2xl px-14 py-12">
+    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-12">
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
       >
-        Editing
+        Task Editing
       </h1>
       <!-- close modal -->
       <div class="flex justify-end">
@@ -223,7 +227,7 @@ onBeforeMount(async () => {
           <!-- Assignees -->
           <div class="flex gap-x-10 items-center">
             <div
-              class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
+              class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
             >
               <span><AssigneeDetail /></span> Assignees
             </div>
@@ -231,7 +235,7 @@ onBeforeMount(async () => {
             <textarea
               maxlength="30"
               rows="1"
-              class="rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
+              class="itbkk-assignees rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
               :class="
                 task.assignees === 'Unassigned'
                   ? 'italic text-gray-500'
@@ -306,14 +310,14 @@ onBeforeMount(async () => {
           <div class="flex gap-x-3">
             <button
               @click="router.push('/')"
-              class="btn btn-outline px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+              class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
             >
               CANCEL
             </button>
             <button
               :disabled="isButtonDisabled"
               @click="editTaskData(updateTask)"
-              class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+              class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
             >
               SAVE
             </button>

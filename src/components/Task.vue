@@ -24,13 +24,20 @@ const deleteTask = async (deleteId) => {
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
       utilityStore.showDeleteConfirmation = false
-      toast("Task has been deleted", {type: "success", timeout: 2000})
+      toast("Task has been deleted", {
+        type: "success",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+      })
     }
 
     if (response.status === 404) {
       toast("An error has occurred, the task does not exist.", {
         type: "error",
         timeout: 2000,
+        theme: "dark",
+        transition: "flip",
       })
       utilityStore.showDeleteConfirmation = false
     }
@@ -63,23 +70,27 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <main class="w-screen h-screen overflow-y-auto bg-base p-[4rem]">
+  <main
+    class="w-screen h-screen overflow-y-auto bg-gradient-to-l from-base via-[#161624] to-base p-[4rem]"
+  >
     <div class="flex justify-between">
       <div>
-        <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
+        <h1
+          class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand"
+        >
           IT-BangMod Kradan Kanban
         </h1>
 
-        <div class="ml-[22rem] -rotate-[7.57deg] tracking-in-expand-2">
+        <div class="ml-[22rem] tracking-in-expand-2">
           <GroupCode />
         </div>
       </div>
 
-      <div class="flex items-center gap-x-3 cursor-pointer">
-        <span><FilterIcon /></span>
+      <div class="flex items-center gap-x-3">
+        <span class="cursor-pointer"><FilterIcon /></span>
         <router-link :to="{name: 'create-task'}">
           <div
-            class="border-solid border-[1px] border-secondary px-3 py-1 rounded-lg flex items-center gap-x-2 hover:drop-shadow-2xl"
+            class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
           >
             <span><CreateTaskIcon /></span>
             <button class="itbkk-button-add text-normal text-opacity-75">
@@ -90,10 +101,8 @@ onBeforeMount(async () => {
       </div>
     </div>
 
-    <div class="w-full h-full pt-14">
-      <table
-        class="table border-collapse overscroll-y-none bg-[#FFFFFF] bg-opacity-[0.08]"
-      >
+    <div class="pt-14">
+      <table class="table border-collapse bg-[#141414] text-center">
         <thead
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
@@ -125,14 +134,14 @@ onBeforeMount(async () => {
           >
             <td>{{ task.id }}</td>
             <td
-              class="itbkk-title tracking-wider cursor-pointer hover:text-[#dcc6c6] hover:scale-90 transition ease-in-ou duration-300"
+              class="itbkk-title tracking-wider cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
               @click="router.push(`/task/${task.id}`)"
             >
               {{ task.title }}
             </td>
-            <td class="itbkk-assignees text-opacity-90 text-center">
+            <td class="itbkk-assignees text-opacity-90 text-center italic">
               <div
-                class="bg-[#1A1B1D] rounded-md px-1 py-2 tracking-wide"
+                class="bg-[#1A1B1D] rounded-md px-1 py-2 text-wrap tracking-wide"
                 :class="
                   task.assignees === 'Unassigned'
                     ? 'italic text-gray-500'
@@ -144,18 +153,18 @@ onBeforeMount(async () => {
             </td>
             <td class="itbkk-status">
               <div
-                class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] text-center tracking-wide font-Inter"
+                class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] text-center tracking-normal font-Inter"
                 :class="utilityStore.getStatusStyle(task.status)"
               >
                 {{ utilityStore.convertToStatus[task.status] }}
               </div>
             </td>
             <td>
-              <div class="dropdown dropdown-bottom">
+              <div class="dropdown dropdown-bottom itbkk-button-action">
                 <div
                   tabindex="0"
                   role="button"
-                  class="itbkk-button-action btn bg-transparent outline-none border-none hover:bg-white hover:bg-opacity-[0.07]"
+                  class="btn bg-transparent outline-none border-none hover:bg-white hover:bg-opacity-[0.07]"
                 >
                   <MoreIcon />
                 </div>
@@ -212,7 +221,9 @@ onBeforeMount(async () => {
           </h1>
           <div class="divider m-0"></div>
           <div class="p-10 flex flex-col gap-y-6">
-            <p class="text-[#ECECEC] text-opacity-75 break-all">
+            <p
+              class="itbkk-button-message even:text-[#ECECEC] text-opacity-75 break-all"
+            >
               Do you want to delete task "{{ utilityStore.taskTitle }}"?
             </p>
             <div class="flex justify-end">
@@ -223,7 +234,7 @@ onBeforeMount(async () => {
                 Cancel
               </button>
               <button
-                class="itbkk-button-confirm btn btn-outline btn-error text-xs font-bold px-[2rem] bg-[#730000] hover:bg-opacity-85 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
+                class="itbkk-button-confirm btn border-[#730000] text-xs font-bold px-[2rem] bg-[#730000] hover:bg-opacity-35 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
                 @click="deleteTask(utilityStore.selectedTaskId)"
               >
                 Delete
@@ -270,24 +281,13 @@ onBeforeMount(async () => {
 }
 
 .tracking-in-expand-2 {
-	-webkit-animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.610, 0.355, 1.000) 0.8s both;
-	        animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.610, 0.355, 1.000) 0.8s both;
+  -webkit-animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1)
+    0.8s both;
+  animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1) 0.8s
+    both;
 }
 
-
-/* ----------------------------------------------
- * Generated by Animista on 2024-5-5 18:32:4
- * Licensed under FreeBSD License.
- * See http://animista.net/license for more info. 
- * w: http://animista.net, t: @cssanimista
- * ---------------------------------------------- */
-
-/**
- * ----------------------------------------
- * animation tracking-in-expand
- * ----------------------------------------
- */
- @-webkit-keyframes tracking-in-expand {
+@-webkit-keyframes tracking-in-expand {
   0% {
     letter-spacing: -0.5em;
     opacity: 0;
@@ -312,4 +312,113 @@ onBeforeMount(async () => {
   }
 }
 
+.bounce-in-top {
+  -webkit-animation: bounce-in-top 1.5s both;
+  animation: bounce-in-top 1.5s both;
+}
+
+@-webkit-keyframes bounce-in-top {
+  0% {
+    -webkit-transform: translateY(-500px);
+    transform: translateY(-500px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  38% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+    opacity: 1;
+  }
+  55% {
+    -webkit-transform: translateY(-65px);
+    transform: translateY(-65px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  72% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  81% {
+    -webkit-transform: translateY(-28px);
+    transform: translateY(-28px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  90% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  95% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+}
+@keyframes bounce-in-top {
+  0% {
+    -webkit-transform: translateY(-500px);
+    transform: translateY(-500px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  38% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+    opacity: 1;
+  }
+  55% {
+    -webkit-transform: translateY(-65px);
+    transform: translateY(-65px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  72% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  81% {
+    -webkit-transform: translateY(-28px);
+    transform: translateY(-28px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  90% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+  95% {
+    -webkit-transform: translateY(-8px);
+    transform: translateY(-8px);
+    -webkit-animation-timing-function: ease-in;
+    animation-timing-function: ease-in;
+  }
+  100% {
+    -webkit-transform: translateY(0);
+    transform: translateY(0);
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+  }
+}
 </style>
