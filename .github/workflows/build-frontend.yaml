@@ -40,3 +40,13 @@ jobs:
           context: .
           push: true
           tags: title20306/frontend:v${{ github.run_number }}
+      - name: Connect to Virtual machine
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: ${{ secrets.VM_USERNAME }}
+          password: ${{ secrets.VM_PASSWORD }}
+          script: |
+          
+          git pull https://github.com/INT221-INTEGRATED-TT1/INT221_Frontend-Kanban.git
+          ls
