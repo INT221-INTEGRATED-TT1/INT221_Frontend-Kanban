@@ -49,9 +49,9 @@ const deleteTask = async (deleteId) => {
 }
 
 const confirmDeleteTask = (taskId, taskTitle) => {
+  utilityStore.showDeleteConfirmation = true
   utilityStore.selectedTaskId = taskId
   utilityStore.taskTitle = taskTitle
-  utilityStore.showDeleteConfirmation = true
 }
 
 onBeforeMount(async () => {
