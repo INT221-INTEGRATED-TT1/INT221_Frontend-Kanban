@@ -51,6 +51,7 @@ const createTask = async (newTask) => {
   createTask.status = ConvertToEnumStatus[createTask.status]
   if (createTask.assignees.trim().length === 0) {
     createTask.assignees = null
+    
   }
   if (createTask.description.trim().length === 0) {
     createTask.description = null
