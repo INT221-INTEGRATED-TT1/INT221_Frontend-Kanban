@@ -119,7 +119,7 @@ const editTaskData = async (newTask) => {
     }
 
     if (response.status === 404) {
-      toast("An error has occurred, the task does not exist.", {
+      toast("The task does not exist", {
         type: "error",
         timeout: 2000,
         theme: "dark",

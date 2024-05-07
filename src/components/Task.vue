@@ -29,17 +29,17 @@ const deleteTask = async (deleteId) => {
         timeout: 2000,
         theme: "dark",
         transition: "flip",
-        position:"bottom-right"
+        position: "bottom-right",
       })
     }
 
     if (response.status === 404) {
-      toast("An error has occurred, the task does not exist.", {
+      toast("The task does not exist", {
         type: "error",
         timeout: 2000,
         theme: "dark",
         transition: "flip",
-        position:"bottom-right"
+        position: "bottom-right",
       })
       utilityStore.showDeleteConfirmation = false
     }
@@ -180,15 +180,19 @@ onBeforeMount(async () => {
                     class="itbkk-button-edit cursor-pointer p-1 hover:rounded-md"
                     @click="router.push(`/task/${task.id}/edit`)"
                   >
-                    <span class="font-Inter tracking-wider font-semibold"><EditTaskIcon />Edit</span>
+                    <span class="font-Inter tracking-wider font-semibold"
+                      ><EditTaskIcon />Edit</span
+                    >
                   </li>
                   <div class="divider m-0 h-0"></div>
                   <li
                     class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
                     @click="confirmDeleteTask(task.id, task.title)"
                   >
-                    <span class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold"
-                      ><DeleteIcon />Delete</span>
+                    <span
+                      class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold"
+                      ><DeleteIcon />Delete</span
+                    >
                   </li>
                 </ul>
               </div>
