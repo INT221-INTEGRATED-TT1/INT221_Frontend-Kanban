@@ -23,6 +23,9 @@ class TaskManagement {
 
   editTask(taskId, newTask) {
     console.log("Task id is", taskId)
+    if(newTask.assignees.trim().length === 0) {
+      newTask.assignees = "Unassigned"
+    }
     taskId = parseInt(taskId)
     const newTaskWithId = {
       id: taskId,
