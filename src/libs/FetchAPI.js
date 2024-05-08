@@ -56,6 +56,8 @@ const createTask = async (newTask) => {
   if (createTask.description.trim().length === 0) {
     createTask.description = null
   }
+
+  console.log(newTask);
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v1/tasks`,
