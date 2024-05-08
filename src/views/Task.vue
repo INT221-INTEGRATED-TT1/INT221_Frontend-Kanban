@@ -74,9 +74,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <main
-    class="w-screen h-screen overflow-y-auto bg-gradient-to-l from-base via-[#161624] to-base p-[4rem]"
-  >
+  <main class="w-screen h-screen overflow-y-auto bg-animation p-[4rem]">
     <div class="flex justify-between">
       <div>
         <h1
@@ -91,7 +89,14 @@ onBeforeMount(async () => {
       </div>
 
       <div class="flex items-center gap-x-3">
-        <span class="cursor-pointer"><FilterIcon /></span>
+        <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
+        <router-link to="/status/manage">
+          <div
+            class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer"
+          >
+            Manage Status
+          </div>
+        </router-link>
         <router-link :to="{name: 'create-task'}">
           <div
             class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
@@ -132,11 +137,11 @@ onBeforeMount(async () => {
         <tbody>
           <tr
             class="itbkk-item"
-            v-for="task in utilityStore.tasksManager.getTasks()"
+            v-for="(task, index) in utilityStore.tasksManager.getTasks()"
             :key="task.id"
             v-if="utilityStore.tasksManager.getTasks().length > 0"
           >
-            <td>{{ task.id }}</td>
+            <td>{{ ++index }}</td>
             <td
               class="itbkk-title tracking-wider cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
               @click="router.push(`/task/${task.id}`)"
@@ -256,69 +261,6 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
-.tracking-in-expand {
-  -webkit-animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1)
-    both;
-  animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1) both;
-}
-
-@-webkit-keyframes tracking-in-expand {
-  0% {
-    letter-spacing: -0.5em;
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-@keyframes tracking-in-expand {
-  0% {
-    letter-spacing: -0.5em;
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.tracking-in-expand-2 {
-  -webkit-animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1)
-    0.8s both;
-  animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1) 0.8s
-    both;
-}
-
-@-webkit-keyframes tracking-in-expand {
-  0% {
-    letter-spacing: -0.5em;
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-@keyframes tracking-in-expand {
-  0% {
-    letter-spacing: -0.5em;
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
 .bounce-in-top {
   -webkit-animation: bounce-in-top 1.5s both;
   animation: bounce-in-top 1.5s both;
