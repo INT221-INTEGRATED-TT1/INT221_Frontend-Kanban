@@ -8,6 +8,7 @@ import TaskEdit from "@/views/TaskEdit.vue"
 import TestLen from "@/components/TestLen.vue"
 import StatusCreate from "@/views/StatusCreate.vue"
 import StatusManage from "@/views/StatusManage.vue"
+import StatusEdit from "@/views/StatusEdit.vue"
 
 const router = createRouter({
   history: createWebHistory(), // base url
@@ -33,16 +34,19 @@ const router = createRouter({
 
     {
       path: "/status",
+      // redirect: "/status/manage",
+      component: StatusManage,
       children: [
         {
           path: "manage",
-          component: StatusManage,
-
+          // component: StatusManage,
+          name: "manage-task-status",
           // children: [
           //   {path: "add", component: StatusCreate, name: "create-task-status"},
           // ],
         },
         {path: "add", component: StatusCreate, name: "create-task-status"},
+        {path: ":id/edit", component: StatusEdit, name: "edit-task-status"},
       ],
     },
 

@@ -215,7 +215,7 @@ onBeforeMount(async () => {
         </tbody>
       </table>
     </div>
-    <router-view></router-view>
+    <router-view />
 
     <!-- delete confirmation -->
     <div>

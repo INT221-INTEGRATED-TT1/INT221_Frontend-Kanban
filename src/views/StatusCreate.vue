@@ -1,39 +1,51 @@
 <script setup>
-import {ref, reactive, watch} from "vue"
+import {ref, reactive, watch, computed} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore"
+import {createStatus} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
+import {toast} from "vue3-toastify"
+import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
-
-const presetColors = [
-  "#1A9338",
-  "#E79D13",
-  "#0090FF",
-  "#E5484D",
-  "#8E4EC6",
-  "#5A5A5A",
-  "#12A594",
-  "#E9EB87",
-  "#008080",
-  "#B31957",
-  "#4B0082",
-  "#BE6F26",
-]
 
 const newStatus = reactive({
   name: "No Status",
   description: "",
-  color: presetColors[5],
+  color: utilityStore.presetColors[5],
 })
-
-const selectedColor = ref(null)
 
 const updateColor = (index) => {
   console.log(newStatus.color)
-  newStatus.color = presetColors[index]
-  selectedColor.value = index
+  newStatus.color = utilityStore.presetColors[index]
+  utilityStore.selectedColor = index
 }
+
+const createNewStatus = async () => {
+  try {
+    const response = await createStatus(newStatus)
+    if (response.status === 201) {
+      console.log(newStatus);
+      utilityStore.statusManager.addStatus(newStatus)
+      router.push("/status/manage")
+      setTimeout(() => {
+        toast("The status has been successfully added", {
+          type: "success",
+          timeout: 2000,
+          theme: "dark",
+          transition: "flip",
+          position: "bottom-right",
+        })
+      })
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+const isButtonDisabled = computed(() => {
+  return !newStatus.name
+})
 </script>
 
 <template>
@@ -43,25 +55,24 @@ const updateColor = (index) => {
     <div
       class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out"
     >
+      <h1
+        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
+      >
+        Create Status
+      </h1>
       <div class="flex justify-end px-14">
         <button @click="router.back()">
           <span><Xmark /></span>
         </button>
       </div>
 
-      <h1
-        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
-      >
-        Create Status
-      </h1>
-
       <!-- preview -->
       <div
-        class="w-full h-[5.5rem] mt-4 bg-[#313131] flex justify-center items-center"
+        class="w-full h-[5.5rem] mt-5 bg-[#313131] flex justify-center items-center"
       >
         <div
           :class="utilityStore.statusCustomStyle(newStatus.color)"
-          class="flex items-center justify-center rounded-xl px-3 w-auto h-[2.5rem] font-bold text-[16px] tracking-wider"
+          class="flex items-center justify-center rounded-3xl px-3 w-auto h-[2.2rem] font-bold text-[16px] tracking-wider"
         >
           <span>
             {{ newStatus.name }}
@@ -101,10 +112,10 @@ const updateColor = (index) => {
         class="grid grid-cols-6 grid-rows-2 gap-y-4 justify-items-center pt-4 px-20"
       >
         <div
-          v-for="(color, index) in presetColors"
+          v-for="(color, index) in utilityStore.presetColors"
           :key="index"
           :style="{backgroundColor: color}"
-          :class="{'opacity-50': selectedColor === index}"
+          :class="{'opacity-50': utilityStore.selectedColor === index}"
           @click="updateColor(index)"
           class="inline-block w-[2.35rem] h-[2.35rem] rounded-xl text-transparent cursor-pointer"
         ></div>
@@ -121,7 +132,9 @@ const updateColor = (index) => {
             CANCEL
           </button>
           <button
+          @click="createNewStatus()"
             class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+            :disabled="isButtonDisabled"
           >
             SAVE
           </button>

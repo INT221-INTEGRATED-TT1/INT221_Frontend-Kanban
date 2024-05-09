@@ -1,6 +1,8 @@
 <script setup>
+import {ref, onBeforeMount} from "vue"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import {getAllStatuses} from "@/libs/FetchAPI"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import TitleIcon from "@/components/icons/TitleIcon.vue"
@@ -9,6 +11,20 @@ import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import EditTaskIcon from "@/components/icons/EditTaskIcon.vue"
 import DescIcon from "@/components/icons/DescIcon.vue"
 import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
+
+const utilityStore = useUtilityStore()
+
+onBeforeMount(async () => {
+  try {
+    const fetchData = await getAllStatuses()
+    utilityStore.statusManager.addStatuses(fetchData)
+    console.log(utilityStore.statusManager.getStatus())
+
+    // console.log(fetchData);
+  } catch (error) {
+    console.log(error)
+  }
+})
 </script>
 
 <template>
@@ -38,7 +54,7 @@ import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
           </div>
         </router-link>
 
-        <router-link :to="{name: 'create-task-status'}">
+        <router-link to="add">
           <div
             class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
           >
@@ -74,17 +90,35 @@ import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
+          <tr
+            v-for="(statuses, index) in utilityStore.statusManager.getStatus()"
+          >
+            <td class="w-[8rem]" >{{ ++index }}</td>
+            <td class="text-start w-[30rem]">
+              <div
+                class="rounded-2xl p-2 font-semibold text-[16px] w-fit px-5 text-center tracking-normal font-Inter"
+                :class="utilityStore.statusCustomStyle(statuses.color)"
+              >
+                <span>
+                  {{ statuses.name }}
+                </span>
+              </div>
+            </td>
+            <td class="text-start">{{ statuses.description }}</td>
             <td class="flex gap-x-3 justify-center items-center">
               <!-- <div class="flex gap-x-2"> -->
               <div class="tooltip tooltip-edit" data-tip="Edit">
-                <button class="itbkk-button-edit"><EditTaskStatus /></button>
+                <button
+                  @click="router.push(`/status/${statuses.id}/edit`)"
+                  class="itbkk-button-edit"
+                >
+                  <EditTaskStatus />
+                </button>
               </div>
               <div class="tooltip tooltip-error text-normal" data-tip="Delete">
-                <button class="itbkk-button-delete"><DeleteIcon width="22" height="31" /></button>
+                <button class="itbkk-button-delete">
+                  <DeleteIcon width="22" height="31" />
+                </button>
               </div>
               <!-- </div> -->
             </td>
@@ -93,6 +127,7 @@ import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
       </table>
     </div>
   </main>
+  <router-view />
 </template>
 
 <style scoped>
