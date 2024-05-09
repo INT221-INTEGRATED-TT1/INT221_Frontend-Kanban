@@ -1,22 +1,78 @@
 <script setup>
-import {ref, reactive} from "vue"
+import {ref, reactive, onBeforeMount, computed} from "vue"
 import router from "@/router"
+import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore"
+import {getStatus, editStatus} from "@/libs/FetchAPI"
 import Xmark from "@/components/icons/Xmark.vue"
+import {toast} from "vue3-toastify"
+import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
+const route = useRoute()
+const status = ref([])
 
-const editStatus = reactive({
-  name: "No Status",
+const updateStatus = reactive({
+  name: "",
   description: "",
-  color: utilityStore.presetColors[5],
+  color: "",
 })
 
 const updateColor = (index) => {
-  console.log(editStatus.color)
-  editStatus.color = utilityStore.presetColors[index]
+  console.log(updateStatus.color)
+  updateStatus.color = utilityStore.presetColors[index]
   utilityStore.selectedColor = index
 }
+
+const editStatusData = async (newStatus) => {
+  try {
+    const response = await editStatus(route.params.id, newStatus)
+    if (response.status === 200) {
+      utilityStore.statusManager.editStatus(route.params.id, newStatus)
+      router.push("/status/manage")
+      setTimeout(() => {
+        toast("The status has been updated", {
+          type: "success",
+          timeout: 2000,
+          theme: "dark",
+          transition: "flip",
+          position: "bottom-right",
+        })
+      })
+    }
+
+    // if (response.status === 404) {
+    //   toast("The task does not exist", {
+    //     type: "error",
+    //     timeout: 2000,
+    //     theme: "dark",
+    //     transition: "flip",
+    //     position: "bottom-right",
+    //   })
+    // }
+  } catch (error) {
+    console.log("Error updating status: ", error)
+  }
+}
+
+const isButtonDisabled = computed(() => {
+  return !updateStatus.name
+})
+
+onBeforeMount(async () => {
+  try {
+    const fetchData = await getStatus(route.params.id)
+    status.value = fetchData
+    // console.log(status.value);
+    // console.log(fetchData);
+
+    updateStatus.name = status.value.name
+    updateStatus.description = status.value.description
+    updateStatus.color = status.value.color
+  } catch (error) {
+    console.log(error)
+  }
+})
 </script>
 
 <template>
@@ -42,11 +98,11 @@ const updateColor = (index) => {
         class="w-full h-[5.5rem] mt-5 bg-[#313131] flex justify-center items-center"
       >
         <div
-          :class="utilityStore.statusCustomStyle(editStatus.color)"
+          :class="utilityStore.statusCustomStyle(updateStatus.color)"
           class="flex items-center justify-center rounded-3xl px-3 w-auto h-[2.2rem] font-bold text-[16px] tracking-wider"
         >
           <span>
-            {{ editStatus.name }}
+            {{ updateStatus.name }}
           </span>
         </div>
       </div>
@@ -59,7 +115,7 @@ const updateColor = (index) => {
           required
           class="itbkk-status-name resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-2"
           placeholder="Enter status name"
-          v-model.trim="editStatus.name"
+          v-model.trim="updateStatus.name"
         ></textarea>
 
         <!-- status description -->
@@ -68,7 +124,7 @@ const updateColor = (index) => {
           maxlength="200"
           class="itbkk-status-description resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-3 my-4"
           placeholder="Enter your description"
-          v-model.trim="editStatus.description"
+          v-model.trim="updateStatus.description"
         ></textarea>
 
         <h1
@@ -103,6 +159,8 @@ const updateColor = (index) => {
             CANCEL
           </button>
           <button
+            @click="editStatusData(updateStatus)"
+            :disabled="isButtonDisabled"
             class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
           >
             SAVE

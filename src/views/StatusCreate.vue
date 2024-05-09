@@ -25,12 +25,24 @@ const createNewStatus = async () => {
   try {
     const response = await createStatus(newStatus)
     if (response.status === 201) {
-      console.log(newStatus);
+      console.log(newStatus)
       utilityStore.statusManager.addStatus(newStatus)
       router.push("/status/manage")
       setTimeout(() => {
         toast("The status has been successfully added", {
           type: "success",
+          timeout: 2000,
+          theme: "dark",
+          transition: "flip",
+          position: "bottom-right",
+        })
+      })
+    }
+
+    if (response.status === 500) {
+      setTimeout(() => {
+        toast("The status is duplicated", {
+          type: "error",
           timeout: 2000,
           theme: "dark",
           transition: "flip",
@@ -132,7 +144,7 @@ const isButtonDisabled = computed(() => {
             CANCEL
           </button>
           <button
-          @click="createNewStatus()"
+            @click="createNewStatus()"
             class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
             :disabled="isButtonDisabled"
           >
