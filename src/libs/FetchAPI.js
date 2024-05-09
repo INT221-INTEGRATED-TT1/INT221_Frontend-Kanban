@@ -121,4 +121,8 @@ const editTask = async (id, newTask) => {
   }
 }
 
+const getAllStatus = async () =>{
+  
+}
+
 export {getAllTasks, getTask, createTask, deleteTasks, editTask}
