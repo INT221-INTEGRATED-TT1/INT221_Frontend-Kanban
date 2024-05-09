@@ -10,7 +10,7 @@ import StatusCreate from "@/views/StatusCreate.vue"
 import StatusManage from "@/views/StatusManage.vue"
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(), // base url
 
   routes: [
     {path: "/", redirect: "/task"},

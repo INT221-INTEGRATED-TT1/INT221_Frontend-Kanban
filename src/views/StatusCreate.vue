@@ -6,7 +6,7 @@ import Xmark from "@/components/icons/Xmark.vue"
 
 const utilityStore = useUtilityStore()
 
-const presetColors = reactive([
+const presetColors = [
   "#1A9338",
   "#E79D13",
   "#0090FF",
@@ -19,22 +19,21 @@ const presetColors = reactive([
   "#B31957",
   "#4B0082",
   "#BE6F26",
-])
+]
 
-const colorModel = reactive([...presetColors])
-const previewColor = reactive({
-  
+const newStatus = reactive({
+  name: "No Status",
+  description: "",
+  color: presetColors[5],
 })
 
-console.log(colorModel)
+const selectedColor = ref(null)
 
-// const updateColor = (index) => {
-//   presetColors[index] = colorModel.value[index]
-// }
-
-watch(colorModel,(newValue) =>{
-  console.log("change");
-})
+const updateColor = (index) => {
+  console.log(newStatus.color)
+  newStatus.color = presetColors[index]
+  selectedColor.value = index
+}
 </script>
 
 <template>
@@ -42,7 +41,7 @@ watch(colorModel,(newValue) =>{
     class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
   >
     <div
-      class="w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out"
+      class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out"
     >
       <div class="flex justify-end px-14">
         <button @click="router.back()">
@@ -57,28 +56,37 @@ watch(colorModel,(newValue) =>{
       </h1>
 
       <!-- preview -->
-      <div class="w-full h-[5.5rem] mt-4 bg-[#313131]">
+      <div
+        class="w-full h-[5.5rem] mt-4 bg-[#313131] flex justify-center items-center"
+      >
         <div
-          class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-          :style="{backgroundColor: colorModel[index]}"
-          
+          :class="utilityStore.statusCustomStyle(newStatus.color)"
+          class="flex items-center justify-center rounded-xl px-3 w-auto h-[2.5rem] font-bold text-[16px] tracking-wider"
         >
-          
-          asdfasd
+          <span>
+            {{ newStatus.name }}
+          </span>
         </div>
       </div>
 
       <div class="px-14 mt-7 flex flex-col">
+        <!-- status name -->
         <textarea
           rows="1"
-          class="resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-2"
+          maxlength="50"
+          required
+          class="itbkk-status-name resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-2"
           placeholder="Enter status name"
+          v-model.trim="newStatus.name"
         ></textarea>
 
+        <!-- status description -->
         <textarea
           rows="3"
-          class="resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-3 my-4"
+          maxlength="200"
+          class="itbkk-status-description resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-3 my-4"
           placeholder="Enter your description"
+          v-model.trim="newStatus.description"
         ></textarea>
 
         <h1
@@ -92,12 +100,14 @@ watch(colorModel,(newValue) =>{
       <div
         class="grid grid-cols-6 grid-rows-2 gap-y-4 justify-items-center pt-4 px-20"
       >
-        <input
+        <div
           v-for="(color, index) in presetColors"
           :key="index"
-          :style="{backgroundColor: colorModel[index]}"
+          :style="{backgroundColor: color}"
+          :class="{'opacity-50': selectedColor === index}"
+          @click="updateColor(index)"
           class="inline-block w-[2.35rem] h-[2.35rem] rounded-xl text-transparent cursor-pointer"
-        ></input>
+        ></div>
       </div>
       <!-- </div> -->
 
@@ -111,7 +121,6 @@ watch(colorModel,(newValue) =>{
             CANCEL
           </button>
           <button
-            :disabled="isButtonDisabled"
             class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
           >
             SAVE
@@ -123,6 +132,4 @@ watch(colorModel,(newValue) =>{
   </section>
 </template>
 
-<style scoped>
-/* px-14 */
-</style>
+<style scoped></style>
