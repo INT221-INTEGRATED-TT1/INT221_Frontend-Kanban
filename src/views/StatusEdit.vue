@@ -29,7 +29,7 @@ const editStatusData = async (newStatus) => {
     const response = await editStatus(route.params.id, newStatus)
     if (response.status === 200) {
       utilityStore.statusManager.editStatus(route.params.id, newStatus)
-      router.push("/status/manage")
+      router.push("/status")
       setTimeout(() => {
         toast("The status has been updated", {
           type: "success",
@@ -39,10 +39,8 @@ const editStatusData = async (newStatus) => {
           position: "bottom-right",
         })
       })
-    }
-
-    else if (response.status === 500) {
-      toast("The status is duplicated", {
+    } else if (response.status === 404) {
+      toast("An error has occurred, the status does not exist", {
         type: "error",
         timeout: 2000,
         theme: "dark",
@@ -55,8 +53,17 @@ const editStatusData = async (newStatus) => {
   }
 }
 
+// const isButtonDisabled = computed(() => {
+//   return !updateStatus.name
+// })
+
 const isButtonDisabled = computed(() => {
-  return !updateStatus.name
+  return (
+    (updateStatus.name === status.value.name &&
+      updateStatus.description === status.value.description &&
+      updateStatus.color === status.value.color) ||
+    !updateStatus.name
+  )
 })
 
 onBeforeMount(async () => {

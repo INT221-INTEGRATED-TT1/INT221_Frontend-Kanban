@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount} from "vue"
+import {ref, onBeforeMount, reactive} from "vue"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {getAllStatuses} from "@/libs/FetchAPI"
@@ -9,10 +9,23 @@ import TitleIcon from "@/components/icons/TitleIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import DescIcon from "@/components/icons/DescIcon.vue"
 import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
+import {
+  deleteStatuses,
+  deleteStatusTransfer,
+  getAllTasks,
+} from "@/libs/FetchAPI"
+import Xmark from "@/components/icons/Xmark.vue"
+import DropdownIcon from "@/components/icons/DropdownIcon.vue"
+import {toast} from "vue3-toastify"
+import "vue3-toastify/dist/index.css"
+import AstronautStopSmile from "@/components/icons/AstronautStopSmile.vue"
+import AstronautStopSignBlack from "@/components/icons/AstronautStopSignBlack.vue"
+import {getTask} from "@/libs/FetchAPI"
 
 const utilityStore = useUtilityStore()
 
 const disableBtn = ref(true)
+
 const disabledActionButton = () => {
   for (const status of utilityStore.statusManager.getStatus()) {
     if (status.name === "No Status") {
@@ -21,13 +34,62 @@ const disabledActionButton = () => {
   }
 }
 
-const deleteStats = async () => {}
+const deleteStatus = async (deleteId, oldDeleteId, newDeleteId) => {
+  // const tasks = utilityStore.tasksManager.getTasks()
+
+  try {
+    const response = await deleteStatuses(deleteId)
+    if (response.status === 200) {
+      utilityStore.statusManager.deleteStatus(deleteId)
+      utilityStore.showDeleteConfirmation = false
+      disableTransfer.value = false
+      toast("Status has been deleted", {
+        type: "success",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      })
+    } else if (response.status === 500) {
+      utilityStore.showDeleteConfirmation = false
+      disableTransfer.value = true
+      newStatus.name = utilityStore.statusTitle
+      newStatus.color = utilityStore.selectedColor
+    }
+  } catch {}
+}
+
+const newStatus = reactive({
+  id: "",
+  name: "",
+  description: "",
+  color: "",
+})
+// console.log(utilityStore.tasksManager.getTasks())
+// console.log(utilityStore.statusManager.getStatus());
+
+const selectStatus = (name, color) => {
+  newStatus.name = name
+  newStatus.color = color
+}
+
+const disableTransfer = ref(false)
+
+const dropdownTextColor = (status) => {
+  return {
+    "text-[#D8D8D8]": status === "No Status",
+    "text-[#FF881B]": status === "To Do",
+    "text-[#2697FF]": status === "Doing",
+    "text-[#65EE6C]": status === "Done",
+  }
+}
 
 onBeforeMount(async () => {
   try {
     const fetchData = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchData)
-    // console.log(utilityStore.statusManager.getStatus())
+    // newStatus.value = fetchData
+    console.log(utilityStore.statusManager.getStatus())
     // console.log(fetchData);
   } catch (error) {
     console.log(error)
@@ -62,7 +124,7 @@ onBeforeMount(async () => {
           </div>
         </router-link>
 
-        <router-link to="add">
+        <router-link to="/status/add">
           <div
             class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
           >
@@ -172,15 +234,101 @@ onBeforeMount(async () => {
       </table>
     </div>
 
+    <!-- transfer status -->
     <section
+      v-show="disableTransfer"
       class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
     >
       <div
-        class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out"
+        class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out px-12"
       >
-      
-    </div>
+        <h1
+          class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-widest"
+        >
+          Transfer Status
+        </h1>
+        <!-- close modal -->
+        <div class="flex justify-end">
+          <button @click="disableTransfer = false">
+            <span><Xmark /></span>
+          </button>
+        </div>
+        <!-- close modal -->
+
+        <div class="w-full flex pt-10 gap-x-5">
+          <AstronautStopSignBlack
+            v-show="newStatus.name === utilityStore.statusTitle ? true : false"
+          />
+
+          <AstronautStopSmile
+            v-show="newStatus.name !== utilityStore.statusTitle ? true : false"
+          />
+
+          <div class="pt-16">
+            <div class="tracking-wider text-opacity-[0.43]">
+              There is some task associated with the
+              <span :style="{color: utilityStore.selectedColor}">{{
+                utilityStore.statusTitle
+              }}</span>
+              status.
+            </div>
+            <div class="flex items-center pt-10 gap-x-5">
+              <div class="font-Gemunu font-bold text-xl tracking-wider">
+                Transfer to
+              </div>
+              <!-- Status -->
+              <div class="dropdown dropdown-bottom ">
+                <div
+                  tabindex="0"
+                  role="button"
+                  class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3 break-all"
+                  :class="utilityStore.statusCustomStyle(newStatus.color)"
+                >
+                  <!-- :class="utilityStore.getStatusStyle(updateTask.status)" -->
+                  {{ newStatus.name }}
+                  <span><DropdownIcon /></span>
+                </div>
+
+                <!-- :class="utilityStore.statusCustomStyle(utilityStore.statusManager.getStatus().name)" -->
+                <div
+                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-scroll cursor-pointer"
+                >
+                <ul
+                  tabindex="0"
+                >
+                  <li
+                    v-for="status in utilityStore.statusManager.getStatus()"
+                    :key="status.id"
+                    @click="selectStatus(status.name, status.color)"
+                    :class="utilityStore.statusCustomStyle(status.color)"
+                    class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
+                  >
+                    {{ status.name }}
+                  </li>
+                </ul></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-center pt-6 gap-x-5">
+          <button
+            @click="disableTransfer = false"
+            class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+          >
+            CANCEL
+          </button>
+          <button
+            @click=""
+            :disabled="newStatus.name === utilityStore.statusTitle"
+            class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+          >
+            SAVE
+          </button>
+        </div>
+      </div>
     </section>
+    <!-- transfer status -->
 
     <!-- delete confirmation -->
     <div>
@@ -215,7 +363,7 @@ onBeforeMount(async () => {
               </button>
               <button
                 class="itbkk-button-confirm btn border-[#730000] text-xs font-bold px-[2rem] bg-[#730000] hover:bg-opacity-35 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
-                @click="deleteTask(utilityStore.deleteStats)"
+                @click="deleteStatus(utilityStore.selectedId)"
               >
                 Delete
               </button>
@@ -230,6 +378,8 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
+@import url("https://fonts.googleapis.com/css2?family=Gemunu+Libre:wght@200..800&display=swap");
+
 .tooltip-error {
   --tooltip-color: #dc3b62;
   --tooltip-text-color: #dedfe0;

@@ -27,7 +27,7 @@ const createNewStatus = async () => {
     if (response.status === 201) {
       // console.log(newStatus)
       utilityStore.statusManager.addStatus(response.data)
-      router.push("/status/manage")
+      router.push("/status")
       setTimeout(() => {
         toast("The status has been successfully added", {
           type: "success",
@@ -39,7 +39,7 @@ const createNewStatus = async () => {
       })
     } else if (response.status === 500 || response.status === 400) {
       setTimeout(() => {
-        toast("The status is duplicated", {
+        toast("An error has  occurred, the status could not be added.", {
           type: "error",
           timeout: 2000,
           theme: "dark",

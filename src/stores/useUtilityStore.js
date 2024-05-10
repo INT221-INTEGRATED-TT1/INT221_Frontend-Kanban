@@ -7,7 +7,7 @@ export const useUtilityStore = defineStore("utility", () => {
   const tasksManager = ref(new TaskManagement())
   const statusManager = ref(new StatusManagement())
   const selectedId = ref("")
-  const taskTitle = ref("")
+  const taskTitleConfirm = ref("")
   const statusTitle = ref("")
   const showDeleteConfirmation = ref(false)
   const selectedColor = ref(null)
@@ -83,19 +83,26 @@ export const useUtilityStore = defineStore("utility", () => {
     selectedColor.value = statusColor
   }
 
+  const confirmDeleteTask = (taskId, taskTitle) => {
+    showDeleteConfirmation.value = true
+    selectedId.value = taskId
+    taskTitleConfirm.value = taskTitle
+  }
+
   return {
     convertToStatus,
     getStatusStyle,
     tasksManager,
     selectedId,
     showDeleteConfirmation,
-    taskTitle,
+    taskTitleConfirm,
     ConvertToEnumStatus,
     statusCustomStyle,
     statusManager,
     presetColors,
     selectedColor,
     statusTitle,
-    confirmDeleteStatus
+    confirmDeleteStatus,
+    confirmDeleteTask
   }
 })

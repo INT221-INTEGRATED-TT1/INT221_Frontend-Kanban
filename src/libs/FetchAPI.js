@@ -146,7 +146,7 @@ const getStatus = async (statusId) => {
         router: router.push("/status/manage"),
       }
     }
-    console.log(typeof statusId);
+    console.log(typeof statusId)
     return response.json()
   }
 }
@@ -197,6 +197,44 @@ const editStatus = async (statusId, newStatus) => {
   }
 }
 
+const deleteStatuses = async (statusId) => {
+  console.log(typeof statusId);
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`,
+      {
+        method: "DELETE",
+      }
+    )
+    return {
+      status: response.status,
+      message: "Status deleted successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const deleteStatusTransfer = async (oldId, newId) => {
+  console.log(typeof oldId, typeof newId);
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${oldId}/${newId}`,
+      {
+        method: "DELETE",
+      }
+    )
+    return {
+      status: response.status,
+      message: "Status deleted successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -207,4 +245,6 @@ export {
   getStatus,
   createStatus,
   editStatus,
+  deleteStatuses,
+  deleteStatusTransfer
 }

@@ -12,6 +12,13 @@ class StatusManagement {
     this.statuses.push(newStatus)
   }
 
+  deleteStatus(deleteId) {
+    this.statuses.splice(
+      this.statuses.findIndex((status) => status.id === deleteId),
+      1
+    )
+  }
+
   editStatus(statusId, newStatus) {
     // console.log("Task id is", taskId)
     // if (newTask.assignees.trim().length === 0) {
