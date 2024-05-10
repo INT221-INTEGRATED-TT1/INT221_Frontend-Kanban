@@ -137,7 +137,7 @@ const getAllStatuses = async () => {
 
 const getStatus = async (statusId) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`
+    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${parseInt(statusId)}`
   )
   {
     if (!response.ok) {
@@ -146,6 +146,7 @@ const getStatus = async (statusId) => {
         router: router.push("/status/manage"),
       }
     }
+    console.log(typeof statusId);
     return response.json()
   }
 }

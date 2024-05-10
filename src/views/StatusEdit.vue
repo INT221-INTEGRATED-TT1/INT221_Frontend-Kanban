@@ -65,6 +65,7 @@ onBeforeMount(async () => {
     status.value = fetchData
     // console.log(status.value);
     // console.log(fetchData);
+    console.log(typeof status.value.id);
 
     updateStatus.name = status.value.name
     updateStatus.description = status.value.description

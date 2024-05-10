@@ -25,7 +25,7 @@ const createNewStatus = async () => {
   try {
     const response = await createStatus(newStatus)
     if (response.status === 201) {
-      console.log(newStatus)
+      // console.log(newStatus)
       utilityStore.statusManager.addStatus(newStatus)
       router.push("/status/manage")
       setTimeout(() => {
@@ -39,7 +39,7 @@ const createNewStatus = async () => {
       })
     }
 
-    if (response.status === 500) {
+    if (response.status === 500 || response.status === 400) {
       setTimeout(() => {
         toast("The status is duplicated", {
           type: "error",

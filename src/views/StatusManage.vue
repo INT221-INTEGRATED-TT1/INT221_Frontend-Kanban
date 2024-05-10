@@ -14,18 +14,6 @@ import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
 
 const utilityStore = useUtilityStore()
 
-onBeforeMount(async () => {
-  try {
-    const fetchData = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchData)
-    console.log(utilityStore.statusManager.getStatus())
-
-    // console.log(fetchData);
-  } catch (error) {
-    console.log(error)
-  }
-})
-
 const disableBtn = ref(true)
 const disabledActionButton = () => {
   for (const status of utilityStore.statusManager.getStatus()) {
@@ -34,6 +22,17 @@ const disabledActionButton = () => {
     }
   }
 }
+
+onBeforeMount(async () => {
+  try {
+    const fetchData = await getAllStatuses()
+    utilityStore.statusManager.addStatuses(fetchData)
+    console.log(utilityStore.statusManager.getStatus())
+    // console.log(fetchData);
+  } catch (error) {
+    console.log(error)
+  }
+})
 </script>
 
 <template>
@@ -116,39 +115,47 @@ const disabledActionButton = () => {
             <td class="text-start">{{ statuses.description }}</td>
             <td class="flex gap-x-3 justify-center items-center">
               <!-- <div class="flex gap-x-2"> -->
-              <div class="tooltip tooltip-edit" :data-tip="statuses.name === 'No Status' ? '' : 'Edit' ">
+              <div
+                class="tooltip tooltip-edit"
+                :data-tip="
+                  statuses.name === 'No Status' ? 'Cannot Edit No Status' : 'Edit'
+                "
+              >
                 <button
                   @click="router.push(`/status/${statuses.id}/edit`)"
                   class="itbkk-button-edit"
-                  :disabled="statuses.name === 'No Status' ? disabledActionButton : false"
-                  :class="{'opacity-50 cursor-not-allowed': statuses.name === 'No Status'}"
+                  :disabled="
+                    statuses.name === 'No Status' ? disabledActionButton : false
+                  "
+                  :class="{
+                    'opacity-50 cursor-not-allowed':
+                      statuses.name === 'No Status',
+                  }"
                 >
                   <EditTaskStatus />
                 </button>
               </div>
-              <div class="tooltip text-normal tooltip-error" :class="statuses.name === 'No Status' ? '': ''" :data-tip="statuses.name === 'No Status' ? '' : 'Delete'">
+              <div
+                class="tooltip text-normal tooltip-error"
+                :data-tip="
+                  statuses.name === 'No Status' ? 'Cannot Delete No Status' : 'Delete'
+                "
+              >
                 <button
                   class="itbkk-button-delete"
-                  :disabled="statuses.name === 'No Status' ? disabledActionButton : false"
-                  :class="{'opacity-50 cursor-not-allowed': statuses.name === 'No Status'}"
+                  :disabled="
+                    statuses.name === 'No Status' ? disabledActionButton : false
+                  "
+                  :class="{
+                    'opacity-50 cursor-not-allowed ':
+                      statuses.name === 'No Status',
+                  }"
                 >
                   <DeleteIcon width="22" height="31" />
                 </button>
               </div>
               <!-- </div> -->
             </td>
-            <!-- <td v-else class="flex gap-x-3 justify-center items-center">
-              <div class="tooltip tooltip-edit" data-tip="Edit">
-                <button class="itbkk-button-edit opacity-50 disabled">
-                  <EditTaskStatus />
-                </button>
-              </div>
-              <div class="tooltip tooltip-error text-normal" data-tip="Delete">
-                <button class="itbkk-button-delete opacity-50 disabled ">
-                  <DeleteIcon width="22" height="31" />
-                </button>
-              </div>
-            </td> -->
           </tr>
         </tbody>
       </table>
