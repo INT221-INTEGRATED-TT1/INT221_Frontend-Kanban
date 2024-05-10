@@ -41,15 +41,15 @@ const editStatusData = async (newStatus) => {
       })
     }
 
-    // if (response.status === 404) {
-    //   toast("The task does not exist", {
-    //     type: "error",
-    //     timeout: 2000,
-    //     theme: "dark",
-    //     transition: "flip",
-    //     position: "bottom-right",
-    //   })
-    // }
+    else if (response.status === 500) {
+      toast("The status is duplicated", {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      })
+    }
   } catch (error) {
     console.log("Error updating status: ", error)
   }
@@ -65,7 +65,7 @@ onBeforeMount(async () => {
     status.value = fetchData
     // console.log(status.value);
     // console.log(fetchData);
-    console.log(typeof status.value.id);
+    console.log(typeof status.value.id)
 
     updateStatus.name = status.value.name
     updateStatus.description = status.value.description

@@ -218,9 +218,5 @@ textarea:placeholder-shown {
   font-size: medium;
 }
 
-.required:after {
-  content: " *";
-  color: red;
-  font-size: 1.5rem;
-}
+
 </style>

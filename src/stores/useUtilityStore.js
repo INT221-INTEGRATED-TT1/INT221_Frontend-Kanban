@@ -6,8 +6,9 @@ import {reactive, ref} from "vue"
 export const useUtilityStore = defineStore("utility", () => {
   const tasksManager = ref(new TaskManagement())
   const statusManager = ref(new StatusManagement())
-  const selectedTaskId = ref("")
+  const selectedId = ref("")
   const taskTitle = ref("")
+  const statusTitle = ref("")
   const showDeleteConfirmation = ref(false)
   const selectedColor = ref(null)
 
@@ -75,11 +76,18 @@ export const useUtilityStore = defineStore("utility", () => {
     "#BE6F26",
   ])
 
+  const confirmDeleteStatus = (statusId, statusName, statusColor) => {
+    showDeleteConfirmation.value = true
+    selectedId.value = statusId
+    statusTitle.value = statusName
+    selectedColor.value = statusColor
+  }
+
   return {
     convertToStatus,
     getStatusStyle,
     tasksManager,
-    selectedTaskId,
+    selectedId,
     showDeleteConfirmation,
     taskTitle,
     ConvertToEnumStatus,
@@ -87,5 +95,7 @@ export const useUtilityStore = defineStore("utility", () => {
     statusManager,
     presetColors,
     selectedColor,
+    statusTitle,
+    confirmDeleteStatus
   }
 })

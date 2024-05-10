@@ -137,7 +137,7 @@ const getAllStatuses = async () => {
 
 const getStatus = async (statusId) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${parseInt(statusId)}`
+    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`
   )
   {
     if (!response.ok) {
