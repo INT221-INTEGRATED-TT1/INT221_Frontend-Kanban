@@ -146,6 +146,7 @@ const getStatus = async (statusId) => {
         router: router.push("/status/manage"),
       }
     }
+    console.log(typeof statusId);
     return response.json()
   }
 }

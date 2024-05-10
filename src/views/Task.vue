@@ -31,9 +31,7 @@ const deleteTask = async (deleteId) => {
         transition: "flip",
         position: "bottom-right",
       })
-    }
-
-    if (response.status === 404) {
+    } else if (response.status === 404) {
       toast("The task does not exist", {
         type: "error",
         timeout: 2000,
@@ -50,7 +48,7 @@ const deleteTask = async (deleteId) => {
 
 const confirmDeleteTask = (taskId, taskTitle) => {
   utilityStore.showDeleteConfirmation = true
-  utilityStore.selectedTaskId = taskId
+  utilityStore.selectedId = taskId
   utilityStore.taskTitle = taskTitle
 }
 
@@ -247,7 +245,7 @@ onBeforeMount(async () => {
               </button>
               <button
                 class="itbkk-button-confirm btn border-[#730000] text-xs font-bold px-[2rem] bg-[#730000] hover:bg-opacity-35 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
-                @click="deleteTask(utilityStore.selectedTaskId)"
+                @click="deleteTask(utilityStore.selectedId)"
               >
                 Delete
               </button>

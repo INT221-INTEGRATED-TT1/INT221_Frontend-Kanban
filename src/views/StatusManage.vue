@@ -6,25 +6,11 @@ import {getAllStatuses} from "@/libs/FetchAPI"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import TitleIcon from "@/components/icons/TitleIcon.vue"
-import StatusIcon from "@/components/icons/StatusIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
-import EditTaskIcon from "@/components/icons/EditTaskIcon.vue"
 import DescIcon from "@/components/icons/DescIcon.vue"
 import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
 
 const utilityStore = useUtilityStore()
-
-onBeforeMount(async () => {
-  try {
-    const fetchData = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchData)
-    console.log(utilityStore.statusManager.getStatus())
-
-    // console.log(fetchData);
-  } catch (error) {
-    console.log(error)
-  }
-})
 
 const disableBtn = ref(true)
 const disabledActionButton = () => {
@@ -34,6 +20,19 @@ const disabledActionButton = () => {
     }
   }
 }
+
+const deleteStats = async () => {}
+
+onBeforeMount(async () => {
+  try {
+    const fetchData = await getAllStatuses()
+    utilityStore.statusManager.addStatuses(fetchData)
+    // console.log(utilityStore.statusManager.getStatus())
+    // console.log(fetchData);
+  } catch (error) {
+    console.log(error)
+  }
+})
 </script>
 
 <template>
@@ -116,43 +115,116 @@ const disabledActionButton = () => {
             <td class="text-start">{{ statuses.description }}</td>
             <td class="flex gap-x-3 justify-center items-center">
               <!-- <div class="flex gap-x-2"> -->
-              <div class="tooltip tooltip-edit" :data-tip="statuses.name === 'No Status' ? '' : 'Edit' ">
+              <div
+                class="tooltip tooltip-edit"
+                :data-tip="
+                  statuses.name === 'No Status'
+                    ? 'Cannot Edit No Status'
+                    : 'Edit'
+                "
+              >
                 <button
                   @click="router.push(`/status/${statuses.id}/edit`)"
                   class="itbkk-button-edit"
-                  :disabled="statuses.name === 'No Status' ? disabledActionButton : false"
-                  :class="{'opacity-50 cursor-not-allowed': statuses.name === 'No Status'}"
+                  :disabled="
+                    statuses.name === 'No Status' ? disabledActionButton : false
+                  "
+                  :class="{
+                    'opacity-50 cursor-not-allowed':
+                      statuses.name === 'No Status',
+                  }"
                 >
                   <EditTaskStatus />
                 </button>
               </div>
-              <div class="tooltip text-normal tooltip-error" :class="statuses.name === 'No Status' ? '': ''" :data-tip="statuses.name === 'No Status' ? '' : 'Delete'">
+              <div
+                class="tooltip text-normal tooltip-error"
+                :data-tip="
+                  statuses.name === 'No Status'
+                    ? 'Cannot Delete No Status'
+                    : 'Delete'
+                "
+              >
                 <button
                   class="itbkk-button-delete"
-                  :disabled="statuses.name === 'No Status' ? disabledActionButton : false"
-                  :class="{'opacity-50 cursor-not-allowed': statuses.name === 'No Status'}"
+                  @click="
+                    utilityStore.confirmDeleteStatus(
+                      statuses.id,
+                      statuses.name,
+                      statuses.color
+                    )
+                  "
+                  :disabled="
+                    statuses.name === 'No Status' ? disabledActionButton : false
+                  "
+                  :class="{
+                    'opacity-50 cursor-not-allowed ':
+                      statuses.name === 'No Status',
+                  }"
                 >
                   <DeleteIcon width="22" height="31" />
                 </button>
               </div>
               <!-- </div> -->
             </td>
-            <!-- <td v-else class="flex gap-x-3 justify-center items-center">
-              <div class="tooltip tooltip-edit" data-tip="Edit">
-                <button class="itbkk-button-edit opacity-50 disabled">
-                  <EditTaskStatus />
-                </button>
-              </div>
-              <div class="tooltip tooltip-error text-normal" data-tip="Delete">
-                <button class="itbkk-button-delete opacity-50 disabled ">
-                  <DeleteIcon width="22" height="31" />
-                </button>
-              </div>
-            </td> -->
           </tr>
         </tbody>
       </table>
     </div>
+
+    <section
+      class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
+    >
+      <div
+        class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out"
+      >
+      
+    </div>
+    </section>
+
+    <!-- delete confirmation -->
+    <div>
+      <div
+        class="fixed inset-0 backdrop-blur-md flex justify-center items-center"
+        v-if="utilityStore.showDeleteConfirmation"
+      >
+        <div
+          class="itbkk-message bg-[#18181B] rounded-lg w-[30rem] h-[15rem] flex flex-col"
+        >
+          <h1
+            class="text-[#DB1058] font-bold text-2xl text-opacity-80 flex px-10 pt-6"
+          >
+            Delete a Task
+          </h1>
+          <div class="divider m-0"></div>
+          <div class="p-10 flex flex-col gap-y-6">
+            <p
+              class="itbkk-button-message even:text-[#ECECEC] text-opacity-75 break-all"
+            >
+              Do you want to delete status "<span
+                :style="{color: utilityStore.selectedColor}"
+                >{{ utilityStore.statusTitle }}</span
+              >" ?
+            </p>
+            <div class="flex justify-end">
+              <button
+                class="itbkk-button-cancel btn text-xs font-semibold px-[2rem] text-[#FFFFFF] bg-transparent text-opacity-70 border-none hover:bg-transparent"
+                @click="utilityStore.showDeleteConfirmation = false"
+              >
+                Cancel
+              </button>
+              <button
+                class="itbkk-button-confirm btn border-[#730000] text-xs font-bold px-[2rem] bg-[#730000] hover:bg-opacity-35 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
+                @click="deleteTask(utilityStore.deleteStats)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- delete confirmation -->
   </main>
   <router-view />
 </template>

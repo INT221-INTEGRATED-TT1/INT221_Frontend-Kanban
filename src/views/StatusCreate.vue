@@ -25,8 +25,8 @@ const createNewStatus = async () => {
   try {
     const response = await createStatus(newStatus)
     if (response.status === 201) {
-      console.log(newStatus)
-      utilityStore.statusManager.addStatus(newStatus)
+      // console.log(newStatus)
+      utilityStore.statusManager.addStatus(response.data)
       router.push("/status/manage")
       setTimeout(() => {
         toast("The status has been successfully added", {
@@ -37,9 +37,7 @@ const createNewStatus = async () => {
           position: "bottom-right",
         })
       })
-    }
-
-    if (response.status === 500) {
+    } else if (response.status === 500 || response.status === 400) {
       setTimeout(() => {
         toast("The status is duplicated", {
           type: "error",
@@ -94,23 +92,33 @@ const isButtonDisabled = computed(() => {
 
       <div class="px-14 mt-7 flex flex-col">
         <!-- status name -->
-        <textarea
-          rows="1"
-          maxlength="50"
-          required
-          class="itbkk-status-name resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-2"
-          placeholder="Enter status name"
-          v-model.trim="newStatus.name"
-        ></textarea>
+        <div>
+          <textarea
+            rows="1"
+            maxlength="50"
+            required
+            class="itbkk-status-name resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-2"
+            placeholder="Enter status name"
+            v-model.trim="newStatus.name"
+          ></textarea>
+          <span class="flex justify-end text-xs text-normal opacity-45 required"
+            >{{ newStatus.name.length }} / 50</span
+          >
+        </div>
 
         <!-- status description -->
-        <textarea
-          rows="3"
-          maxlength="200"
-          class="itbkk-status-description resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-3 my-4"
-          placeholder="Enter your description"
-          v-model.trim="newStatus.description"
-        ></textarea>
+        <div class="my-4">
+          <textarea
+            rows="3"
+            maxlength="200"
+            class="itbkk-status-description resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-3 "
+            placeholder="Enter your description"
+            v-model.trim="newStatus.description"
+          ></textarea>
+          <span class="flex justify-end text-xs text-normal opacity-45 "
+            >{{ newStatus.description.length }} / 200</span
+          >
+        </div>
 
         <h1
           class="text-[12px] text-headline text-opacity-[0.43] font-bold text-start tracking-wider"

@@ -41,6 +41,7 @@ const router = createRouter({
           path: "manage",
           // component: StatusManage,
           name: "manage-task-status",
+          // redirect: "/status/manage",
           // children: [
           //   {path: "add", component: StatusCreate, name: "create-task-status"},
           // ],
