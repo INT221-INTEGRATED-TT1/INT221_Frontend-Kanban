@@ -32,6 +32,12 @@
   background: rgb(0, 0, 0);
 }
 
+.required:after {
+  content: " *";
+  color: red;
+  font-size: 1.5rem;
+}
+
 @keyframes animation {
   0% {
     background: linear-gradient(90deg, rgba(0, 0, 0, 1));

@@ -31,9 +31,7 @@ const deleteTask = async (deleteId) => {
         transition: "flip",
         position: "bottom-right",
       })
-    }
-
-    if (response.status === 404) {
+    } else if (response.status === 404) {
       toast("The task does not exist", {
         type: "error",
         timeout: 2000,
@@ -46,12 +44,6 @@ const deleteTask = async (deleteId) => {
   } catch (error) {
     console.log("Error deleting task : ", error)
   }
-}
-
-const confirmDeleteTask = (taskId, taskTitle) => {
-  utilityStore.showDeleteConfirmation = true
-  utilityStore.selectedTaskId = taskId
-  utilityStore.taskTitle = taskTitle
 }
 
 onBeforeMount(async () => {
@@ -90,7 +82,7 @@ onBeforeMount(async () => {
 
       <div class="flex items-center gap-x-3">
         <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
-        <router-link to="/status/manage">
+        <router-link to="/status">
           <div
             class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer"
           >
@@ -192,7 +184,7 @@ onBeforeMount(async () => {
                   <div class="divider m-0 h-0"></div>
                   <li
                     class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
-                    @click="confirmDeleteTask(task.id, task.title)"
+                    @click="utilityStore.confirmDeleteTask(task.id, task.title)"
                   >
                     <span
                       class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold"
@@ -215,7 +207,7 @@ onBeforeMount(async () => {
         </tbody>
       </table>
     </div>
-    <router-view></router-view>
+    <router-view />
 
     <!-- delete confirmation -->
     <div>
@@ -236,7 +228,7 @@ onBeforeMount(async () => {
             <p
               class="itbkk-button-message even:text-[#ECECEC] text-opacity-75 break-all"
             >
-              Do you want to delete task "{{ utilityStore.taskTitle }}"?
+              Do you want to delete task "{{ utilityStore.taskTitleConfirm }}"?
             </p>
             <div class="flex justify-end">
               <button
@@ -247,7 +239,7 @@ onBeforeMount(async () => {
               </button>
               <button
                 class="itbkk-button-confirm btn border-[#730000] text-xs font-bold px-[2rem] bg-[#730000] hover:bg-opacity-35 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
-                @click="deleteTask(utilityStore.selectedTaskId)"
+                @click="deleteTask(utilityStore.selectedId)"
               >
                 Delete
               </button>
