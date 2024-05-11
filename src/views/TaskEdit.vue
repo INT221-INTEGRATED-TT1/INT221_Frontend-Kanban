@@ -28,7 +28,7 @@ import "vue3-toastify/dist/index.css"
 //   textArea.value.style.height = textArea.value.scrollHeight + "px";
 // };
 
-const task = ref([])
+const task = ref({})
 const route = useRoute()
 const utilityStore = useUtilityStore()
 
@@ -102,7 +102,7 @@ const editTaskData = async (newTask) => {
   try {
     const response = await editTask(route.params.id, newTask)
     if (response.status === 200) {
-      utilityStore.tasksManager.editTask(route.params.id, newTask)
+      utilityStore.tasksManager.editTask(route.params.id, response.data)
       router.push("/task")
       setTimeout(() => {
         toast("The task has been updated", {
@@ -133,10 +133,9 @@ onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
-
+    console.log(task.value)
     const fetchStatus = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchStatus)
-
     if (
       task.value.description === null ||
       task.value.description.trim().length === 0
@@ -149,14 +148,17 @@ onBeforeMount(async () => {
     ) {
       task.value.assignees = "Unassigned"
     }
-
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
 
     updateTask.title = task.value.title
     updateTask.description = task.value.description
     updateTask.assignees = task.value.assignees
-    updateTask.statusNo = task.value.status
+
+    newStatus.id = task.value.status.id
+    newStatus.name = task.value.status.name
+    newStatus.description = task.value.status.description
+    newStatus.color = task.value.status.color
 
     // console.log(updateTask.status.length)
   } catch (error) {
