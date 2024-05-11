@@ -20,6 +20,7 @@ const utilityStore = useUtilityStore()
 
 const deleteTask = async (deleteId) => {
   try {
+    console.log(deleteId);
     const response = await deleteTasks(deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
@@ -155,9 +156,9 @@ onBeforeMount(async () => {
             <td class="itbkk-status">
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] text-center tracking-normal font-Inter"
-                :class="utilityStore.getStatusStyle(task.status)"
+                :class="utilityStore.statusCustomStyle(task.status.color)"
               >
-                {{ utilityStore.convertToStatus[task.status] }}
+                {{ task.status.name }}
               </div>
             </td>
             <td>

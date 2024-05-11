@@ -2,15 +2,8 @@ import router from "@/router"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
-const ConvertToEnumStatus = {
-  "No Status": "NO_STATUS",
-  "To Do": "TO_DO",
-  "Doing": "DOING",
-  "Done": "DONE",
-}
-
 const getAllTasks = async () => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`)
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v2/tasks`)
   {
     if (!response.ok) {
       throw {
@@ -24,7 +17,7 @@ const getAllTasks = async () => {
 
 const getTask = async (id) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`
+    `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`
   )
   {
     if (!response.ok) {
@@ -48,7 +41,7 @@ const getTask = async (id) => {
 
 const createTask = async (newTask) => {
   let createTask = {...newTask}
-  createTask.status = ConvertToEnumStatus[createTask.status]
+  // createTask.status = ConvertToEnumStatus[createTask.status]
   if (createTask.assignees.trim().length === 0) {
     createTask.assignees = null
   }
@@ -56,10 +49,10 @@ const createTask = async (newTask) => {
     createTask.description = null
   }
 
-  console.log(newTask)
+  // console.log(newTask)
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v1/tasks`,
+      `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`,
       {
         method: "POST",
         headers: {
@@ -68,6 +61,7 @@ const createTask = async (newTask) => {
         body: JSON.stringify({...createTask}),
       }
     )
+    console.log(createTask);
 
     return {
       status: response.status,
@@ -82,7 +76,7 @@ const createTask = async (newTask) => {
 const deleteTasks = async (id) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`,
       {
         method: "DELETE",
       }
@@ -100,7 +94,7 @@ const deleteTasks = async (id) => {
 const editTask = async (id, newTask) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`,
       {
         method: "PUT",
         headers: {

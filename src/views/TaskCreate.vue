@@ -1,6 +1,6 @@
 <script setup>
-import {ref, reactive, computed, watchEffect} from "vue"
-import {createTask} from "@/libs/FetchAPI"
+import {ref, reactive, computed, onBeforeMount, onMounted} from "vue"
+import {createTask, getAllStatuses} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -12,29 +12,31 @@ import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
 
-const dropdownTextColor = (status) => {
-  return {
-    "text-[#D8D8D8]": status === "No Status",
-    "text-[#FF881B]": status === "To Do",
-    "text-[#2697FF]": status === "Doing",
-    "text-[#65EE6C]": status === "Done",
-  }
-}
-
-const selectStatus = (status) => {
-  newTask.status = status
-}
+const newStatus = reactive({
+  id: 101,
+  name: "No Status",
+  description: "",
+  color: "#5A5A5A",
+})
 
 const newTask = reactive({
   title: "",
   description: "",
   assignees: "",
-  status: "No Status",
+  statusNo: newStatus.id,
 })
+
+const selectStatus = (name, color, id) => {
+  newStatus.name = name
+  newStatus.color = color
+  newTask.statusNo = id
+}
 
 const createNewTask = async () => {
   try {
+    console.log(newTask)
     const response = await createTask(newTask)
+    console.log(newTask)
     if (response.status === 201) {
       utilityStore.tasksManager.addTask(response.data)
       router.push("/task")
@@ -69,6 +71,15 @@ const createNewTask = async () => {
 
 const isButtonDisabled = computed(() => {
   return !newTask.title
+})
+
+onBeforeMount(async () => {
+  try {
+    const fetchStatus = await getAllStatuses()
+    utilityStore.statusManager.addStatuses(fetchStatus)
+  } catch {
+    console.log("kuy")
+  }
 })
 </script>
 
@@ -120,30 +131,26 @@ const isButtonDisabled = computed(() => {
                 tabindex="0"
                 role="button"
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="
-                  utilityStore.getStatusStyle(
-                    utilityStore.ConvertToEnumStatus[newTask.status]
-                  )
-                "
+                :class="utilityStore.statusCustomStyle(newStatus.color)"
               >
-                {{ newTask.status }}
+                {{ newStatus.name }}
                 <span><DropdownIcon /></span>
               </div>
-
-              <ul
-                tabindex="0"
-                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 cursor-pointer"
+              <div
+                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-scroll cursor-pointer"
               >
-                <li
-                  v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
-                  :key="status"
-                  @click="selectStatus(status)"
-                  :class="dropdownTextColor(status)"
-                  class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md"
-                >
-                  {{ status }}
-                </li>
-              </ul>
+                <ul tabindex="0">
+                  <li
+                    v-for="status in utilityStore.statusManager.getStatus()"
+                    :key="status.id"
+                    @click="selectStatus(status.name, status.color, status.id)"
+                    :class="utilityStore.statusCustomStyle(status.color)"
+                    class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
+                  >
+                    {{ status.name }}
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
           <!-- Status -->
@@ -217,6 +224,4 @@ textarea:placeholder-shown {
   font-weight: 300;
   font-size: medium;
 }
-
-
 </style>

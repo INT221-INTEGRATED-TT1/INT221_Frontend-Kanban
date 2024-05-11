@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, computed, reactive} from "vue"
-import {getTask, editTask} from "@/libs/FetchAPI.js"
+import {getTask, editTask, getAllStatuses} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import router from "@/router/index.js"
@@ -31,30 +31,28 @@ import "vue3-toastify/dist/index.css"
 const task = ref([])
 const route = useRoute()
 const utilityStore = useUtilityStore()
+
+const newStatus = reactive({
+  id: "",
+  name: "",
+  description: "",
+  color: "",
+})
+
 const updateTask = reactive({
   title: "",
   description: "",
   assignees: "",
-  status: "",
+  statusNo: newStatus.id,
 })
 
+const selectStatus = (name, color, id) => {
+  newStatus.name = name
+  newStatus.color = color
+  updateTask.statusNo = id
+}
+
 // const isOpen = ref(false)
-
-const dropdownTextColor = (status) => {
-  return {
-    "text-[#D8D8D8]": status === "No Status",
-    "text-[#FF881B]": status === "To Do",
-    "text-[#2697FF]": status === "Doing",
-    "text-[#65EE6C]": status === "Done",
-  }
-}
-
-const selectStatus = (status) => {
-  console.log("TasK : ", task.value.status)
-  updateTask.status = utilityStore.ConvertToEnumStatus[status]
-  // console.log("updateTasK : ", updateTask.status)
-  // console.log("TasK : ", task.value.status)
-}
 
 // const isOpen = ref(false)
 
@@ -95,7 +93,7 @@ const isButtonDisabled = computed(() => {
     (updateTask.title === task.value.title &&
       updateTask.description === task.value.description &&
       updateTask.assignees === task.value.assignees &&
-      updateTask.status === task.value.status) ||
+      updateTask.statusNo === task.value.status) ||
     !updateTask.title
   )
 })
@@ -112,8 +110,7 @@ const editTaskData = async (newTask) => {
           timeout: 2000,
           theme: "dark",
           transition: "flip",
-        position:"bottom-right"
-
+          position: "bottom-right",
         })
       })
     }
@@ -124,8 +121,7 @@ const editTaskData = async (newTask) => {
         timeout: 2000,
         theme: "dark",
         transition: "flip",
-        position:"bottom-right"
-
+        position: "bottom-right",
       })
     }
   } catch (error) {
@@ -137,6 +133,9 @@ onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
+
+    const fetchStatus = await getAllStatuses()
+    utilityStore.statusManager.addStatuses(fetchStatus)
 
     if (
       task.value.description === null ||
@@ -157,7 +156,7 @@ onBeforeMount(async () => {
     updateTask.title = task.value.title
     updateTask.description = task.value.description
     updateTask.assignees = task.value.assignees
-    updateTask.status = task.value.status
+    updateTask.statusNo = task.value.status
 
     // console.log(updateTask.status.length)
   } catch (error) {
@@ -205,26 +204,27 @@ onBeforeMount(async () => {
                 tabindex="0"
                 role="button"
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.getStatusStyle(updateTask.status)"
+                :class="utilityStore.statusCustomStyle(newStatus.color)"
               >
-                {{ utilityStore.convertToStatus[updateTask.status] }}
+                {{ newStatus.name }}
                 <span><DropdownIcon /></span>
               </div>
 
-              <ul
-                tabindex="0"
-                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 cursor-pointer"
+              <div
+                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-scroll cursor-pointer"
               >
-                <li
-                  v-for="status in ['No Status', 'To Do', 'Doing', 'Done']"
-                  :key="status"
-                  @click="selectStatus(status)"
-                  :class="dropdownTextColor(status)"
-                  class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md"
-                >
-                  {{ status }}
-                </li>
-              </ul>
+                <ul tabindex="0">
+                  <li
+                    v-for="status in utilityStore.statusManager.getStatus()"
+                    :key="status.id"
+                    @click="selectStatus(status.name, status.color, status.id)"
+                    :class="utilityStore.statusCustomStyle(status.color)"
+                    class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
+                  >
+                    {{ status.name }}
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 

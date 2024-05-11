@@ -78,6 +78,7 @@ export const useUtilityStore = defineStore("utility", () => {
 
   const confirmDeleteStatus = (statusId, statusName, statusColor) => {
     showDeleteConfirmation.value = true
+    
     selectedId.value = statusId
     statusTitle.value = statusName
     selectedColor.value = statusColor

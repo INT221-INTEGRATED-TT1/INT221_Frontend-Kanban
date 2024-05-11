@@ -123,9 +123,9 @@ onBeforeMount(async () => {
             <div>
               <div
                 class="rounded-xl px-2 py-1 font-semibold font-Inter text-[14px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.getStatusStyle(task.status)"
+                :class="utilityStore.statusCustomStyle(task.status.color)"
               >
-                {{ utilityStore.convertToStatus[task.status] }}
+                {{ task.status.name }}
               </div>
             </div>
           </div>
