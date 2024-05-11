@@ -20,7 +20,7 @@ const utilityStore = useUtilityStore()
 
 const deleteTask = async (deleteId) => {
   try {
-    console.log(deleteId);
+    console.log(deleteId)
     const response = await deleteTasks(deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
@@ -139,7 +139,7 @@ onBeforeMount(async () => {
               class="itbkk-title tracking-wider cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
               @click="router.push(`/task/${task.id}`)"
             >
-              {{ task.title }}
+              <div class="w-[37rem] break-words">{{ task.title }}</div>
             </td>
             <td class="itbkk-assignees text-opacity-90 text-center italic">
               <div
@@ -155,7 +155,7 @@ onBeforeMount(async () => {
             </td>
             <td class="itbkk-status">
               <div
-                class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] text-center tracking-normal font-Inter"
+                class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
                 :class="utilityStore.statusCustomStyle(task.status.color)"
               >
                 {{ task.status.name }}

@@ -137,7 +137,7 @@ onBeforeMount(async () => {
                 <span><DropdownIcon /></span>
               </div>
               <div
-                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-scroll cursor-pointer"
+                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-auto cursor-pointer"
               >
                 <ul tabindex="0">
                   <li
