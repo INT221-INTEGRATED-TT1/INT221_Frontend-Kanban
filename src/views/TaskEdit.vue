@@ -154,6 +154,7 @@ onBeforeMount(async () => {
     updateTask.title = task.value.title
     updateTask.description = task.value.description
     updateTask.assignees = task.value.assignees
+    updateTask.statusNo = task.value.status.id
 
     newStatus.id = task.value.status.id
     newStatus.name = task.value.status.name
