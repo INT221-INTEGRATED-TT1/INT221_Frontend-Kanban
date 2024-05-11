@@ -20,6 +20,7 @@ const utilityStore = useUtilityStore()
 
 const deleteTask = async (deleteId) => {
   try {
+    console.log(deleteId)
     const response = await deleteTasks(deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
@@ -31,9 +32,7 @@ const deleteTask = async (deleteId) => {
         transition: "flip",
         position: "bottom-right",
       })
-    }
-
-    if (response.status === 404) {
+    } else if (response.status === 404) {
       toast("The task does not exist", {
         type: "error",
         timeout: 2000,
@@ -46,12 +45,6 @@ const deleteTask = async (deleteId) => {
   } catch (error) {
     console.log("Error deleting task : ", error)
   }
-}
-
-const confirmDeleteTask = (taskId, taskTitle) => {
-  utilityStore.showDeleteConfirmation = true
-  utilityStore.selectedTaskId = taskId
-  utilityStore.taskTitle = taskTitle
 }
 
 onBeforeMount(async () => {
@@ -74,9 +67,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <main
-    class="w-screen h-screen overflow-y-auto bg-gradient-to-l from-base via-[#161624] to-base p-[4rem]"
-  >
+  <main class="w-screen h-screen overflow-y-auto bg-animation p-[4rem]">
     <div class="flex justify-between">
       <div>
         <h1
@@ -91,7 +82,14 @@ onBeforeMount(async () => {
       </div>
 
       <div class="flex items-center gap-x-3">
-        <span class="cursor-pointer"><FilterIcon /></span>
+        <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
+        <router-link to="/status">
+          <div
+            class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer"
+          >
+            Manage Status
+          </div>
+        </router-link>
         <router-link :to="{name: 'create-task'}">
           <div
             class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
@@ -132,16 +130,16 @@ onBeforeMount(async () => {
         <tbody>
           <tr
             class="itbkk-item"
-            v-for="task in utilityStore.tasksManager.getTasks()"
+            v-for="(task, index) in utilityStore.tasksManager.getTasks()"
             :key="task.id"
             v-if="utilityStore.tasksManager.getTasks().length > 0"
           >
-            <td>{{ task.id }}</td>
+            <td>{{ ++index }}</td>
             <td
               class="itbkk-title tracking-wider cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
               @click="router.push(`/task/${task.id}`)"
             >
-              {{ task.title }}
+              <div class="w-[37rem] break-words">{{ task.title }}</div>
             </td>
             <td class="itbkk-assignees text-opacity-90 text-center italic">
               <div
@@ -157,10 +155,10 @@ onBeforeMount(async () => {
             </td>
             <td class="itbkk-status">
               <div
-                class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] text-center tracking-normal font-Inter"
-                :class="utilityStore.getStatusStyle(task.status)"
+                class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
+                :class="utilityStore.statusCustomStyle(task.status.color)"
               >
-                {{ utilityStore.convertToStatus[task.status] }}
+                {{ task.status.name }}
               </div>
             </td>
             <td>
@@ -187,7 +185,7 @@ onBeforeMount(async () => {
                   <div class="divider m-0 h-0"></div>
                   <li
                     class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
-                    @click="confirmDeleteTask(task.id, task.title)"
+                    @click="utilityStore.confirmDeleteTask(task.id, task.title)"
                   >
                     <span
                       class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold"
@@ -210,7 +208,7 @@ onBeforeMount(async () => {
         </tbody>
       </table>
     </div>
-    <router-view></router-view>
+    <router-view />
 
     <!-- delete confirmation -->
     <div>
@@ -231,7 +229,7 @@ onBeforeMount(async () => {
             <p
               class="itbkk-button-message even:text-[#ECECEC] text-opacity-75 break-all"
             >
-              Do you want to delete task "{{ utilityStore.taskTitle }}"?
+              Do you want to delete task "{{ utilityStore.taskTitleConfirm }}"?
             </p>
             <div class="flex justify-end">
               <button
@@ -242,7 +240,7 @@ onBeforeMount(async () => {
               </button>
               <button
                 class="itbkk-button-confirm btn border-[#730000] text-xs font-bold px-[2rem] bg-[#730000] hover:bg-opacity-35 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
-                @click="deleteTask(utilityStore.selectedTaskId)"
+                @click="deleteTask(utilityStore.selectedId)"
               >
                 Delete
               </button>
@@ -256,69 +254,6 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped>
-.tracking-in-expand {
-  -webkit-animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1)
-    both;
-  animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1) both;
-}
-
-@-webkit-keyframes tracking-in-expand {
-  0% {
-    letter-spacing: -0.5em;
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-@keyframes tracking-in-expand {
-  0% {
-    letter-spacing: -0.5em;
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.tracking-in-expand-2 {
-  -webkit-animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1)
-    0.8s both;
-  animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.61, 0.355, 1) 0.8s
-    both;
-}
-
-@-webkit-keyframes tracking-in-expand {
-  0% {
-    letter-spacing: -0.5em;
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-@keyframes tracking-in-expand {
-  0% {
-    letter-spacing: -0.5em;
-    opacity: 0;
-  }
-  40% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
 .bounce-in-top {
   -webkit-animation: bounce-in-top 1.5s both;
   animation: bounce-in-top 1.5s both;

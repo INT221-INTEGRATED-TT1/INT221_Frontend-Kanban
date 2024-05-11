@@ -2,15 +2,8 @@ import router from "@/router"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
-const ConvertToEnumStatus = {
-  "No Status": "NO_STATUS",
-  "To Do": "TO_DO",
-  "Doing": "DOING",
-  "Done": "DONE",
-}
-
 const getAllTasks = async () => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/tasks`)
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v2/tasks`)
   {
     if (!response.ok) {
       throw {
@@ -24,7 +17,7 @@ const getAllTasks = async () => {
 
 const getTask = async (id) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`
+    `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`
   )
   {
     if (!response.ok) {
@@ -48,17 +41,18 @@ const getTask = async (id) => {
 
 const createTask = async (newTask) => {
   let createTask = {...newTask}
-  createTask.status = ConvertToEnumStatus[createTask.status]
+  // createTask.status = ConvertToEnumStatus[createTask.status]
   if (createTask.assignees.trim().length === 0) {
     createTask.assignees = null
-    
   }
   if (createTask.description.trim().length === 0) {
     createTask.description = null
   }
+
+  // console.log(newTask)
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v1/tasks`,
+      `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`,
       {
         method: "POST",
         headers: {
@@ -67,6 +61,7 @@ const createTask = async (newTask) => {
         body: JSON.stringify({...createTask}),
       }
     )
+    console.log(createTask);
 
     return {
       status: response.status,
@@ -81,7 +76,7 @@ const createTask = async (newTask) => {
 const deleteTasks = async (id) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`,
       {
         method: "DELETE",
       }
@@ -99,7 +94,7 @@ const deleteTasks = async (id) => {
 const editTask = async (id, newTask) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v1/tasks/${id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`,
       {
         method: "PUT",
         headers: {
@@ -119,4 +114,131 @@ const editTask = async (id, newTask) => {
   }
 }
 
-export {getAllTasks, getTask, createTask, deleteTasks, editTask}
+const getAllStatuses = async () => {
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses`
+  )
+  {
+    if (!response.ok) {
+      throw {
+        status: response.status,
+        router: router.push("/status/manage"),
+      }
+    }
+    return response.json()
+  }
+}
+
+const getStatus = async (statusId) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`
+  )
+  {
+    if (!response.ok) {
+      throw {
+        status: response.status,
+        router: router.push("/status/manage"),
+      }
+    }
+    console.log(typeof statusId)
+    return response.json()
+  }
+}
+
+const createStatus = async (newStatus) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newStatus),
+      }
+    )
+
+    return {
+      status: response.status,
+      message: "Status created successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const editStatus = async (statusId, newStatus) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newStatus),
+      }
+    )
+
+    return {
+      status: response.status,
+      message: "Task updated successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const deleteStatuses = async (statusId) => {
+  console.log(typeof statusId);
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`,
+      {
+        method: "DELETE",
+      }
+    )
+    return {
+      status: response.status,
+      message: "Status deleted successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const deleteStatusTransfer = async (oldId, newId) => {
+  console.log(typeof oldId, typeof newId);
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${oldId}/${newId}`,
+      {
+        method: "DELETE",
+      }
+    )
+    return {
+      status: response.status,
+      message: "Status deleted successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+export {
+  getAllTasks,
+  getTask,
+  createTask,
+  deleteTasks,
+  editTask,
+  getAllStatuses,
+  getStatus,
+  createStatus,
+  editStatus,
+  deleteStatuses,
+  deleteStatusTransfer
+}
