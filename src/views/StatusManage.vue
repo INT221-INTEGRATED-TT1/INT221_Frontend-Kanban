@@ -9,22 +9,17 @@ import TitleIcon from "@/components/icons/TitleIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import DescIcon from "@/components/icons/DescIcon.vue"
 import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
-import {
-  deleteStatuses,
-  deleteStatusTransfer,
-  getAllTasks,
-} from "@/libs/FetchAPI"
+import {deleteStatuses, deleteStatusTransfer} from "@/libs/FetchAPI"
 import Xmark from "@/components/icons/Xmark.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import AstronautStopSmile from "@/components/icons/AstronautStopSmile.vue"
 import AstronautStopSignBlack from "@/components/icons/AstronautStopSignBlack.vue"
-import {getTask} from "@/libs/FetchAPI"
 
 const utilityStore = useUtilityStore()
-
 const disableBtn = ref(true)
+const disableTransfer = ref(false)
 
 const disabledActionButton = () => {
   for (const status of utilityStore.statusManager.getStatus()) {
@@ -34,7 +29,7 @@ const disabledActionButton = () => {
   }
 }
 
-const deleteStatus = async (deleteId, oldDeleteId, newDeleteId) => {
+const deleteStatus = async (deleteId) => {
   // const tasks = utilityStore.tasksManager.getTasks()
 
   try {
@@ -59,37 +54,39 @@ const deleteStatus = async (deleteId, oldDeleteId, newDeleteId) => {
   } catch {}
 }
 
+const deleteTransfer = async (oldDeleteId, newDeleteId) => {
+  const response = await deleteStatusTransfer(oldDeleteId, newDeleteId)
+  if (response.status === 200) {
+    utilityStore.statusManager.deleteTransferStatus(oldDeleteId, newDeleteId)
+    disableTransfer.value = false
+    toast("Status has been deleted", {
+      type: "success",
+      timeout: 2000,
+      theme: "dark",
+      transition: "flip",
+      position: "bottom-right",
+    })
+  }
+}
+
 const newStatus = reactive({
   id: "",
   name: "",
   description: "",
   color: "",
 })
-// console.log(utilityStore.tasksManager.getTasks())
-// console.log(utilityStore.statusManager.getStatus());
 
-const selectStatus = (name, color) => {
+const selectStatus = (name, color, id) => {
   newStatus.name = name
   newStatus.color = color
-}
-
-const disableTransfer = ref(false)
-
-const dropdownTextColor = (status) => {
-  return {
-    "text-[#D8D8D8]": status === "No Status",
-    "text-[#FF881B]": status === "To Do",
-    "text-[#2697FF]": status === "Doing",
-    "text-[#65EE6C]": status === "Done",
-  }
+  newStatus.id = id
 }
 
 onBeforeMount(async () => {
   try {
     const fetchData = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchData)
-    // newStatus.value = fetchData
-    console.log(utilityStore.statusManager.getStatus())
+    // console.log(utilityStore.statusManager.getStatus())
     // console.log(fetchData);
   } catch (error) {
     console.log(error)
@@ -265,11 +262,13 @@ onBeforeMount(async () => {
           />
 
           <div class="pt-16">
-            <div class="tracking-wider text-opacity-[0.43]">
+            <div class="tracking-wide text-opacity-[0.43]">
               There is some task associated with the
-              <span :style="{color: utilityStore.selectedColor}">{{
-                utilityStore.statusTitle
-              }}</span>
+              <span
+                class="font-bold tracking-wider"
+                :style="{color: utilityStore.selectedColor}"
+                >{{ utilityStore.statusTitle }}</span
+              >
               status.
             </div>
             <div class="flex items-center pt-10 gap-x-5">
@@ -277,35 +276,34 @@ onBeforeMount(async () => {
                 Transfer to
               </div>
               <!-- Status -->
-              <div class="dropdown dropdown-bottom ">
+              <div class="dropdown dropdown-bottom">
                 <div
                   tabindex="0"
                   role="button"
                   class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3 break-all"
                   :class="utilityStore.statusCustomStyle(newStatus.color)"
                 >
-                  <!-- :class="utilityStore.getStatusStyle(updateTask.status)" -->
                   {{ newStatus.name }}
                   <span><DropdownIcon /></span>
                 </div>
 
-                <!-- :class="utilityStore.statusCustomStyle(utilityStore.statusManager.getStatus().name)" -->
                 <div
-                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-scroll cursor-pointer"
+                  class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-scroll cursor-pointer"
                 >
-                <ul
-                  tabindex="0"
-                >
-                  <li
-                    v-for="status in utilityStore.statusManager.getStatus()"
-                    :key="status.id"
-                    @click="selectStatus(status.name, status.color)"
-                    :class="utilityStore.statusCustomStyle(status.color)"
-                    class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
-                  >
-                    {{ status.name }}
-                  </li>
-                </ul></div>
+                  <ul tabindex="0">
+                    <li
+                      v-for="status in utilityStore.statusManager.getStatus()"
+                      :key="status.id"
+                      @click="
+                        selectStatus(status.name, status.color, status.id)
+                      "
+                      :class="utilityStore.statusCustomStyle(status.color)"
+                      class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
+                    >
+                      {{ status.name }}
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -319,7 +317,7 @@ onBeforeMount(async () => {
             CANCEL
           </button>
           <button
-            @click=""
+            @click="deleteTransfer(utilityStore.selectedId, newStatus.id)"
             :disabled="newStatus.name === utilityStore.statusTitle"
             class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
           >
@@ -347,9 +345,10 @@ onBeforeMount(async () => {
           <div class="divider m-0"></div>
           <div class="p-10 flex flex-col gap-y-6">
             <p
-              class="itbkk-button-message even:text-[#ECECEC] text-opacity-75 break-all"
+              class="itbkk-button-message even:text-[#ECECEC] text-opacity-75 break-all tracking-wide"
             >
               Do you want to delete status "<span
+                class="font-bold tracking-wider"
                 :style="{color: utilityStore.selectedColor}"
                 >{{ utilityStore.statusTitle }}</span
               >" ?

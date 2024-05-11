@@ -8,7 +8,7 @@ class StatusManagement {
   }
 
   addStatus(newStatus) {
-    console.log(newStatus)
+    // console.log(newStatus)
     this.statuses.push(newStatus)
   }
 
@@ -17,6 +17,28 @@ class StatusManagement {
       this.statuses.findIndex((status) => status.id === deleteId),
       1
     )
+  }
+
+  deleteTransferStatus(oldId, newId) {
+    let index = []
+
+    const findId = this.statuses.forEach((status, indexId) => {
+      if (status.id === oldId) {
+        index.push(indexId)
+      }
+    })
+
+    index.forEach((id) => {
+      this.statuses[id].id = newId
+    })
+
+    if (findId !== -1) {
+      this.statuses.splice(findId, 1)
+    }
+
+    
+
+    // console.log(this.statuses)
   }
 
   editStatus(statusId, newStatus) {
@@ -37,6 +59,7 @@ class StatusManagement {
   }
 
   getStatus() {
+    // console.log(this.statuses);
     return this.statuses
   }
 }
