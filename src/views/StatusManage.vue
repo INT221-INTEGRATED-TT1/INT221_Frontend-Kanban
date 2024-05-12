@@ -50,6 +50,13 @@ const deleteStatus = async (deleteId) => {
       disableTransfer.value = true
       newStatus.name = utilityStore.statusTitle
       newStatus.color = utilityStore.selectedColor
+      toast("Status has been use by another task", {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      })
     }
   } catch {}
 }
