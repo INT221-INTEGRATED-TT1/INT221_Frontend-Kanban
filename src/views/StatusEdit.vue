@@ -31,21 +31,13 @@ const editStatusData = async (newStatus) => {
       utilityStore.statusManager.editStatus(route.params.id, newStatus)
       router.push("/status")
       setTimeout(() => {
-        toast("The status has been updated", {
+        toast("The status has been edited", {
           type: "success",
           timeout: 2000,
           theme: "dark",
           transition: "flip",
           position: "bottom-right",
         })
-      })
-    } else if (response.status === 404) {
-      toast("An error has occurred, the status does not exist", {
-        type: "error",
-        timeout: 2000,
-        theme: "dark",
-        transition: "flip",
-        position: "bottom-right",
       })
     }
   } catch (error) {
@@ -84,12 +76,12 @@ onBeforeMount(async () => {
     class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
   >
     <div
-      class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 flip-in-hor-bottom "
+      class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 flip-in-hor-bottom"
     >
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
       >
-        Create Status
+        Editing Status
       </h1>
       <div class="flex justify-end px-14">
         <button @click="router.back()">

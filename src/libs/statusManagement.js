@@ -8,8 +8,19 @@ class StatusManagement {
   }
 
   addStatus(newStatus) {
+    if (
+      newStatus.description === null ||
+      newStatus.description.trim().length === 0
+    ) {
+      newStatus.description = "No description is provided"
+    }
+    
+    const newStatusWithCount = {
+      ...newStatus,
+      count: 0,
+    }
     // console.log(newStatus)
-    this.statuses.push(newStatus)
+    this.statuses.push(newStatusWithCount)
   }
 
   deleteStatus(deleteId) {
@@ -20,29 +31,21 @@ class StatusManagement {
   }
 
   deleteTransferStatus(oldId, newId) {
-    let index = []
-  
-
-    this.statuses.forEach((status, indexId) => {
-      if (status.id === oldId) {
-        index.push(indexId)
-      }
-    })
-
-    index.forEach((indexId) => {
-      this.statuses[indexId].id = newId
-    })
-
-    console.log(index.reverse());
-
-    index.reverse().forEach((id) => {
-      this.statuses.splice(id, 1)
-    })
-
-    // console.log(this.statuses)
+    this.deleteStatus(oldId)
+    const findStatusIndex = this.statuses.findIndex(
+      (status) => status.id === newId
+    )
+    this.statuses[findStatusIndex].count++
   }
 
   editStatus(statusId, newStatus) {
+    if (
+      newStatus.description === null ||
+      newStatus.description.trim().length === 0
+    ) {
+      newStatus.description = "No description is provided"
+    }
+
     statusId = parseInt(statusId)
     const newStatusWithId = {
       id: statusId,

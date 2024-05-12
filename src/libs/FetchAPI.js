@@ -59,7 +59,7 @@ const createTask = async (newTask) => {
         body: JSON.stringify({...createTask}),
       }
     )
-    console.log(createTask);
+    // console.log(createTask)
 
     return {
       status: response.status,
@@ -135,11 +135,39 @@ const getStatus = async (statusId) => {
     if (!response.ok) {
       throw {
         status: response.status,
-        router: router.push("/status/manage"),
+        router: router.push("/status"),
+        toast: setTimeout(() => {
+          toast("An error has occurred, the status does not exist", {
+            type: "error",
+            timeout: 2000,
+            theme: "dark",
+            transition: "flip",
+            position: "bottom-right",
+          })
+        }),
       }
     }
     console.log(typeof statusId)
     return response.json()
+  }
+}
+
+const countStatus = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/count`
+    )
+    {
+      if (!response.ok) {
+        throw {
+          status: response.status,
+          router: router.push("/status/manage"),
+        }
+      }
+      return response.json()
+    }
+  } catch (error) {
+    throw error
   }
 }
 
@@ -190,7 +218,7 @@ const editStatus = async (statusId, newStatus) => {
 }
 
 const deleteStatuses = async (statusId) => {
-  console.log(typeof statusId);
+  console.log(typeof statusId)
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`,
@@ -209,7 +237,7 @@ const deleteStatuses = async (statusId) => {
 }
 
 const deleteStatusTransfer = async (oldId, newId) => {
-  console.log(typeof oldId, typeof newId);
+  console.log(typeof oldId, typeof newId)
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${oldId}/${newId}`,
@@ -238,5 +266,6 @@ export {
   createStatus,
   editStatus,
   deleteStatuses,
-  deleteStatusTransfer
+  deleteStatusTransfer,
+  countStatus
 }

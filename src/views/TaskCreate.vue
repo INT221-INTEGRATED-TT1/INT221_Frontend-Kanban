@@ -36,7 +36,6 @@ const createNewTask = async () => {
   try {
     console.log(newTask)
     const response = await createTask(newTask)
-    console.log(newTask)
     if (response.status === 201) {
       utilityStore.tasksManager.addTask(response.data)
       router.push("/task")

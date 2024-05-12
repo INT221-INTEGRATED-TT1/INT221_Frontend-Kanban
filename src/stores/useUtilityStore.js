@@ -11,6 +11,7 @@ export const useUtilityStore = defineStore("utility", () => {
   const statusTitle = ref("")
   const showDeleteConfirmation = ref(false)
   const selectedColor = ref(null)
+  const disableTransfer = ref(false)
 
   const statusCustomStyle = (selectedColor) => {
     return {
@@ -53,11 +54,15 @@ export const useUtilityStore = defineStore("utility", () => {
     "#BE6F26",
   ])
 
-  const confirmDeleteStatus = (statusId, statusName, statusColor) => {
-    showDeleteConfirmation.value = true
-    selectedId.value = statusId
-    statusTitle.value = statusName
-    selectedColor.value = statusColor
+  const confirmDeleteStatus = (statuses) => {
+    // showDeleteConfirmation.value = true
+    selectedId.value = statuses.id
+    statusTitle.value = statuses.name
+    selectedColor.value = statuses.color
+    statuses.count > 0 ? disableTransfer.value = true : showDeleteConfirmation.value = true;
+    
+    // selectedCount.value = statuses.count 
+
   }
 
   const confirmDeleteTask = (taskId, taskTitle) => {
@@ -78,5 +83,6 @@ export const useUtilityStore = defineStore("utility", () => {
     statusTitle,
     confirmDeleteStatus,
     confirmDeleteTask,
+    disableTransfer
   }
 })
