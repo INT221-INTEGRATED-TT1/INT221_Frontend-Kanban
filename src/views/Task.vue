@@ -156,7 +156,10 @@ onBeforeMount(async () => {
                 {{ task.assignees }}
               </div>
             </td>
-            <td class="itbkk-status tooltip  " :data-tip="task.status.name">
+            <td
+              class="itbkk-status tooltip before:max-w-none"
+              :data-tip="task.status.name"
+            >
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
                 :class="utilityStore.statusCustomStyle(task.status.color)"
