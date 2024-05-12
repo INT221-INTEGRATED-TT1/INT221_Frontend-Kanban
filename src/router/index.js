@@ -11,7 +11,7 @@ import StatusManage from "@/views/StatusManage.vue"
 import StatusEdit from "@/views/StatusEdit.vue"
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.VITE_BACKEND_URL), // base url
+  history: createWebHistory(import.meta.env.VITE_BASE_URL), // base url
 
   routes: [
     {path: "/", redirect: "/task"},

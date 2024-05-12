@@ -136,11 +136,10 @@ onBeforeMount(async () => {
           >
             <td>{{ ++index }}</td>
             <td
-              class="itbkk-title tooltip tracking-wider cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
+              class="itbkk-title  cursor-pointer w-[20rem] hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
               @click="router.push(`/task/${task.id}`)"
-              :data-tip="task.title"
             >
-              <div class="w-[30rem] truncate">
+              <div class="w-[30rem] truncate tracking-wider">
                 {{ task.title }}
               </div>
             </td>
