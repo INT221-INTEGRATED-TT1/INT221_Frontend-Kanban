@@ -1,5 +1,5 @@
 <script setup>
-import {ref, reactive, onBeforeMount, computed} from "vue"
+import {ref, reactive, onBeforeMount, computed, onMounted} from "vue"
 import router from "@/router"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore"
@@ -53,10 +53,6 @@ const editStatusData = async (newStatus) => {
   }
 }
 
-// const isButtonDisabled = computed(() => {
-//   return !updateStatus.name
-// })
-
 const isButtonDisabled = computed(() => {
   return (
     (updateStatus.name === status.value.name &&
@@ -72,7 +68,7 @@ onBeforeMount(async () => {
     status.value = fetchData
     // console.log(status.value);
     // console.log(fetchData);
-    console.log(typeof status.value.id)
+    // console.log(typeof status.value.id)
 
     updateStatus.name = status.value.name
     updateStatus.description = status.value.description
@@ -88,7 +84,7 @@ onBeforeMount(async () => {
     class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
   >
     <div
-      class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out"
+      class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 flip-in-hor-bottom "
     >
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"

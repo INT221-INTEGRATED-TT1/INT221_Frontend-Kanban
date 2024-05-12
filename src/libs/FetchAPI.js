@@ -41,7 +41,6 @@ const getTask = async (id) => {
 
 const createTask = async (newTask) => {
   let createTask = {...newTask}
-  // createTask.status = ConvertToEnumStatus[createTask.status]
   if (createTask.assignees.trim().length === 0) {
     createTask.assignees = null
   }
@@ -49,7 +48,6 @@ const createTask = async (newTask) => {
     createTask.description = null
   }
 
-  // console.log(newTask)
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`,

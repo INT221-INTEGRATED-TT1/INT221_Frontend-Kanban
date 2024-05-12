@@ -119,7 +119,7 @@ onBeforeMount(async () => {
                 <span><AssigneesIcon /></span>Assignees
               </div>
             </th>
-            <th>
+            <th class="text-center">
               <div class="flex gap-x-3">
                 <span><StatusIcon /></span>Status
               </div>
@@ -136,11 +136,10 @@ onBeforeMount(async () => {
           >
             <td>{{ ++index }}</td>
             <td
-              class="itbkk-title tooltip tracking-wider cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
+              class="itbkk-title cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
               @click="router.push(`/task/${task.id}`)"
-              :data-tip="task.title"
             >
-              <div class="w-[30rem] truncate">
+              <div class="w-[20rem] mx-auto truncate tracking-wider">
                 {{ task.title }}
               </div>
             </td>
@@ -156,7 +155,10 @@ onBeforeMount(async () => {
                 {{ task.assignees }}
               </div>
             </td>
-            <td class="itbkk-status tooltip  " :data-tip="task.status.name">
+            <td
+              class="itbkk-status tooltip before:max-w-none"
+              :data-tip="task.status.name"
+            >
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
                 :class="utilityStore.statusCustomStyle(task.status.color)"

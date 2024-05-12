@@ -21,6 +21,7 @@ class StatusManagement {
 
   deleteTransferStatus(oldId, newId) {
     let index = []
+  
 
     this.statuses.forEach((status, indexId) => {
       if (status.id === oldId) {
@@ -28,9 +29,11 @@ class StatusManagement {
       }
     })
 
-    index.forEach((id) => {
-      this.statuses[id].id = newId
+    index.forEach((indexId) => {
+      this.statuses[indexId].id = newId
     })
+
+    console.log(index.reverse());
 
     index.reverse().forEach((id) => {
       this.statuses.splice(id, 1)
@@ -40,19 +43,12 @@ class StatusManagement {
   }
 
   editStatus(statusId, newStatus) {
-    // console.log("Task id is", taskId)
-    // if (newTask.assignees.trim().length === 0) {
-    //   newTask.assignees = "Unassigned"
-    // }
-
     statusId = parseInt(statusId)
     const newStatusWithId = {
       id: statusId,
       ...newStatus,
     }
-    // console.log(this.tasks)
     const filterId = this.statuses.findIndex((status) => status.id === statusId)
-    // console.log("Remove id is", filterId)
     this.statuses.splice(filterId, 1, newStatusWithId)
   }
 
