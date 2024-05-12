@@ -119,7 +119,7 @@ onBeforeMount(async () => {
                 <span><AssigneesIcon /></span>Assignees
               </div>
             </th>
-            <th>
+            <th class="text-center">
               <div class="flex gap-x-3">
                 <span><StatusIcon /></span>Status
               </div>
@@ -136,10 +136,10 @@ onBeforeMount(async () => {
           >
             <td>{{ ++index }}</td>
             <td
-              class="itbkk-title  cursor-pointer w-[20rem] hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
+              class="itbkk-title cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
               @click="router.push(`/task/${task.id}`)"
             >
-              <div class="w-[30rem] truncate tracking-wider">
+              <div class="w-[20rem] mx-auto truncate tracking-wider">
                 {{ task.title }}
               </div>
             </td>

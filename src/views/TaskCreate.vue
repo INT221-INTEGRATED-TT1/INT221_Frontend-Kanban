@@ -182,7 +182,7 @@ onBeforeMount(async () => {
           <div class="flex flex-col">
             <textarea
               class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-5"
-              rows="6"
+              rows="4"
               placeholder="Enter Task Description"
               v-model.trim="newTask.description"
               maxlength="500"
