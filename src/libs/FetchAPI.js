@@ -155,7 +155,7 @@ const getStatus = async (statusId) => {
 const countStatus = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/count`
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/statuses`
     )
     {
       if (!response.ok) {
