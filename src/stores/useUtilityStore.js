@@ -11,29 +11,7 @@ export const useUtilityStore = defineStore("utility", () => {
   const statusTitle = ref("")
   const showDeleteConfirmation = ref(false)
   const selectedColor = ref(null)
-
-  const convertToStatus = ref({
-    NO_STATUS: "No Status",
-    TO_DO: "To Do",
-    DOING: "Doing",
-    DONE: "Done",
-  })
-
-  const ConvertToEnumStatus = ref({
-    "No Status": "NO_STATUS",
-    "To Do": "TO_DO",
-    "Doing": "DOING",
-    "Done": "DONE",
-  })
-
-  const getStatusStyle = (status) => {
-    return {
-      "bg-[#5A5A5A] bg-opacity-30 text-[#ededed] ": status === "NO_STATUS",
-      "bg-[#321b00] text-[#ffbd00] ": status === "TO_DO",
-      "bg-[#102049]  text-[#2697FF] ": status === "DOING",
-      "bg-[#043109]  text-[#4ec84b]": status === "DONE",
-    }
-  }
+  const disableTransfer = ref(false)
 
   const statusCustomStyle = (selectedColor) => {
     return {
@@ -76,12 +54,15 @@ export const useUtilityStore = defineStore("utility", () => {
     "#BE6F26",
   ])
 
-  const confirmDeleteStatus = (statusId, statusName, statusColor) => {
-    showDeleteConfirmation.value = true
+  const confirmDeleteStatus = (statuses) => {
+    // showDeleteConfirmation.value = true
+    selectedId.value = statuses.id
+    statusTitle.value = statuses.name
+    selectedColor.value = statuses.color
+    statuses.count > 0 ? disableTransfer.value = true : showDeleteConfirmation.value = true;
     
-    selectedId.value = statusId
-    statusTitle.value = statusName
-    selectedColor.value = statusColor
+    // selectedCount.value = statuses.count 
+
   }
 
   const confirmDeleteTask = (taskId, taskTitle) => {
@@ -91,19 +72,17 @@ export const useUtilityStore = defineStore("utility", () => {
   }
 
   return {
-    convertToStatus,
-    getStatusStyle,
     tasksManager,
     selectedId,
     showDeleteConfirmation,
     taskTitleConfirm,
-    ConvertToEnumStatus,
     statusCustomStyle,
     statusManager,
     presetColors,
     selectedColor,
     statusTitle,
     confirmDeleteStatus,
-    confirmDeleteTask
+    confirmDeleteTask,
+    disableTransfer
   }
 })

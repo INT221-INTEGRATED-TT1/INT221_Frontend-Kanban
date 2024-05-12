@@ -2,14 +2,18 @@
 import {ref, onBeforeMount, reactive} from "vue"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
-import {getAllStatuses} from "@/libs/FetchAPI"
+import {
+  getAllStatuses,
+  deleteStatuses,
+  countStatus,
+  deleteStatusTransfer,
+} from "@/libs/FetchAPI"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import TitleIcon from "@/components/icons/TitleIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import DescIcon from "@/components/icons/DescIcon.vue"
 import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
-import {deleteStatuses, deleteStatusTransfer} from "@/libs/FetchAPI"
 import Xmark from "@/components/icons/Xmark.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import {toast} from "vue3-toastify"
@@ -19,7 +23,6 @@ import AstronautStopSignBlack from "@/components/icons/AstronautStopSignBlack.vu
 
 const utilityStore = useUtilityStore()
 const disableBtn = ref(true)
-const disableTransfer = ref(false)
 
 const disabledActionButton = () => {
   for (const status of utilityStore.statusManager.getStatus()) {
@@ -29,45 +32,49 @@ const disabledActionButton = () => {
   }
 }
 
+const deleteModal = (statuses) => {
+  newStatus.name = statuses.name
+  newStatus.color = statuses.color
+  utilityStore.confirmDeleteStatus(statuses)
+}
+
 const deleteStatus = async (deleteId) => {
-  // const tasks = utilityStore.tasksManager.getTasks()
+  // console.log(statuses.value)
 
   try {
     const response = await deleteStatuses(deleteId)
     if (response.status === 200) {
       utilityStore.statusManager.deleteStatus(deleteId)
       utilityStore.showDeleteConfirmation = false
-      disableTransfer.value = false
-      toast("Status has been deleted", {
+      utilityStore.disableTransfer = false
+      toast("The status has been deleted", {
         type: "success",
         timeout: 2000,
         theme: "dark",
         transition: "flip",
         position: "bottom-right",
       })
-    } else if (response.status === 500) {
-      utilityStore.showDeleteConfirmation = false
-      disableTransfer.value = true
-      newStatus.name = utilityStore.statusTitle
-      newStatus.color = utilityStore.selectedColor
-      toast("Status has been use by another task", {
-        type: "error",
-        timeout: 2000,
-        theme: "dark",
-        transition: "flip",
-        position: "bottom-right",
-      })
     }
-  } catch {}
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 const deleteTransfer = async (oldDeleteId, newDeleteId) => {
   const response = await deleteStatusTransfer(oldDeleteId, newDeleteId)
   if (response.status === 200) {
     utilityStore.statusManager.deleteTransferStatus(oldDeleteId, newDeleteId)
-    disableTransfer.value = false
-    toast("Status has been deleted", {
+    utilityStore.disableTransfer = false
+    toast("The task(s) have been transferred and the status has been deleted", {
       type: "success",
+      timeout: 2000,
+      theme: "dark",
+      transition: "flip",
+      position: "bottom-right",
+    })
+  } else if (response.status === 404) {
+    toast("An  error has occurred, the status does not exist", {
+      type: "error",
       timeout: 2000,
       theme: "dark",
       transition: "flip",
@@ -83,17 +90,26 @@ const newStatus = reactive({
   color: "",
 })
 
-const selectStatus = (name, color, id) => {
-  newStatus.name = name
-  newStatus.color = color
-  newStatus.id = id
+const selectStatus = (status) => {
+  // console.log(status)
+  newStatus.name = status.name
+  newStatus.color = status.color
+  newStatus.id = status.id
 }
 
 onBeforeMount(async () => {
   try {
-    const fetchData = await getAllStatuses()
+    const fetchData = await countStatus()
     utilityStore.statusManager.addStatuses(fetchData)
-    // console.log(utilityStore.statusManager.getStatus())
+    
+    for (const status of utilityStore.statusManager.getStatus()) {
+      if (status.description === null) {
+        status.description = "No description is provided"
+      }
+    }
+    console.log(utilityStore.statusManager.getStatus())
+
+    // console.log(utilityStore.statusManager.getStatus().length )
     // console.log(fetchData);
   } catch (error) {
     console.log(error)
@@ -178,7 +194,18 @@ onBeforeMount(async () => {
                 </span>
               </div>
             </td>
-            <td class="text-start">{{ statuses.description }}</td>
+            <td
+              class="text-start"
+              :class="
+                statuses.description === 'No description is provided'
+                  ? 'italic text-gray-500'
+                  : 'text-[#F99B1D]'
+              "
+            >
+              <div class="w-[20rem] truncate tracking-wider">
+                {{ statuses.description }}
+              </div>
+            </td>
             <td class="flex gap-x-3 justify-center items-center">
               <!-- <div class="flex gap-x-2"> -->
               <div
@@ -213,13 +240,7 @@ onBeforeMount(async () => {
               >
                 <button
                   class="itbkk-button-delete"
-                  @click="
-                    utilityStore.confirmDeleteStatus(
-                      statuses.id,
-                      statuses.name,
-                      statuses.color
-                    )
-                  "
+                  @click="deleteModal(statuses)"
                   :disabled="
                     statuses.name === 'No Status' ? disabledActionButton : false
                   "
@@ -240,42 +261,49 @@ onBeforeMount(async () => {
 
     <!-- transfer status -->
     <section
-      v-show="disableTransfer"
+      v-show="utilityStore.disableTransfer"
       class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
     >
       <div
-        class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out px-12"
+        class="itbkk-modal-status w-[45rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out px-12"
       >
         <h1
-          class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-widest"
+          class="text-[12px] font-extrabold text-center mt-5 tracking-widest bg-transparent text-transparent bg-clip-text bg-gradient-to-r from-[#B136FD] from-[28%] via-[#E95689] via-[59%] to-[#ED9E2F] to-[88%]"
         >
           Transfer Status
         </h1>
         <!-- close modal -->
         <div class="flex justify-end">
-          <button @click="disableTransfer = false">
+          <button @click="utilityStore.disableTransfer = false">
             <span><Xmark /></span>
           </button>
         </div>
         <!-- close modal -->
 
         <div class="w-full flex pt-10 gap-x-5">
-          <AstronautStopSignBlack
-            v-show="newStatus.name === utilityStore.statusTitle ? true : false"
-          />
+          <div>
+            <AstronautStopSignBlack
+              v-show="
+                newStatus.name === utilityStore.statusTitle ? true : false
+              "
+            />
 
-          <AstronautStopSmile
-            v-show="newStatus.name !== utilityStore.statusTitle ? true : false"
-          />
+            <AstronautStopSmile
+              v-show="
+                newStatus.name !== utilityStore.statusTitle ? true : false
+              "
+            />
+          </div>
 
           <div class="pt-16">
             <div class="tracking-wide text-opacity-[0.43]">
               There is some task associated with the
-              <span
-                class="font-bold tracking-wider"
+              <h1
+                class="font-bold tracking-wider break-all"
                 :style="{color: utilityStore.selectedColor}"
-                >{{ utilityStore.statusTitle }}</span
               >
+                {{ utilityStore.statusTitle }}
+              </h1>
               status.
             </div>
             <div class="flex items-center pt-10 gap-x-5">
@@ -287,23 +315,24 @@ onBeforeMount(async () => {
                 <div
                   tabindex="0"
                   role="button"
-                  class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3 break-all"
+                  class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center mx-auto gap-x-3 max-w-[10rem] break-all"
                   :class="utilityStore.statusCustomStyle(newStatus.color)"
                 >
-                  {{ newStatus.name }}
+                  <h1 class="truncate">{{ newStatus.name }}</h1>
                   <span><DropdownIcon /></span>
                 </div>
 
                 <div
                   class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-scroll cursor-pointer"
                 >
-                  <ul tabindex="0">
+                  <ul
+                    tabindex="0"
+                    v-for="status in utilityStore.statusManager.getStatus()"
+                    :key="status.id"
+                  >
                     <li
-                      v-for="status in utilityStore.statusManager.getStatus()"
-                      :key="status.id"
-                      @click="
-                        selectStatus(status.name, status.color, status.id)
-                      "
+                      v-if="utilityStore.selectedId !== status.id"
+                      @click="selectStatus(status)"
                       :class="utilityStore.statusCustomStyle(status.color)"
                       class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
                     >
@@ -318,7 +347,7 @@ onBeforeMount(async () => {
 
         <div class="flex justify-center pt-6 gap-x-5">
           <button
-            @click="disableTransfer = false"
+            @click="utilityStore.disableTransfer = false"
             class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
           >
             CANCEL
@@ -380,6 +409,7 @@ onBeforeMount(async () => {
     </div>
     <!-- delete confirmation -->
   </main>
+
   <router-view />
 </template>
 
