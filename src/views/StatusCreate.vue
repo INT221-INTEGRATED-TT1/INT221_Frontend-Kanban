@@ -10,7 +10,7 @@ import "vue3-toastify/dist/index.css"
 const utilityStore = useUtilityStore()
 
 const newStatus = reactive({
-  name: "No Status",
+  name: "",
   description: "",
   color: utilityStore.presetColors[5],
 })
@@ -24,12 +24,13 @@ const updateColor = (index) => {
 const createNewStatus = async () => {
   try {
     const response = await createStatus(newStatus)
+    console.log(response.data)
     if (response.status === 201) {
       // console.log(newStatus)
       utilityStore.statusManager.addStatus(response.data)
       router.push("/status")
       setTimeout(() => {
-        toast("The status has been successfully added", {
+        toast("The status has been  added", {
           type: "success",
           timeout: 2000,
           theme: "dark",
@@ -39,7 +40,7 @@ const createNewStatus = async () => {
       })
     } else if (response.status === 500 || response.status === 400) {
       setTimeout(() => {
-        toast("An error has  occurred, the status could not be added.", {
+        toast("An error has occurred, the status could not be added.", {
           type: "error",
           timeout: 2000,
           theme: "dark",
@@ -111,11 +112,11 @@ const isButtonDisabled = computed(() => {
           <textarea
             rows="3"
             maxlength="200"
-            class="itbkk-status-description resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-3 "
+            class="itbkk-status-description resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-3"
             placeholder="Enter your description"
             v-model.trim="newStatus.description"
           ></textarea>
-          <span class="flex justify-end text-xs text-normal opacity-45 "
+          <span class="flex justify-end text-xs text-normal opacity-45"
             >{{ newStatus.description.length }} / 200</span
           >
         </div>
