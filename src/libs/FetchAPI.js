@@ -90,6 +90,13 @@ const deleteTasks = async (id) => {
 }
 
 const editTask = async (id, newTask) => {
+  if (newTask.assignees === null || newTask.assignees.trim().length === 0) {
+    newTask.assignees = null
+  }
+  if (newTask.description === null || newTask.description.trim().length === 0) {
+    newTask.description = null
+  }
+
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`,
