@@ -81,7 +81,7 @@ onBeforeMount(async () => {
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
       >
-        Editing Status
+        Status Editing
       </h1>
       <div class="flex justify-end px-14">
         <button @click="router.back()">
@@ -130,7 +130,6 @@ onBeforeMount(async () => {
         </h1>
       </div>
 
-      <!-- <div class="flex flex-col justify-center"> -->
       <div
         class="grid grid-cols-6 grid-rows-2 gap-y-4 justify-items-center pt-4 px-20"
       >
@@ -143,7 +142,6 @@ onBeforeMount(async () => {
           class="inline-block w-[2.35rem] h-[2.35rem] rounded-xl text-transparent cursor-pointer"
         ></div>
       </div>
-      <!-- </div> -->
 
       <!-- button operation -->
       <div class="flex justify-center pt-6">

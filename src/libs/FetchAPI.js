@@ -112,18 +112,37 @@ const editTask = async (id, newTask) => {
   }
 }
 
+// const getAllStatuses = async () => {
+//   const response = await fetch(
+//     `${import.meta.env.VITE_BACKEND_URL}/v2/statuses`
+//   )
+//   {
+//     if (!response.ok) {
+//       throw {
+//         status: response.status,
+//         router: router.push("/status/manage"),
+//       }
+//     }
+//     return response.json()
+//   }
+// }
+
 const getAllStatuses = async () => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses`
-  )
-  {
-    if (!response.ok) {
-      throw {
-        status: response.status,
-        router: router.push("/status/manage"),
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/count`
+    )
+    {
+      if (!response.ok) {
+        throw {
+          status: response.status,
+          router: router.push("/status"),
+        }
       }
+      return response.json()
     }
-    return response.json()
+  } catch (error) {
+    throw error
   }
 }
 
@@ -147,27 +166,7 @@ const getStatus = async (statusId) => {
         }),
       }
     }
-    console.log(typeof statusId)
     return response.json()
-  }
-}
-
-const countStatus = async () => {
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/count`
-    )
-    {
-      if (!response.ok) {
-        throw {
-          status: response.status,
-          router: router.push("/status/manage"),
-        }
-      }
-      return response.json()
-    }
-  } catch (error) {
-    throw error
   }
 }
 
@@ -218,7 +217,6 @@ const editStatus = async (statusId, newStatus) => {
 }
 
 const deleteStatuses = async (statusId) => {
-  console.log(typeof statusId)
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`,
@@ -237,7 +235,6 @@ const deleteStatuses = async (statusId) => {
 }
 
 const deleteStatusTransfer = async (oldId, newId) => {
-  console.log(typeof oldId, typeof newId)
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${oldId}/${newId}`,
@@ -267,5 +264,4 @@ export {
   editStatus,
   deleteStatuses,
   deleteStatusTransfer,
-  countStatus
 }

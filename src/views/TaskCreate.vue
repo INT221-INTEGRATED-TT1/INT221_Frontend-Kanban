@@ -34,7 +34,7 @@ const selectStatus = (name, color, id) => {
 
 const createNewTask = async () => {
   try {
-    console.log(newTask)
+    // console.log(newTask)
     const response = await createTask(newTask)
     if (response.status === 201) {
       utilityStore.tasksManager.addTask(response.data)
