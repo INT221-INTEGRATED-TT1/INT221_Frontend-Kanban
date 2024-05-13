@@ -130,7 +130,7 @@ const editTask = async (id, newTask) => {
 const getAllStatuses = async () => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/count`
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/statuses`
     )
     {
       if (!response.ok) {
@@ -182,7 +182,6 @@ const createStatus = async (newStatus) => {
         body: JSON.stringify(newStatus),
       }
     )
-
     return {
       status: response.status,
       message: "Status created successfully",
