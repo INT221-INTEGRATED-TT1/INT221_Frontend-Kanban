@@ -3,9 +3,8 @@ import {ref, onBeforeMount, reactive} from "vue"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {
-  getAllStatuses,
   deleteStatuses,
-  countStatus,
+  getAllStatuses,
   deleteStatusTransfer,
 } from "@/libs/FetchAPI"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
@@ -99,18 +98,16 @@ const selectStatus = (status) => {
 
 onBeforeMount(async () => {
   try {
-    const fetchData = await countStatus()
+    const fetchData = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchData)
-    
+
     for (const status of utilityStore.statusManager.getStatus()) {
       if (status.description === null) {
         status.description = "No description is provided"
       }
     }
-    console.log(utilityStore.statusManager.getStatus())
+    // console.log(utilityStore.statusManager.getStatus())
 
-    // console.log(utilityStore.statusManager.getStatus().length )
-    // console.log(fetchData);
   } catch (error) {
     console.log(error)
   }

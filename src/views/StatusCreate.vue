@@ -16,7 +16,7 @@ const newStatus = reactive({
 })
 
 const updateColor = (index) => {
-  console.log(newStatus.color)
+  // console.log(newStatus.color)
   newStatus.color = utilityStore.presetColors[index]
   utilityStore.selectedColor = index
 }
@@ -24,7 +24,7 @@ const updateColor = (index) => {
 const createNewStatus = async () => {
   try {
     const response = await createStatus(newStatus)
-    console.log(response.data)
+    // console.log(response.data)
     if (response.status === 201) {
       // console.log(newStatus)
       utilityStore.statusManager.addStatus(response.data)

@@ -133,7 +133,7 @@ onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
-    console.log(task.value)
+    // console.log(task.value)
     const fetchStatus = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchStatus)
     if (
@@ -173,7 +173,7 @@ onBeforeMount(async () => {
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
-    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-12">
+    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 ">
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
       >

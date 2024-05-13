@@ -20,7 +20,7 @@ const utilityStore = useUtilityStore()
 
 const deleteTask = async (deleteId) => {
   try {
-    console.log(deleteId)
+    // console.log(deleteId)
     const response = await deleteTasks(deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)

@@ -14,7 +14,7 @@ class StatusManagement {
     ) {
       newStatus.description = "No description is provided"
     }
-    
+
     const newStatusWithCount = {
       ...newStatus,
       count: 0,
