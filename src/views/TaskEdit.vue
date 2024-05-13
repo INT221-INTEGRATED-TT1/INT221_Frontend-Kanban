@@ -88,19 +88,10 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
-const isButtonDisabled = computed(() => {
-  return (
-    (updateTask.title === task.value.title &&
-      updateTask.description === task.value.description &&
-      updateTask.assignees === task.value.assignees &&
-      updateTask.status === task.value.status) ||
-    !updateTask.title
-  )
-})
-
 const editTaskData = async (newTask) => {
   try {
     const response = await editTask(route.params.id, newTask)
+
     if (response.status === 200) {
       utilityStore.tasksManager.editTask(route.params.id, response.data)
       router.push("/task")
@@ -129,6 +120,16 @@ const editTaskData = async (newTask) => {
   }
 }
 
+const isButtonDisabled = computed(() => {
+  return (
+    (updateTask.title === task.value.title &&
+      updateTask.description === task.value.description &&
+      updateTask.assignees === task.value.assignees &&
+      updateTask.status === task.value.status.id) ||
+    !updateTask.title
+  )
+})
+
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
@@ -136,8 +137,6 @@ onBeforeMount(async () => {
     // console.log(task.value)
     const fetchStatus = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchStatus)
-
-   
 
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
@@ -151,13 +150,6 @@ onBeforeMount(async () => {
     newStatus.name = task.value.status.name
     newStatus.description = task.value.status.description
     newStatus.color = task.value.status.color
-
-    //  if (task.value.description === null) {
-    //   updateTask.description = "No Description Provided"
-    // }
-    // if (task.value.assignees === null) {
-    //   updateTask.assignees = "Unassigned"
-    // }
 
     // console.log(updateTask.status.length)
   } catch (error) {
@@ -247,9 +239,8 @@ onBeforeMount(async () => {
                   : ' text-[#F99B1D]'
               "
               v-model.trim="updateTask.assignees"
-              :placeholder="updateTask.assignees"
-              ></textarea
-            >
+              placeholder="Enter assignees"
+            ></textarea>
           </div>
 
           <!-- CreatedOn -->
@@ -291,7 +282,7 @@ onBeforeMount(async () => {
                 : 'text-normal text opacity-80'
             "
             v-model.trim="updateTask.description"
-            :placeholder="updateTask.description"
+            placeholder="Enter description"
           ></textarea>
 
           <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->

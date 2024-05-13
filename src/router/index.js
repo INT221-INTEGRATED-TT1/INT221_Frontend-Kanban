@@ -33,21 +33,21 @@ const router = createRouter({
     },
 
     {
-      path: "/status",
+      path: "/status/manage",
       // redirect: "/status/manage",
       component: StatusManage,
       children: [
-        {
-          path: "manage",
-          // component: StatusManage,
-          name: "manage-task-status",
-          // redirect: "/status/manage",
-          // children: [
-          //   {path: "add", component: StatusCreate, name: "create-task-status"},
-          // ],
-        },
-        {path: "add", component: StatusCreate, name: "create-task-status"},
-        {path: ":id/edit", component: StatusEdit, name: "edit-task-status"},
+        // {
+        //   path: "manage",
+        //   // component: StatusManage,
+        //   name: "manage-task-status",
+        //   // redirect: "/status/manage",
+        //   // children: [
+        //   //   {path: "add", component: StatusCreate, name: "create-task-status"},
+        //   // ],
+        // },
+        {path: "/status/add", component: StatusCreate, name: "create-task-status"},
+        {path: "/status/:id/edit", component: StatusEdit, name: "edit-task-status"},
       ],
     },
 
