@@ -133,7 +133,7 @@ onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
-    console.log(task.value)
+    // console.log(task.value)
     const fetchStatus = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchStatus)
     if (

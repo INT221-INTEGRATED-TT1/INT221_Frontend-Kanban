@@ -22,7 +22,7 @@ class TaskManagement {
   }
 
   editTask(taskId, newTask) {
-    console.log("Task id is", taskId)
+    // console.log("Task id is", taskId)
     if (newTask.assignees.trim().length === 0) {
       newTask.assignees = "Unassigned"
     }
@@ -34,7 +34,7 @@ class TaskManagement {
     }
     // console.log(this.tasks)
     const filterId = this.tasks.findIndex((task) => task.id === taskId)
-    console.log("Remove id is", filterId)
+    // console.log("Remove id is", filterId)
     this.tasks.splice(filterId, 1, newTaskWithId)
   }
 
