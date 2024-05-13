@@ -61,10 +61,10 @@ const isButtonDisabled = computed(() => {
 
 <template>
   <section
-    class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
+    class="itbkk-modal-task fixed inset-0 flex items-center justify-center backdrop-blur-md"
   >
     <div
-      class="itbkk-modal-status w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out"
+      class="w-[40rem] bg-[#1F1F1F] rounded-2xl py-10 transition ease-in-out"
     >
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
@@ -83,7 +83,7 @@ const isButtonDisabled = computed(() => {
       >
         <div
           :class="utilityStore.statusCustomStyle(newStatus.color)"
-          class="flex items-center justify-center rounded-3xl px-3 w-auto h-[2.2rem] font-bold text-[16px] tracking-wider"
+          class="flex items-center justify-center rounded-3xl px-3 h-[2.2rem] font-bold text-[16px] tracking-wider"
         >
           <span>
             {{ newStatus.name }}

@@ -19,7 +19,7 @@ const updateStatus = reactive({
 })
 
 const updateColor = (index) => {
-  console.log(updateStatus.color)
+  // console.log(updateStatus.color)
   updateStatus.color = utilityStore.presetColors[index]
   utilityStore.selectedColor = index
 }

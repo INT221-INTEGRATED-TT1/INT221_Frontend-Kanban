@@ -147,7 +147,7 @@ onBeforeMount(async () => {
           >
             <span><CreateTaskIcon /></span>
             <button class="itbkk-button-add text-normal text-opacity-75">
-              New Status
+              Add Status
             </button>
           </div>
         </router-link>
@@ -157,9 +157,9 @@ onBeforeMount(async () => {
     <div class="pt-14">
       <table class="table border-collapse bg-[#141414] text-center">
         <thead
-          class="itbkk-item bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
+          class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
-          <tr>
+          <tr class="itbkk-item ">
             <th class="rounded-tl-xl"></th>
             <th>
               <div class="flex gap-x-3 items-center">
@@ -181,7 +181,7 @@ onBeforeMount(async () => {
             v-for="(statuses, index) in utilityStore.statusManager.getStatus()"
           >
             <td class="w-[8rem]">{{ ++index }}</td>
-            <td class="text-start w-[30rem]">
+            <td class="itbkk-status-name text-start w-[30rem]">
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-fit px-5 text-center tracking-normal font-Inter"
                 :class="utilityStore.statusCustomStyle(statuses.color)"
@@ -192,7 +192,7 @@ onBeforeMount(async () => {
               </div>
             </td>
             <td
-              class="text-start"
+              class="itbkk-status-description text-start"
               :class="
                 statuses.description === 'No description is provided'
                   ? 'italic text-gray-500'
