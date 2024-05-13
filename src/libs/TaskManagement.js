@@ -23,8 +23,12 @@ class TaskManagement {
 
   editTask(taskId, newTask) {
     // console.log("Task id is", taskId)
-    if (newTask.assignees.trim().length === 0) {
+    if (newTask.assignees === null) {
       newTask.assignees = "Unassigned"
+    }
+
+    if (newTask.description === null) {
+      newTask.description = "No Description Provided"
     }
 
     taskId = parseInt(taskId)
