@@ -112,37 +112,18 @@ const editTask = async (id, newTask) => {
   }
 }
 
-// const getAllStatuses = async () => {
-//   const response = await fetch(
-//     `${import.meta.env.VITE_BACKEND_URL}/v2/statuses`
-//   )
-//   {
-//     if (!response.ok) {
-//       throw {
-//         status: response.status,
-//         router: router.push("/status/manage"),
-//       }
-//     }
-//     return response.json()
-//   }
-// }
-
 const getAllStatuses = async () => {
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/statuses`
-    )
-    {
-      if (!response.ok) {
-        throw {
-          status: response.status,
-          router: router.push("/status"),
-        }
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses`
+  )
+  {
+    if (!response.ok) {
+      throw {
+        status: response.status,
+        router: router.push("/status"),
       }
-      return response.json()
     }
-  } catch (error) {
-    throw error
+    return response.json()
   }
 }
 
