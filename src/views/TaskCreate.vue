@@ -13,7 +13,7 @@ import "vue3-toastify/dist/index.css"
 const utilityStore = useUtilityStore()
 
 const newStatus = reactive({
-  id: 101,
+  id: 1,
   name: "No Status",
   description: "",
   color: "#5A5A5A",
@@ -23,13 +23,13 @@ const newTask = reactive({
   title: "",
   description: "",
   assignees: "",
-  statusNo: newStatus.id,
+  status: newStatus.id,
 })
 
 const selectStatus = (name, color, id) => {
   newStatus.name = name
   newStatus.color = color
-  newTask.statusNo = id
+  newTask.status = id
 }
 
 const createNewTask = async () => {

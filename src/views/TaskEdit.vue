@@ -43,13 +43,13 @@ const updateTask = reactive({
   title: "",
   description: "",
   assignees: "",
-  statusNo: newStatus.id,
+  status: newStatus.id,
 })
 
 const selectStatus = (name, color, id) => {
   newStatus.name = name
   newStatus.color = color
-  updateTask.statusNo = id
+  updateTask.status = id
 }
 
 // const isOpen = ref(false)
@@ -93,7 +93,7 @@ const isButtonDisabled = computed(() => {
     (updateTask.title === task.value.title &&
       updateTask.description === task.value.description &&
       updateTask.assignees === task.value.assignees &&
-      updateTask.statusNo === task.value.status) ||
+      updateTask.status === task.value.status) ||
     !updateTask.title
   )
 })
@@ -154,7 +154,7 @@ onBeforeMount(async () => {
     updateTask.title = task.value.title
     updateTask.description = task.value.description
     updateTask.assignees = task.value.assignees
-    updateTask.statusNo = task.value.status.id
+    updateTask.status = task.value.status.id
 
     newStatus.id = task.value.status.id
     newStatus.name = task.value.status.name
