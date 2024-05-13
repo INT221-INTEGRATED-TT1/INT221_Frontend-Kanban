@@ -136,18 +136,9 @@ onBeforeMount(async () => {
     // console.log(task.value)
     const fetchStatus = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchStatus)
-    if (
-      task.value.description === null ||
-      task.value.description.trim().length === 0
-    ) {
-      task.value.description = "No Description Provided"
-    }
-    if (
-      task.value.assignees === null ||
-      task.value.assignees.trim().length === 0
-    ) {
-      task.value.assignees = "Unassigned"
-    }
+
+   
+
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
 
@@ -161,6 +152,12 @@ onBeforeMount(async () => {
     newStatus.description = task.value.status.description
     newStatus.color = task.value.status.color
 
+    //  if (task.value.description === null) {
+    //   updateTask.description = "No Description Provided"
+    // }
+    // if (task.value.assignees === null) {
+    //   updateTask.assignees = "Unassigned"
+    // }
 
     // console.log(updateTask.status.length)
   } catch (error) {
@@ -173,7 +170,7 @@ onBeforeMount(async () => {
   <section
     class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
   >
-    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 ">
+    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10">
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
       >
@@ -250,8 +247,8 @@ onBeforeMount(async () => {
                   : ' text-[#F99B1D]'
               "
               v-model.trim="updateTask.assignees"
-              :placeholder="task.assignees"
-              >{{ task.assignees }}</textarea
+              :placeholder="updateTask.assignees"
+              ></textarea
             >
           </div>
 
@@ -294,7 +291,7 @@ onBeforeMount(async () => {
                 : 'text-normal text opacity-80'
             "
             v-model.trim="updateTask.description"
-            :placeholder="task.description"
+            :placeholder="updateTask.description"
           ></textarea>
 
           <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
