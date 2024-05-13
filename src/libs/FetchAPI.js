@@ -182,7 +182,6 @@ const createStatus = async (newStatus) => {
         body: JSON.stringify(newStatus),
       }
     )
-
     return {
       status: response.status,
       message: "Status created successfully",
