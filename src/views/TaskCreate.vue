@@ -1,5 +1,5 @@
 <script setup>
-import {ref, reactive, computed, onBeforeMount, onMounted} from "vue"
+import {ref, reactive, computed, onBeforeMount} from "vue"
 import {createTask, getAllStatuses} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"

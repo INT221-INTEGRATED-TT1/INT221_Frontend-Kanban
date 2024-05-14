@@ -8,9 +8,7 @@ class TaskManagement {
   }
 
   addTask(newTask) {
-    if (newTask.assignees === null) {
-      newTask.assignees = "Unassigned"
-    }
+    newTask.assignees === null ? (newTask.assignees = "Unassigned") : ""
     this.tasks.push(newTask)
   }
 
@@ -23,13 +21,10 @@ class TaskManagement {
 
   editTask(taskId, newTask) {
     // console.log("Task id is", taskId)
-    if (newTask.assignees === null) {
-      newTask.assignees = "Unassigned"
-    }
-
-    if (newTask.description === null) {
-      newTask.description = "No Description Provided"
-    }
+    newTask.assignees === null ? (newTask.assignees = "Unassigned") : ""
+    newTask.description === null
+      ? (newTask.description = "No Description Provided")
+      : ""
 
     taskId = parseInt(taskId)
     const newTaskWithId = {

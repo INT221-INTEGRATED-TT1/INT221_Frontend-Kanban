@@ -41,12 +41,11 @@ const getTask = async (id) => {
 
 const createTask = async (newTask) => {
   let createTask = {...newTask}
-  if (createTask.assignees.trim().length === 0) {
-    createTask.assignees = null
-  }
-  if (createTask.description.trim().length === 0) {
-    createTask.description = null
-  }
+
+  createTask.assignees.trim().length === 0 ? (createTask.assignees = null) : ""
+  createTask.description.trim().length === 0
+    ? (createTask.description = null)
+    : ""
 
   try {
     const response = await fetch(
@@ -90,12 +89,12 @@ const deleteTasks = async (id) => {
 }
 
 const editTask = async (id, newTask) => {
-  if (newTask.assignees === null || newTask.assignees.trim().length === 0) {
-    newTask.assignees = null
-  }
-  if (newTask.description === null || newTask.description.trim().length === 0) {
-    newTask.description = null
-  }
+  newTask.assignees === null || newTask.assignees.trim().length === 0
+    ? (newTask.assignees = null)
+    : ""
+  newTask.description === null || newTask.description.trim().length === 0
+    ? (newTask.description = null)
+    : ""
 
   try {
     const response = await fetch(
@@ -127,7 +126,7 @@ const getAllStatuses = async () => {
     if (!response.ok) {
       throw {
         status: response.status,
-        router: router.push("/status"),
+        router: router.push("/status/manage"),
       }
     }
     return response.json()
@@ -142,7 +141,7 @@ const getStatus = async (statusId) => {
     if (!response.ok) {
       throw {
         status: response.status,
-        router: router.push("/status"),
+        router: router.push("/status/manage"),
         toast: setTimeout(() => {
           toast("An error has occurred, the status does not exist", {
             type: "error",
@@ -159,6 +158,10 @@ const getStatus = async (statusId) => {
 }
 
 const createStatus = async (newStatus) => {
+  let createStatus = {...newStatus}
+  createStatus.description.trim().length === 0
+    ? (createStatus.description = null)
+    : ""
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v2/statuses`,
@@ -167,7 +170,7 @@ const createStatus = async (newStatus) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newStatus),
+        body: JSON.stringify(createStatus),
       }
     )
     return {
@@ -181,6 +184,9 @@ const createStatus = async (newStatus) => {
 }
 
 const editStatus = async (statusId, newStatus) => {
+  newStatus.description.trim().length === 0
+    ? (newStatus.description = null)
+    : ""
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`,
