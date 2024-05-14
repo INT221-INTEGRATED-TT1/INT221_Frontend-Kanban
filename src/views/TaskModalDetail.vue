@@ -3,6 +3,7 @@ import {ref, onBeforeMount, reactive} from "vue"
 import {getTask, getAllStatuses} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
 import router from "@/router/index.js"
 import Xmark from "@/components/icons/Xmark.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
@@ -28,6 +29,7 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 const task = ref([])
 const route = useRoute()
 const utilityStore = useUtilityStore()
+const statusStyleStore = useStatusStyleStore()
 
 // const isOpen = ref(false)
 
@@ -133,7 +135,7 @@ onBeforeMount(async () => {
             <div>
               <div
                 class="rounded-xl px-2 py-1 font-semibold font-Inter text-[14px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.statusCustomStyle(statusAtt.color)"
+                :class="statusStyleStore.statusCustomStyle(statusAtt.color)"
               >
                 {{ statusAtt.name }}
               </div>
@@ -227,7 +229,7 @@ onBeforeMount(async () => {
           <div class="flex gap-x-3">
             <button
               @click="router.push('/')"
-              class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+              class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-none hover:bg-opacity-30"
             >
               OK
             </button>
