@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount, onMounted, reactive} from "vue"
+import {ref, onBeforeMount, reactive} from "vue"
 import {getTask, getAllStatuses} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -239,6 +239,4 @@ onBeforeMount(async () => {
   </section>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
