@@ -3,7 +3,7 @@ import {ref, onMounted, onBeforeMount} from "vue"
 import {getAllTasks, deleteTasks, createTask} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
-import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import FilterIcon from "@/components/icons/FilterIcon.vue"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
@@ -113,26 +113,25 @@ onBeforeMount(async () => {
         >
           <tr class="border-none">
             <th class="rounded-tl-xl"></th>
-            <th class="flex gap-x-3 items-center">
-              <span><TitleIcon /></span>
-              Title
+            <th>
+              <div class="flex gap-x-3 items-center text-center">
+                <TitleIcon />Title
+              </div>
             </th>
             <th>
-              <div class="flex gap-x-3">
-                <span><AssigneesIcon /></span>Assignees
+              <div class="flex gap-x-3 items-center">
+                <AssigneesIcon />Assignees
               </div>
             </th>
-            <th class="text-center">
-              <div class="flex gap-x-3">
-                <span><StatusIcon /></span>Status
-              </div>
+            <th class="flex gap-x-3 items-center justify-center">
+                <StatusIcon />Status
             </th>
             <th class="rounded-tr-xl"></th>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="itbkk-item border-none text-[#dcc6c6]" 
+            class="itbkk-item border-none text-secondary"
             v-for="(task, index) in utilityStore.tasksManager.getTasks()"
             :key="task.id"
             v-if="utilityStore.tasksManager.getTasks().length > 0"
@@ -219,7 +218,9 @@ onBeforeMount(async () => {
     <router-view />
 
     <!-- delete confirmation -->
-    <DeleteConfirmationTask @delete-task="deleteTask(utilityStore.selectedId)" />
+    <DeleteConfirmationTask
+      @delete-task="deleteTask(utilityStore.selectedId)"
+    />
     <!-- delete confirmation -->
   </main>
 </template>
