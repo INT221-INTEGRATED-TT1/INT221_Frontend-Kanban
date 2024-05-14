@@ -28,7 +28,7 @@ const createNewStatus = async () => {
     if (response.status === 201) {
       // console.log(newStatus)
       utilityStore.statusManager.addStatus(response.data)
-      router.push("/status")
+      router.push("/status/manage")
       setTimeout(() => {
         toast("The status has been  added", {
           type: "success",

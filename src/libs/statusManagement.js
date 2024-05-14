@@ -8,12 +8,9 @@ class StatusManagement {
   }
 
   addStatus(newStatus) {
-    if (
-      newStatus.description === null ||
-      newStatus.description.trim().length === 0
-    ) {
-      newStatus.description = "No description is provided"
-    }
+    newStatus.description === null || newStatus.description.trim().length === 0
+      ? (newStatus.description = "No description is provided")
+      : ""
 
     const newStatusWithCount = {
       ...newStatus,
@@ -39,12 +36,9 @@ class StatusManagement {
   }
 
   editStatus(statusId, newStatus) {
-    if (
-      newStatus.description === null ||
-      newStatus.description.trim().length === 0
-    ) {
-      newStatus.description = "No description is provided"
-    }
+    newStatus.description === null || newStatus.description.trim().length === 0
+      ? (newStatus.description = "No description is provided")
+      : ""
 
     statusId = parseInt(statusId)
     const newStatusWithId = {

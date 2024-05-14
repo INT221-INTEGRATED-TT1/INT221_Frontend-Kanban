@@ -29,7 +29,7 @@ const editStatusData = async (newStatus) => {
     const response = await editStatus(route.params.id, newStatus)
     if (response.status === 200) {
       utilityStore.statusManager.editStatus(route.params.id, newStatus)
-      router.push("/status")
+      router.push("/status/manage")
       setTimeout(() => {
         toast("The status has been edited", {
           type: "success",
