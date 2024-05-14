@@ -3,6 +3,7 @@ import {ref, onMounted, onBeforeMount} from "vue"
 import {getAllTasks, deleteTasks, createTask} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
 import FilterIcon from "@/components/icons/FilterIcon.vue"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
@@ -12,11 +13,13 @@ import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
 import MoreIcon from "@/components/icons/MoreIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import EditTaskIcon from "@/components/icons/EditTaskIcon.vue"
+import DeleteConfirmationTask from "@/components/DeleteConfirmationTask.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
 // const tasks = ref([])
 const utilityStore = useUtilityStore()
+const statusStyleStore = useStatusStyleStore()
 
 const deleteTask = async (deleteId) => {
   try {
@@ -108,7 +111,7 @@ onBeforeMount(async () => {
         <thead
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
-          <tr>
+          <tr class="border-none">
             <th class="rounded-tl-xl"></th>
             <th class="flex gap-x-3 items-center">
               <span><TitleIcon /></span>
@@ -129,7 +132,7 @@ onBeforeMount(async () => {
         </thead>
         <tbody>
           <tr
-            class="itbkk-item"
+            class="itbkk-item border-none text-[#dcc6c6]" 
             v-for="(task, index) in utilityStore.tasksManager.getTasks()"
             :key="task.id"
             v-if="utilityStore.tasksManager.getTasks().length > 0"
@@ -161,7 +164,7 @@ onBeforeMount(async () => {
             >
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
-                :class="utilityStore.statusCustomStyle(task.status.color)"
+                :class="statusStyleStore.statusCustomStyle(task.status.color)"
               >
                 {{ task.status.name }}
               </div>
@@ -216,44 +219,7 @@ onBeforeMount(async () => {
     <router-view />
 
     <!-- delete confirmation -->
-    <div>
-      <div
-        class="fixed inset-0 backdrop-blur-md flex justify-center items-center"
-        v-if="utilityStore.showDeleteConfirmation"
-      >
-        <div
-          class="itbkk-message bg-[#18181B] rounded-lg w-[30rem] h-auto flex flex-col"
-        >
-          <h1
-            class="text-[#DB1058] font-bold text-2xl text-opacity-80 flex px-10 pt-6"
-          >
-            Delete a Task
-          </h1>
-          <div class="divider m-0"></div>
-          <div class="p-10 flex flex-col gap-y-6">
-            <p
-              class="itbkk-button-message even:text-[#ECECEC] text-opacity-75 break-all"
-            >
-              Do you want to delete task "{{ utilityStore.taskTitleConfirm }}"?
-            </p>
-            <div class="flex justify-end gap-x-[1rem]">
-              <button
-                class="itbkk-button-cancel btn text-xs font-semibold text-[#FFFFFF] bg-transparent text-opacity-70 border-none hover:bg-transparent"
-                @click="utilityStore.showDeleteConfirmation = false"
-              >
-                Cancel
-              </button>
-              <button
-                class="itbkk-button-confirm btn border-[#730000] text-xs font-bold bg-[#730000] hover:bg-opacity-35 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
-                @click="deleteTask(utilityStore.selectedId)"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DeleteConfirmationTask @delete-task="deleteTask(utilityStore.selectedId)" />
     <!-- delete confirmation -->
   </main>
 </template>

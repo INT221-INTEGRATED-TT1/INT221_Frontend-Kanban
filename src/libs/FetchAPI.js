@@ -184,9 +184,7 @@ const createStatus = async (newStatus) => {
 }
 
 const editStatus = async (statusId, newStatus) => {
-  newStatus.description.trim().length === 0
-    ? (newStatus.description = null)
-    : ""
+  newStatus.description === null ? (newStatus.description = null) : ""
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`,

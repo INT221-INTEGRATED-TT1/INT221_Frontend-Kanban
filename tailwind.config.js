@@ -8,7 +8,7 @@ export default {
         headline: "#FFFFFF",
         secondary: "#E3E3E3",
         normal: "#FFFFFF",
-        gradient: "",
+        // gradient: "",
       },
     },
 
@@ -16,8 +16,8 @@ export default {
     
   },
   plugins: [require("daisyui")],
+  darkMode: 'false',
   daisyui: {
-    // themes: true,
-    // base: true,
-  }
+    // themes: ['light'],
+  },
 }

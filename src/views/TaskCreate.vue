@@ -4,6 +4,7 @@ import {createTask, getAllStatuses} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
@@ -11,6 +12,7 @@ import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
+const statusStyleStore = useStatusStyleStore()
 
 const newStatus = reactive({
   id: 1,
@@ -32,7 +34,12 @@ const selectStatus = (name, color, id) => {
   newTask.status = id
 }
 
+const isButtonDisabled = computed(() => {
+  return !newTask.title || utilityStore.transactionDisable
+})
+
 const createNewTask = async () => {
+  utilityStore.transactionDisable = true
   try {
     const response = await createTask(newTask)
     console.log(newTask)
@@ -40,6 +47,7 @@ const createNewTask = async () => {
     if (response.status === 201) {
       utilityStore.tasksManager.addTask(response.data)
       router.push("/task")
+      utilityStore.transactionDisable = false
       setTimeout(() => {
         toast("The task has been successfully added", {
           type: "success",
@@ -68,10 +76,6 @@ const createNewTask = async () => {
     console.log(error)
   }
 }
-
-const isButtonDisabled = computed(() => {
-  return !newTask.title
-})
 
 onBeforeMount(async () => {
   try {
@@ -131,7 +135,7 @@ onBeforeMount(async () => {
                 tabindex="0"
                 role="button"
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.statusCustomStyle(newStatus.color)"
+                :class="statusStyleStore.statusCustomStyle(newStatus.color)"
               >
                 {{ newStatus.name }}
                 <span><DropdownIcon /></span>
@@ -144,7 +148,7 @@ onBeforeMount(async () => {
                     v-for="status in utilityStore.statusManager.getStatus()"
                     :key="status.id"
                     @click="selectStatus(status.name, status.color, status.id)"
-                    :class="utilityStore.statusCustomStyle(status.color)"
+                    :class="statusStyleStore.statusCustomStyle(status.color)"
                     class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
                   >
                     {{ status.name }}
@@ -198,14 +202,14 @@ onBeforeMount(async () => {
             <div class="flex gap-x-3">
               <button
                 @click="router.push('/')"
-                class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+                class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none hover:bg-opacity-30 bg-transparent"
               >
                 CANCEL
               </button>
               <button
                 @click="createNewTask()"
                 :disabled="isButtonDisabled"
-                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem]  border-[#007305] hover:border-none bg-transparent hover:bg-base"
               >
                 SAVE
               </button>
