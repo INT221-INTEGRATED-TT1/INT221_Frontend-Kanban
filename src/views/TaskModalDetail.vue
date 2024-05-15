@@ -100,7 +100,7 @@ onBeforeMount(async () => {
 
 <template>
   <section
-    class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
+    class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-md"
   >
     <div
       class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 flip-in-hor-bottom"
