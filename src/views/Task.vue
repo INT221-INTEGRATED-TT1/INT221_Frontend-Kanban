@@ -1,10 +1,9 @@
 <script setup>
 import {ref, onMounted, onBeforeMount} from "vue"
-import {getAllTasks, deleteTasks, createTask} from "@/libs/FetchAPI.js"
+import {getAllTasks, deleteTasks, getAllStatuses} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import FilterIcon from "@/components/icons/FilterIcon.vue"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import TitleIcon from "@/components/icons/TitleIcon.vue"
@@ -13,6 +12,11 @@ import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
 import MoreIcon from "@/components/icons/MoreIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import EditTaskIcon from "@/components/icons/EditTaskIcon.vue"
+import SortDesc from "@/components/icons/sortDESC.vue"
+import SortASC from "@/components/icons/SortASC.vue"
+import dropdownSort from "@/components/icons/dropdownSort.vue"
+import SortRecently from "@/components/icons/SortRecently.vue"
+import FilterIcon from "@/components/icons/FilterIcon.vue"
 import DeleteConfirmationTask from "@/components/DeleteConfirmationTask.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
@@ -54,6 +58,9 @@ onBeforeMount(async () => {
   try {
     const fetchTasks = await getAllTasks()
     utilityStore.tasksManager.addTasks(fetchTasks)
+
+    const fetchStatuses = await getAllStatuses()
+    utilityStore.statusManager.addStatuses(fetchStatuses)
     // console.log(utilityStore.tasksManager.getTasks())
 
     for (const task of utilityStore.tasksManager.getTasks()) {
@@ -67,6 +74,13 @@ onBeforeMount(async () => {
     console.log("Error fetching tasks : ", error)
   }
 })
+
+const selectFilter = (id, color) => {
+  console.log(id,color);
+  utilityStore.selectedId = id
+  utilityStore.selectedColor = color
+    // utilityStore.selectedColor === id ? null : filterId
+}
 </script>
 
 <template>
@@ -106,7 +120,38 @@ onBeforeMount(async () => {
       </div>
     </div>
 
-    <div class="pt-14">
+    <div class="pt-12">
+      <div class="mb-5 collapse">
+        <h1
+          class="flex items-center text-normal gap-x-3 collapse-title tracking-wider"
+        >
+          <FilterIcon /> Filters
+        </h1>
+        <input type="checkbox" />
+
+        <div class="collapse-content m-0">
+          <div class="divider p-2"></div>
+          <div class="flex gap-x-3 gap-y-2 flex-wrap">
+            <div
+              v-for="(status, index) in utilityStore.statusManager.getStatus()"
+              :key="index"
+              class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e]  cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
+              :class="(utilityStore.selectedColor === status.color && utilityStore.selectedId === status.id)? statusStyleStore.statusCustomStyle(status.color) : ''"
+              @click="selectFilter(status.id, status.color)"
+            >
+              {{ status.name }}
+            </div>
+            <!-- :class="statusStyleStore.statusCustomStyle(status.color)" -->
+<!-- 
+            :class="{
+                [statusStyleStore.statusCustomStyle(status.color)]:
+                  utilityStore.selectedColor === status.color,
+              }" -->
+          </div>
+          <div class="divider p-2"></div>
+        </div>
+      </div>
+
       <table class="table border-collapse bg-[#141414] text-center">
         <thead
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
@@ -123,8 +168,31 @@ onBeforeMount(async () => {
                 <AssigneesIcon />Assignees
               </div>
             </th>
-            <th class="flex gap-x-3 items-center justify-center">
-                <StatusIcon />Status
+            <th>
+              <div class="dropdown">
+                <div
+                  tabindex="0"
+                  role="button"
+                  class="flex gap-x-3 justify-center items-center"
+                >
+                  <StatusIcon />Status <dropdownSort />
+                </div>
+                <ul
+                  tabindex="0"
+                  class="dropdown-content z-[1] menu m-0 mt-2 shadow bg-[#2b2b2b] rounded-md w-52"
+                >
+                  <li class="p-0">
+                    <span><SortASC /> Ascending</span>
+                  </li>
+                  <li class="p-0">
+                    <span><SortDesc /> Descending</span>
+                  </li>
+                  <div class="divider m-0"></div>
+                  <li class="p-0">
+                    <span><SortRecently /> Last Created</span>
+                  </li>
+                </ul>
+              </div>
             </th>
             <th class="rounded-tr-xl"></th>
           </tr>

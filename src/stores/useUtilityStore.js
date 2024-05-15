@@ -29,6 +29,22 @@ export const useUtilityStore = defineStore("utility", () => {
     taskTitleConfirm.value = taskTitle
   }
 
+  // console.log(tasksManager.value)
+
+  // console.log(
+  //   tasksManager.value.tasks.sort((a, b) =>
+  //     a.status.name.localeCompare(b.status.name)
+  //   )
+  // )
+
+  // const sortStatus = (order) => {
+  //   tasksManager.value.tasks.sort((a, b) =>
+  //     order
+  //       ? a.status.name.localeCompare(b.status.name)
+  //       : b.status.name.localeCompare(a.status.name)
+  //   )
+  // }
+
   return {
     tasksManager,
     selectedId,
