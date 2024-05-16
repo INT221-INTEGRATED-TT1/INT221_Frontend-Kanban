@@ -24,7 +24,7 @@ import "vue3-toastify/dist/index.css"
 // const tasks = ref([])
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
-
+const filteredStatus = ref([])
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
@@ -63,6 +63,7 @@ onBeforeMount(async () => {
 
     const fetchStatuses = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchStatuses)
+    utilityStore.statusManager.addFilteredField()
     // console.log(utilityStore.tasksManager.getTasks())
 
     for (const task of utilityStore.tasksManager.getTasks()) {
@@ -138,8 +139,8 @@ const selectFilter = (id, color) => {
               v-for="(status, index) in utilityStore.statusManager.getStatus()"
               :key="index"
               class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e]  cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
-              :class="(utilityStore.selectedColor === status.color && utilityStore.selectedId === status.id)? statusStyleStore.statusCustomStyle(status.color) : ''"
-              @click="selectFilter(status.id, status.color)"
+              :class="{'bg-white' : status.filtered}"
+              @click="utilityStore.statusManager.updateFilter(status.id)"
             >
               {{ status.name }}
             </div>

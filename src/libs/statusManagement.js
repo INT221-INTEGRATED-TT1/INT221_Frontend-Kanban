@@ -53,6 +53,19 @@ class StatusManagement {
     // console.log(this.statuses);
     return this.statuses
   }
+  addFilteredField(){
+    this.statuses.forEach((status) => {
+      status.filtered = false
+    })
+  }
+  updateFilter(id){
+    this.statuses.forEach((status) => {
+      if(status.id === id){
+        status.filtered = !status.filtered
+      }
+    })
+
+  }
 }
 
 export {StatusManagement}
