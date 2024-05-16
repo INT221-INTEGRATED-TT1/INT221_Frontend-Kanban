@@ -137,7 +137,7 @@ const selectFilter = (id, color) => {
               v-for="(status, index) in utilityStore.statusManager.getStatus()"
               :key="index"
               class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e]  cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
-              :class= "{'bg-white': status.filtered}"
+              :class="{'bg-white' : status.filtered}"
               @click="utilityStore.statusManager.updateFilter(status.id)"
             >
               {{ status.name }}
