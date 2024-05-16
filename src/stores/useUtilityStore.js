@@ -1,7 +1,7 @@
 import {TaskManagement} from "@/libs/TaskManagement"
 import {StatusManagement} from "@/libs/statusManagement"
 import {defineStore} from "pinia"
-import {reactive, ref} from "vue"
+import {ref} from "vue"
 
 export const useUtilityStore = defineStore("utility", () => {
   const tasksManager = ref(new TaskManagement())
@@ -13,6 +13,8 @@ export const useUtilityStore = defineStore("utility", () => {
   const selectedColor = ref(null)
   const disableTransfer = ref(false)
   const transactionDisable = ref(false)
+  const filterStatusArray = ref([])
+  const sortDirection = ref("")
 
   const confirmDeleteStatus = (statuses) => {
     selectedId.value = statuses.id
@@ -29,22 +31,6 @@ export const useUtilityStore = defineStore("utility", () => {
     taskTitleConfirm.value = taskTitle
   }
 
-  // console.log(tasksManager.value)
-
-  // console.log(
-  //   tasksManager.value.tasks.sort((a, b) =>
-  //     a.status.name.localeCompare(b.status.name)
-  //   )
-  // )
-
-  // const sortStatus = (order) => {
-  //   tasksManager.value.tasks.sort((a, b) =>
-  //     order
-  //       ? a.status.name.localeCompare(b.status.name)
-  //       : b.status.name.localeCompare(a.status.name)
-  //   )
-  // }
-
   return {
     tasksManager,
     selectedId,
@@ -57,5 +43,7 @@ export const useUtilityStore = defineStore("utility", () => {
     confirmDeleteTask,
     disableTransfer,
     transactionDisable,
+    filterStatusArray,
+    sortDirection,
   }
 })
