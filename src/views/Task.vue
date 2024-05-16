@@ -54,6 +54,8 @@ const deleteTask = async (deleteId) => {
   }
 }
 
+
+
 onBeforeMount(async () => {
   try {
     const fetchTasks = await getAllTasks()
