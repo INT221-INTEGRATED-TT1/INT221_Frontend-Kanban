@@ -2,17 +2,35 @@ import router from "@/router"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
-const getAllTasks = async () => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v2/tasks`)
-  {
-    if (!response.ok) {
-      throw {
-        status: response.status,
-        router: router.push("/task"),
+const getAllTasks = async (direction, sortBy, filterStatuses) => {
+  let url = `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`
+
+  if (direction || sortBy || filterStatuses) {
+    const params = new URLSearchParams()
+    if (direction) {
+      params.append("direction", direction)
+    }
+    if (sortBy) {
+      params.append("sortBy", sortBy)
+    }
+    if (filterStatuses) {
+      for (let index = 0; index < filterStatuses.length; index++) {
+        params.append("filterStatuses", filterStatuses[index])
       }
     }
-    return response.json()
+    url += `?${params.toString()}`
   }
+  console.log(url)
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw {
+      status: response.status,
+      router: router.push("/task"),
+    }
+  }
+
+  return response.json()
 }
 
 const getTask = async (id) => {

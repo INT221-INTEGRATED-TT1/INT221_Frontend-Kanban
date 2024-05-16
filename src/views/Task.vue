@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onMounted, onBeforeMount} from "vue"
+import {ref, onMounted, onBeforeMount, watch} from "vue"
 import {getAllTasks, deleteTasks, getAllStatuses} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -24,7 +24,7 @@ import "vue3-toastify/dist/index.css"
 // const tasks = ref([])
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
-const filteredStatus = ref([])
+// const filteredStatus = ref([])
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
@@ -54,7 +54,33 @@ const deleteTask = async (deleteId) => {
   }
 }
 
+const filterOrSortByStatus = async (direction, sortBy, filterStatuses, id) => {
+  utilityStore.statusManager.updateFilter(id)
+  // console.log(utilityStore.sortDirection);
+  // console.log(direction)
+  utilityStore.sortDirection = direction
+  if (!utilityStore.filterStatusArray.includes(filterStatuses)) {
+    utilityStore.filterStatusArray.push(filterStatuses)
+  } else if (utilityStore.filterStatusArray.includes(filterStatuses)) {
+    const index = utilityStore.filterStatusArray.indexOf(filterStatuses)
+    if (index !== -1) {
+      utilityStore.filterStatusArray.splice(index, 1)
+    }
+  }
 
+  const sorted = await getAllTasks(
+    utilityStore.sortDirection,
+    sortBy,
+    utilityStore.filterStatusArray
+  )
+  utilityStore.tasksManager.addTasks(sorted)
+
+  for (const task of utilityStore.tasksManager.getTasks()) {
+    task.assignees === null || task.assignees.trim().length === 0
+      ? (task.assignees = "Unassigned")
+      : ""
+  }
+}
 
 onBeforeMount(async () => {
   try {
@@ -67,23 +93,15 @@ onBeforeMount(async () => {
     // console.log(utilityStore.tasksManager.getTasks())
 
     for (const task of utilityStore.tasksManager.getTasks()) {
-      if (task.assignees === null || task.assignees.trim().length === 0) {
-        task.assignees = "Unassigned"
-      }
-
-      // console.log(task.assignees);
+      task.assignees === null || task.assignees.trim().length === 0
+        ? (task.assignees = "Unassigned")
+        : ""
     }
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }
 })
 
-const selectFilter = (id, color) => {
-  console.log(id,color);
-  utilityStore.selectedId = id
-  utilityStore.selectedColor = color
-    // utilityStore.selectedColor === id ? null : filterId
-}
 </script>
 
 <template>
@@ -138,14 +156,25 @@ const selectFilter = (id, color) => {
             <div
               v-for="(status, index) in utilityStore.statusManager.getStatus()"
               :key="index"
-              class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e]  cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
-              :class="{'bg-white' : status.filtered}"
-              @click="utilityStore.statusManager.updateFilter(status.id)"
+              class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e] cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
+              :class="
+                status.filtered === true
+                  ? statusStyleStore.statusCustomStyle(status.color)
+                  : ''
+              "
+              @click="
+                filterOrSortByStatus(
+                  utilityStore.sortDirection,
+                  'status.name',
+                  status.name,
+                  status.id
+                )
+              "
             >
               {{ status.name }}
             </div>
             <!-- :class="statusStyleStore.statusCustomStyle(status.color)" -->
-<!-- 
+            <!-- 
             :class="{
                 [statusStyleStore.statusCustomStyle(status.color)]:
                   utilityStore.selectedColor === status.color,
@@ -184,14 +213,20 @@ const selectFilter = (id, color) => {
                   tabindex="0"
                   class="dropdown-content z-[1] menu m-0 mt-2 shadow bg-[#2b2b2b] rounded-md w-52"
                 >
-                  <li class="p-0">
+                  <li
+                    class="p-0"
+                    @click="filterOrSortByStatus('ASC', 'status.name', '', '')"
+                  >
                     <span><SortASC /> Ascending</span>
                   </li>
-                  <li class="p-0">
+                  <li
+                    class="p-0"
+                    @click="filterOrSortByStatus('DESC', 'status.name', '', '')"
+                  >
                     <span><SortDesc /> Descending</span>
                   </li>
                   <div class="divider m-0"></div>
-                  <li class="p-0">
+                  <li class="p-0" @click="filterOrSortByStatus('', '', '', '')">
                     <span><SortRecently /> Last Created</span>
                   </li>
                 </ul>
