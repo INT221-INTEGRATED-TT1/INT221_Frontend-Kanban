@@ -10,11 +10,10 @@ export const useUtilityStore = defineStore("utility", () => {
   const taskTitleConfirm = ref("")
   const statusTitle = ref("")
   const showDeleteConfirmation = ref(false)
+  const showStatusSettingMenu = ref(false)
   const selectedColor = ref(null)
   const disableTransfer = ref(false)
   const transactionDisable = ref(false)
-  const filterStatusArray = ref([])
-  const sortDirection = ref("")
 
   const confirmDeleteStatus = (statuses) => {
     selectedId.value = statuses.id
@@ -31,6 +30,10 @@ export const useUtilityStore = defineStore("utility", () => {
     taskTitleConfirm.value = taskTitle
   }
 
+  const limitStatus = () =>{
+    showStatusSettingMenu.value = true
+  }
+
   return {
     tasksManager,
     selectedId,
@@ -43,7 +46,7 @@ export const useUtilityStore = defineStore("utility", () => {
     confirmDeleteTask,
     disableTransfer,
     transactionDisable,
-    filterStatusArray,
-    sortDirection,
+    showStatusSettingMenu,
+    limitStatus
   }
 })

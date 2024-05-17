@@ -1,5 +1,4 @@
 <script setup>
-import {ref} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 
 const utilityStore = useUtilityStore()
@@ -12,7 +11,7 @@ defineEmits(['deleteTask'])
   <!-- delete confirmation Task -->
   <div>
     <div
-      class="fixed inset-0 backdrop-blur-md flex justify-center items-center"
+      class="fixed inset-0 backdrop-blur-md flex justify-center items-center z-30"
       v-if="utilityStore.showDeleteConfirmation"
     >
       <div
