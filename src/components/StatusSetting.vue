@@ -1,10 +1,20 @@
 <script setup>
-import {ref} from "vue"
+import {ref,computed,watch} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
 
 const utilityStore = useUtilityStore()
 const isLimitEnable = ref(false)
+const statusStyleStore = useStatusStyleStore()
+const inputLimitNumber = ref(1)
+
+const computeExceedTaskLimit = computed(()=>{
+  return utilityStore.statusManager.getStatus().filter(status => status.count === inputLimitNumber.value)
+})
+// watch((inputLimitNumber) ,(newValue)=>{
+//   console.log(newValue);
+// })
 </script>
 
 <template>
@@ -53,9 +63,9 @@ const isLimitEnable = ref(false)
 
           <input
             class="w-[5rem] p-1 rounded-lg text-center pl-5 border border-[#71717A]"
+            v-model="inputLimitNumber"
             type="number"
-            min="0"
-            value="10"
+            min="1"
             :disabled="!isLimitEnable"
             :class="{'cursor-not-allowed': isLimitEnable === false}"
           />
@@ -67,6 +77,17 @@ const isLimitEnable = ref(false)
           <div class="text-[13px] text-[#D69C27] tracking-wider">
             These statuses that have reached the task limit No additional tasks
             can be added to these statuses at this time.
+          </div>
+        </div>
+        <div class="flex flex-wrap w-full gap-3 " v-show="isLimitEnable">
+          <div
+            v-for="(status, index) in computeExceedTaskLimit"
+            :key="index"
+            class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e]   truncate text-center tracking-normal font-Inter "
+            :class="statusStyleStore.statusCustomStyle(status.color)"
+
+          >
+            {{ status.name }}
           </div>
         </div>
 
