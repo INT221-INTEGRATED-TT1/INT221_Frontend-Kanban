@@ -6,22 +6,18 @@ import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
-import TitleIcon from "@/components/icons/TitleIcon.vue"
-import StatusIcon from "@/components/icons/StatusIcon.vue"
-import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
 import MoreIcon from "@/components/icons/MoreIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import EditTaskIcon from "@/components/icons/EditTaskIcon.vue"
-import SortDesc from "@/components/icons/sortDESC.vue"
-import SortASC from "@/components/icons/SortASC.vue"
-import dropdownSort from "@/components/icons/dropdownSort.vue"
-import SortRecently from "@/components/icons/SortRecently.vue"
-import FilterIcon from "@/components/icons/FilterIcon.vue"
 import DeleteConfirmationTask from "@/components/DeleteConfirmationTask.vue"
+import FilterCollapse from "@/components/FilterCollapse.vue"
+import DropdownSortStatus from "@/components/DropdownSortStatus.vue"
+import DropdownSortAssignees from "@/components/DropdownSortAssignee.vue"
+import DropdownSortTitle from "@/components/DropdownSortTitle.vue"
+import StatusSetting from "@/components/StatusSetting.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
-// const tasks = ref([])
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 // const filteredStatus = ref([])
@@ -54,43 +50,10 @@ const deleteTask = async (deleteId) => {
   }
 }
 
-const filterOrSortByStatus = async (direction, sortBy, filterStatuses, id) => {
-  utilityStore.statusManager.updateFilter(id)
-  // console.log(utilityStore.sortDirection);
-  // console.log(direction)
-  utilityStore.sortDirection = direction
-  if (!utilityStore.filterStatusArray.includes(filterStatuses)) {
-    utilityStore.filterStatusArray.push(filterStatuses)
-  } else if (utilityStore.filterStatusArray.includes(filterStatuses)) {
-    const index = utilityStore.filterStatusArray.indexOf(filterStatuses)
-    if (index !== -1) {
-      utilityStore.filterStatusArray.splice(index, 1)
-    }
-  }
-
-  const sorted = await getAllTasks(
-    utilityStore.sortDirection,
-    sortBy,
-    utilityStore.filterStatusArray
-  )
-  utilityStore.tasksManager.addTasks(sorted)
-
-  for (const task of utilityStore.tasksManager.getTasks()) {
-    task.assignees === null || task.assignees.trim().length === 0
-      ? (task.assignees = "Unassigned")
-      : ""
-  }
-}
-
 onBeforeMount(async () => {
   try {
     const fetchTasks = await getAllTasks()
     utilityStore.tasksManager.addTasks(fetchTasks)
-
-    const fetchStatuses = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchStatuses)
-    utilityStore.statusManager.addFilteredField()
-    // console.log(utilityStore.tasksManager.getTasks())
 
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
@@ -101,7 +64,6 @@ onBeforeMount(async () => {
     console.log("Error fetching tasks : ", error)
   }
 })
-
 </script>
 
 <template>
@@ -121,6 +83,13 @@ onBeforeMount(async () => {
 
       <div class="flex items-center gap-x-3">
         <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
+
+        <button
+          class="hover:bg-[#1f1f1f] px-4 py-1 tracking-wider rounded-md"
+          @click="utilityStore.limitStatus"
+        >
+          Setting
+        </button>
         <router-link to="/status/manage">
           <div
             class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer"
@@ -142,47 +111,7 @@ onBeforeMount(async () => {
     </div>
 
     <div class="pt-12">
-      <div class="mb-5 collapse">
-        <h1
-          class="flex items-center text-normal gap-x-3 collapse-title tracking-wider"
-        >
-          <FilterIcon /> Filters
-        </h1>
-        <input type="checkbox" />
-
-        <div class="collapse-content m-0">
-          <div class="divider p-2"></div>
-          <div class="flex gap-x-3 gap-y-2 flex-wrap">
-            <div
-              v-for="(status, index) in utilityStore.statusManager.getStatus()"
-              :key="index"
-              class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e] cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
-              :class="
-                status.filtered === true
-                  ? statusStyleStore.statusCustomStyle(status.color)
-                  : ''
-              "
-              @click="
-                filterOrSortByStatus(
-                  utilityStore.sortDirection,
-                  'status.name',
-                  status.name,
-                  status.id
-                )
-              "
-            >
-              {{ status.name }}
-            </div>
-            <!-- :class="statusStyleStore.statusCustomStyle(status.color)" -->
-            <!-- 
-            :class="{
-                [statusStyleStore.statusCustomStyle(status.color)]:
-                  utilityStore.selectedColor === status.color,
-              }" -->
-          </div>
-          <div class="divider p-2"></div>
-        </div>
-      </div>
+      <FilterCollapse />
 
       <table class="table border-collapse bg-[#141414] text-center">
         <thead
@@ -191,47 +120,12 @@ onBeforeMount(async () => {
           <tr class="border-none">
             <th class="rounded-tl-xl"></th>
             <th>
-              <div class="flex gap-x-3 items-center text-center">
-                <TitleIcon />Title
-              </div>
+              <DropdownSortTitle />
             </th>
             <th>
-              <div class="flex gap-x-3 items-center">
-                <AssigneesIcon />Assignees
-              </div>
+              <DropdownSortAssignees />
             </th>
-            <th>
-              <div class="dropdown">
-                <div
-                  tabindex="0"
-                  role="button"
-                  class="flex gap-x-3 justify-center items-center"
-                >
-                  <StatusIcon />Status <dropdownSort />
-                </div>
-                <ul
-                  tabindex="0"
-                  class="dropdown-content z-[1] menu m-0 mt-2 shadow bg-[#2b2b2b] rounded-md w-52"
-                >
-                  <li
-                    class="p-0"
-                    @click="filterOrSortByStatus('ASC', 'status.name', '', '')"
-                  >
-                    <span><SortASC /> Ascending</span>
-                  </li>
-                  <li
-                    class="p-0"
-                    @click="filterOrSortByStatus('DESC', 'status.name', '', '')"
-                  >
-                    <span><SortDesc /> Descending</span>
-                  </li>
-                  <div class="divider m-0"></div>
-                  <li class="p-0" @click="filterOrSortByStatus('', '', '', '')">
-                    <span><SortRecently /> Last Created</span>
-                  </li>
-                </ul>
-              </div>
-            </th>
+            <th><DropdownSortStatus /></th>
             <th class="rounded-tr-xl"></th>
           </tr>
         </thead>
@@ -264,7 +158,7 @@ onBeforeMount(async () => {
               </div>
             </td>
             <td
-              class="itbkk-status tooltip before:max-w-none"
+              class="itbkk-status tooltip mt-1.5 before:max-w-none"
               :data-tip="task.status.name"
             >
               <div
@@ -322,6 +216,10 @@ onBeforeMount(async () => {
       </table>
     </div>
     <router-view />
+
+    <!-- status limit setting -->
+    <StatusSetting />
+    <!-- status limit setting -->
 
     <!-- delete confirmation -->
     <DeleteConfirmationTask
