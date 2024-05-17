@@ -10,7 +10,7 @@ const statusStyleStore = useStatusStyleStore()
 const inputLimitNumber = ref(10)
 
 const computeExceedTaskLimit = computed(()=>{
-  return utilityStore.statusManager.getStatus().filter(status => status.count >= inputLimitNumber.value)
+  return utilityStore.statusManager.getStatus().filter(status => status.count >= inputLimitNumber.value && status.name !== 'No Status' && status.name !== 'Done')
 })
 // watch((inputLimitNumber) ,(newValue)=>{
 //   console.log(newValue);
