@@ -211,8 +211,8 @@ onBeforeMount(async () => {
               <div
                 class="tooltip tooltip-edit"
                 :data-tip="
-                  statuses.name === 'No Status'
-                    ? 'Cannot Edit No Status'
+                  statuses.name === 'No Status' || statuses.name === 'Done'
+                    ? 'Cannot Edit'
                     : 'Edit'
                 "
               >
@@ -220,11 +220,11 @@ onBeforeMount(async () => {
                   @click="router.push(`/status/${statuses.id}/edit`)"
                   class="itbkk-button-edit"
                   :disabled="
-                    statuses.name === 'No Status' ? disabledActionButton : false
+                    statuses.name === 'No Status' || statuses.name === 'Done' ? disabledActionButton : false
                   "
                   :class="{
                     'opacity-50 cursor-not-allowed':
-                      statuses.name === 'No Status',
+                      statuses.name === 'No Status' || statuses.name === 'Done',
                   }"
                 >
                   <EditTaskStatus />
@@ -233,8 +233,8 @@ onBeforeMount(async () => {
               <div
                 class="tooltip text-normal tooltip-error"
                 :data-tip="
-                  statuses.name === 'No Status'
-                    ? 'Cannot Delete No Status'
+                  statuses.name === 'No Status' || statuses.name === 'Done'
+                    ? 'Cannot Delete'
                     : 'Delete'
                 "
               >
@@ -242,11 +242,11 @@ onBeforeMount(async () => {
                   class="itbkk-button-delete"
                   @click="deleteModal(statuses)"
                   :disabled="
-                    statuses.name === 'No Status' ? disabledActionButton : false
+                    statuses.name === 'No Status' || statuses.name === 'Done' ? disabledActionButton : false
                   "
                   :class="{
                     'opacity-50 cursor-not-allowed ':
-                      statuses.name === 'No Status',
+                      statuses.name === 'No Status' || statuses.name === 'Done',
                   }"
                 >
                   <DeleteIcon width="22" height="31" />
