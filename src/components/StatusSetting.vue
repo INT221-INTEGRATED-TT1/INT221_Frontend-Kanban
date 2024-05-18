@@ -32,11 +32,11 @@ const enableStatusLimit = () => {
 
 <template>
   <div
-    class="fixed inset-0 backdrop-blur-md flex justify-center items-center z-30"
+    class="itbkk-modal-setting fixed inset-0 backdrop-blur-md flex justify-center items-center z-30"
     v-if="utilityStore.showStatusSettingMenu"
   >
     <div
-      class="itbkk-message bg-[#18181B] rounded-lg w-[35rem] h-auto flex flex-col"
+      class=" bg-[#18181B] rounded-lg w-[35rem] h-auto flex flex-col"
     >
       <h1
         class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6"
@@ -46,7 +46,7 @@ const enableStatusLimit = () => {
       <div class="divider m-0"></div>
       <div class="p-10 flex flex-col gap-y-6">
         <div
-          class="itbkk-button-message text-[#D8D8D8] text-opacity-75 break-keep tracking-wide"
+          class=" text-[#D8D8D8] text-opacity-75 break-keep tracking-wide"
         >
           User can limit the number of tasks in a status by setting the Maximum
           tasks in each status.
@@ -63,7 +63,7 @@ const enableStatusLimit = () => {
             <input
               type="checkbox"
               v-model="utilityStore.isLimitEnable"
-              class="sr-only peer"
+              class="itbkk-limit-task sr-only peer"
               @change="disableSaveButton = false"
             />
             <div
@@ -76,13 +76,13 @@ const enableStatusLimit = () => {
           </label>
 
           <input
-            class="w-[5rem] p-1 rounded-lg text-center pl-5 border border-[#71717A]"
+            class="itbkk-max-task w-[5rem] p-1 rounded-lg text-center pl-5 border border-[#71717A]"
             v-model="inputLimitNumber"
             type="number"
             min="1"
             :disabled="!utilityStore.isLimitEnable"
             :class="{
-              'cursor-not-allowed': utilityStore.isLimitEnable === false,
+              'cursor-not-allowed opacity-50': utilityStore.isLimitEnable === false,
             }"
           />
         </div>
