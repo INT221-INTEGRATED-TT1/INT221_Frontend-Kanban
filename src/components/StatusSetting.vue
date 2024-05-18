@@ -6,9 +6,10 @@ import WarningIcon from "@/components/icons/WarningIcon.vue"
 
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
-const inputLimitNumber = ref(10)
+const inputLimitNumber = ref(utilityStore.limitStatusNumber)
 const disableSaveButton = ref(true)
 const toggle = ref(utilityStore.isLimitEnable)
+
 const computeExceedTaskLimit = computed(() => {
   return utilityStore.statusManager
     .getStatus()
@@ -20,21 +21,32 @@ const computeExceedTaskLimit = computed(() => {
     )
 })
 
-
-const cancel = ()=>{
-  if(toggle.value !== utilityStore.isLimitEnable){
-    toggle.value = utilityStore.isLimitEnable
-  }
-  utilityStore.showStatusSettingMenu = false
-}
-
-
 const enableStatusLimit = () => {
   utilityStore.isLimitEnable = toggle.value
   utilityStore.limitStatusNumber = inputLimitNumber.value
   utilityStore.showStatusSettingMenu = false
   disableSaveButton.value = true
 }
+
+const cancelLimit = () => {
+  inputLimitNumber.value = utilityStore.limitStatusNumber
+  disableSaveButton.value = true
+  toggle.value !== utilityStore.isLimitEnable
+    ? (toggle.value = utilityStore.isLimitEnable)
+    : ""
+
+  utilityStore.showStatusSettingMenu = false
+}
+
+watch(inputLimitNumber, (newValue) => {
+  newValue === utilityStore.limitStatusNumber ? disableSaveButton.value = true : disableSaveButton.value = false
+})
+
+watch(toggle, (newValue) => {
+  newValue === true && utilityStore.isLimitEnable === false
+    ? (toggle.value = true)
+    : ""
+})
 </script>
 
 <template>
@@ -42,9 +54,7 @@ const enableStatusLimit = () => {
     class="itbkk-modal-setting fixed inset-0 backdrop-blur-md flex justify-center items-center z-30"
     v-if="utilityStore.showStatusSettingMenu"
   >
-    <div
-      class=" bg-[#18181B] rounded-lg w-[35rem] h-auto flex flex-col"
-    >
+    <div class="bg-[#18181B] rounded-lg w-[35rem] h-auto flex flex-col">
       <h1
         class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6"
       >
@@ -52,9 +62,7 @@ const enableStatusLimit = () => {
       </h1>
       <div class="divider m-0"></div>
       <div class="p-10 flex flex-col gap-y-6">
-        <div
-          class=" text-[#D8D8D8] text-opacity-75 break-keep tracking-wide"
-        >
+        <div class="text-[#D8D8D8] text-opacity-75 break-keep tracking-wide">
           User can limit the number of tasks in a status by setting the Maximum
           tasks in each status.
           <div>
@@ -71,7 +79,7 @@ const enableStatusLimit = () => {
               type="checkbox"
               v-model="toggle"
               class="itbkk-limit-task sr-only peer"
-              @change="disableSaveButton = false"
+              @change="disableSaveButton = !disableSaveButton"
             />
             <div
               class="relative w-11 h-6 bg-transparent peer-focus:outline-none ring-2 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#406EF0]"
@@ -94,10 +102,7 @@ const enableStatusLimit = () => {
           />
         </div>
 
-        <div
-          class="flex gap-x-3 items-center"
-          v-show="toggle"
-        >
+        <div class="flex gap-x-3 items-center" v-show="toggle">
           <WarningIcon />
 
           <div class="text-[13px] text-[#D69C27] tracking-wider">
@@ -105,10 +110,7 @@ const enableStatusLimit = () => {
             can be added to these statuses at this time.
           </div>
         </div>
-        <div
-          class="flex flex-wrap w-full gap-3"
-          v-show="toggle"
-        >
+        <div class="flex flex-wrap w-full gap-3" v-show="toggle">
           <div
             v-for="(status, index) in computeExceedTaskLimit"
             :key="index"
@@ -123,7 +125,7 @@ const enableStatusLimit = () => {
         <div class="flex justify-end gap-x-[1rem]">
           <button
             class="itbkk-button-cancel btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
-            @click="cancel"
+            @click="cancelLimit"
           >
             Cancel
           </button>
