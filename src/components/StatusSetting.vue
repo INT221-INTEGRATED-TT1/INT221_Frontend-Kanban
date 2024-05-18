@@ -1,16 +1,22 @@
 <script setup>
-import {ref,computed,watch} from "vue"
+import {ref, computed, watch} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
 
 const utilityStore = useUtilityStore()
-const isLimitEnable = ref(false)
 const statusStyleStore = useStatusStyleStore()
 const inputLimitNumber = ref(10)
 
-const computeExceedTaskLimit = computed(()=>{
-  return utilityStore.statusManager.getStatus().filter(status => status.count >= inputLimitNumber.value && status.name !== 'No Status' && status.name !== 'Done')
+const computeExceedTaskLimit = computed(() => {
+  return utilityStore.statusManager
+    .getStatus()
+    .filter(
+      (status) =>
+        status.count >= inputLimitNumber.value &&
+        status.name !== "No Status" &&
+        status.name !== "Done"
+    )
 })
 // watch((inputLimitNumber) ,(newValue)=>{
 //   console.log(newValue);
@@ -49,7 +55,7 @@ const computeExceedTaskLimit = computed(()=>{
           <label class="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              v-model="isLimitEnable"
+              v-model="utilityStore.isLimitEnable"
               class="sr-only peer"
             />
             <div
@@ -57,7 +63,7 @@ const computeExceedTaskLimit = computed(()=>{
             ></div>
             <span
               class="ms-3 text-sm font-medium text-[#FFFFFF] dark:text-gray-300 tracking-wider"
-              >{{ isLimitEnable ? "Enabled" : "Disabled" }}</span
+              >{{ utilityStore.isLimitEnable ? "Enabled" : "Disabled" }}</span
             >
           </label>
 
@@ -66,12 +72,12 @@ const computeExceedTaskLimit = computed(()=>{
             v-model="inputLimitNumber"
             type="number"
             min="1"
-            :disabled="!isLimitEnable"
-            :class="{'cursor-not-allowed': isLimitEnable === false}"
+            :disabled="!utilityStore.isLimitEnable"
+            :class="{'cursor-not-allowed': utilityStore.isLimitEnable === false}"
           />
         </div>
 
-        <div class="flex gap-x-3 items-center" v-show="isLimitEnable">
+        <div class="flex gap-x-3 items-center" v-show="utilityStore.isLimitEnable">
           <WarningIcon />
 
           <div class="text-[13px] text-[#D69C27] tracking-wider">
@@ -79,13 +85,12 @@ const computeExceedTaskLimit = computed(()=>{
             can be added to these statuses at this time.
           </div>
         </div>
-        <div class="flex flex-wrap w-full gap-3 " v-show="isLimitEnable">
+        <div class="flex flex-wrap w-full gap-3" v-show="utilityStore.isLimitEnable">
           <div
             v-for="(status, index) in computeExceedTaskLimit"
             :key="index"
-            class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e]   truncate text-center tracking-normal font-Inter "
+            class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e] truncate text-center tracking-normal font-Inter"
             :class="statusStyleStore.statusCustomStyle(status.color)"
-
           >
             {{ status.name }}
           </div>
