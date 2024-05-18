@@ -57,7 +57,7 @@ const createNewTask = async () => {
   console.log(filterStatus.value)
   if (
     filterStatusId[0].count >= utilityStore.limitStatusNumber &&
-    utilityStore.isLimitEnable === true
+    utilityStore.isLimitEnable === true && filterStatusId[0].name !== "No Status" && filterStatusId[0].name !== "Done" 
   ) {
     toast(
       `The Status ${newStatus.name} will have to many tasks. Please make progress and update status of existing tasks first.`,
@@ -91,6 +91,7 @@ const createNewTask = async () => {
         })
       })
     } else if (response.status === 400) {
+      utilityStore.transactionDisable = false
       toast("Please fill in the required fields", {
         type: "error",
         timeout: 2000,

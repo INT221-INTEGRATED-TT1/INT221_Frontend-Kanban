@@ -52,6 +52,7 @@ const updateTask = reactive({
 const selectStatus = (name, color, id) => {
   newStatus.name = name
   newStatus.color = color
+  newStatus.id = id
   updateTask.status = id
 }
 
@@ -90,13 +91,36 @@ const formatDateTime = (baseFormatDate) => {
 
   return formattedDate
 }
+const filterStatus = ref({})
 
 const editTaskData = async (newTask) => {
+  const filterStatusId = utilityStore.statusManager.getStatus().filter((status) => status.id === newStatus.id)
+  filterStatus.value = filterStatusId[0]
+  console.log(filterStatus.value)
+  if (
+    filterStatusId[0].count >= utilityStore.limitStatusNumber &&
+    utilityStore.isLimitEnable === true && filterStatusId[0].name !== "No Status" && filterStatusId[0].name !== "Done" 
+  ) {
+    toast(`The Status ${newStatus.name} will have to many tasks. Please make progress and update status of existing tasks first.`,
+      {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      }
+    )
+    utilityStore.transactionDisable = true
+    return
+  }
+
+
   try {
     const response = await editTask(route.params.id, newTask)
 
     if (response.status === 200) {
       utilityStore.tasksManager.editTask(route.params.id, response.data)
+      utilityStore.transactionDisable = false
       router.push("/task")
       setTimeout(() => {
         toast("The task has been updated", {
@@ -110,6 +134,7 @@ const editTaskData = async (newTask) => {
     }
 
     if (response.status === 404) {
+      utilityStore.transactionDisable = false
       toast("The task does not exist", {
         type: "error",
         timeout: 2000,
@@ -124,12 +149,18 @@ const editTaskData = async (newTask) => {
 }
 
 const isButtonDisabled = computed(() => {
+  if (newStatus.id !== filterStatus.value.id ) {
+    utilityStore.transactionDisable = false
+  }
+  else if (newStatus.id === filterStatus.value.id) {
+    utilityStore.transactionDisable = true
+  }
   return (
     (updateTask.title === task.value.title &&
       updateTask.description === task.value.description &&
       updateTask.assignees === task.value.assignees &&
       updateTask.status === task.value.status.id) ||
-    !updateTask.title
+    !updateTask.title || utilityStore.transactionDisable
   )
 })
 
