@@ -12,6 +12,7 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
+import WarningIcon from "@/components/icons/WarningIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
@@ -51,6 +52,7 @@ const updateTask = reactive({
 const selectStatus = (name, color, id) => {
   newStatus.name = name
   newStatus.color = color
+  newStatus.id = id
   updateTask.status = id
 }
 
@@ -89,13 +91,36 @@ const formatDateTime = (baseFormatDate) => {
 
   return formattedDate
 }
+const filterStatus = ref({})
 
 const editTaskData = async (newTask) => {
+  const filterStatusId = utilityStore.statusManager.getStatus().filter((status) => status.id === newStatus.id)
+  filterStatus.value = filterStatusId[0]
+  console.log(filterStatus.value)
+  if (
+    filterStatusId[0].count >= utilityStore.limitStatusNumber &&
+    utilityStore.isLimitEnable === true && filterStatusId[0].name !== "No Status" && filterStatusId[0].name !== "Done" 
+  ) {
+    toast(`The Status ${newStatus.name} will have to many tasks. Please make progress and update status of existing tasks first.`,
+      {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      }
+    )
+    utilityStore.transactionDisable = true
+    return
+  }
+
+
   try {
     const response = await editTask(route.params.id, newTask)
 
     if (response.status === 200) {
       utilityStore.tasksManager.editTask(route.params.id, response.data)
+      utilityStore.transactionDisable = false
       router.push("/task")
       setTimeout(() => {
         toast("The task has been updated", {
@@ -109,6 +134,7 @@ const editTaskData = async (newTask) => {
     }
 
     if (response.status === 404) {
+      utilityStore.transactionDisable = false
       toast("The task does not exist", {
         type: "error",
         timeout: 2000,
@@ -123,12 +149,18 @@ const editTaskData = async (newTask) => {
 }
 
 const isButtonDisabled = computed(() => {
+  if (newStatus.id !== filterStatus.value.id ) {
+    utilityStore.transactionDisable = false
+  }
+  else if (newStatus.id === filterStatus.value.id) {
+    utilityStore.transactionDisable = true
+  }
   return (
     (updateTask.title === task.value.title &&
       updateTask.description === task.value.description &&
       updateTask.assignees === task.value.assignees &&
       updateTask.status === task.value.status.id) ||
-    !updateTask.title
+    !updateTask.title || utilityStore.transactionDisable
   )
 })
 
@@ -137,8 +169,6 @@ onBeforeMount(async () => {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
     // console.log(task.value)
-    const fetchStatus = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchStatus)
 
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
@@ -304,6 +334,14 @@ onBeforeMount(async () => {
               {{ formatTimezone() }}
             </div>
           </div>
+
+          <div
+              :class="utilityStore.isLimitEnable ? '' : 'invisible'"
+              class="text-[#D69C27] flex items-center gap-x-2"
+            >
+              <WarningIcon width="15" height="15" />
+              <span class=" tracking-wider text-xs">Limit Statuses is enabled</span>
+            </div>
 
           <div class="flex gap-x-3">
             <button

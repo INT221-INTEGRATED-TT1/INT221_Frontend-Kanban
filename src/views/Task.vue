@@ -14,7 +14,6 @@ import FilterCollapse from "@/components/FilterCollapse.vue"
 import DropdownSortStatus from "@/components/DropdownSortStatus.vue"
 import DropdownSortAssignees from "@/components/DropdownSortAssignee.vue"
 import DropdownSortTitle from "@/components/DropdownSortTitle.vue"
-import StatusSetting from "@/components/StatusSetting.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
@@ -84,12 +83,6 @@ onBeforeMount(async () => {
       <div class="flex items-center gap-x-3">
         <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
 
-        <button
-          class="hover:bg-[#1f1f1f] px-4 py-1 tracking-wider rounded-md"
-          @click="utilityStore.limitStatus"
-        >
-          Setting
-        </button>
         <router-link to="/status/manage">
           <div
             class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer"
@@ -216,10 +209,6 @@ onBeforeMount(async () => {
       </table>
     </div>
     <router-view />
-
-    <!-- status limit setting -->
-    <StatusSetting />
-    <!-- status limit setting -->
 
     <!-- delete confirmation -->
     <DeleteConfirmationTask

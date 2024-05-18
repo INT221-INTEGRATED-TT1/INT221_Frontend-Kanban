@@ -1,13 +1,14 @@
 <script setup>
-import {ref, reactive, computed, onBeforeMount} from "vue"
+import {ref, reactive, computed, onBeforeMount, watch} from "vue"
 import {createTask, getAllStatuses} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
-import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
+import WarningIcon from "@/components/icons/WarningIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
@@ -31,18 +32,50 @@ const newTask = reactive({
 const selectStatus = (name, color, id) => {
   newStatus.name = name
   newStatus.color = color
+  newStatus.id = id
   newTask.status = id
 }
+const filterStatus = ref({})
 
 const isButtonDisabled = computed(() => {
+  if (newStatus.id !== filterStatus.value.id ) {
+    utilityStore.transactionDisable = false
+  }
+  else if (newStatus.id === filterStatus.value.id) {
+    utilityStore.transactionDisable = true
+  }
   return !newTask.title || utilityStore.transactionDisable
 })
 
 const createNewTask = async () => {
   utilityStore.transactionDisable = true
+  const filterStatusId = utilityStore.statusManager
+    .getStatus()
+    .filter((status) => status.id === newStatus.id)
+
+  filterStatus.value = filterStatusId[0]
+  console.log(filterStatus.value)
+  if (
+    filterStatusId[0].count >= utilityStore.limitStatusNumber &&
+    utilityStore.isLimitEnable === true && filterStatusId[0].name !== "No Status" && filterStatusId[0].name !== "Done" 
+  ) {
+    toast(
+      `The Status ${newStatus.name} will have to many tasks. Please make progress and update status of existing tasks first.`,
+      {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      }
+    )
+
+    return
+  }
+
   try {
     const response = await createTask(newTask)
-    console.log(newTask)
+    // console.log(newTask)
 
     if (response.status === 201) {
       utilityStore.tasksManager.addTask(response.data)
@@ -57,9 +90,8 @@ const createNewTask = async () => {
           position: "bottom-right",
         })
       })
-    }
-
-    if (response.status === 400) {
+    } else if (response.status === 400) {
+      utilityStore.transactionDisable = false
       toast("Please fill in the required fields", {
         type: "error",
         timeout: 2000,
@@ -76,15 +108,6 @@ const createNewTask = async () => {
     console.log(error)
   }
 }
-
-onBeforeMount(async () => {
-  try {
-    const fetchStatus = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchStatus)
-  } catch {
-    console.log("kuy")
-  }
-})
 </script>
 
 <template>
@@ -198,7 +221,15 @@ onBeforeMount(async () => {
           <!-- Description -->
 
           <!-- button operation -->
-          <div class="flex justify-end">
+          <div class="flex justify-between">
+            <div
+              :class="utilityStore.isLimitEnable ? '' : 'invisible'"
+              class="text-[#D69C27] flex items-center gap-x-3"
+            >
+              <WarningIcon width="20" height="20" />
+              <span class="mt-1 tracking-wider">Limit Statuses is enabled</span>
+            </div>
+
             <div class="flex gap-x-3">
               <button
                 @click="router.push('/')"
@@ -209,7 +240,7 @@ onBeforeMount(async () => {
               <button
                 @click="createNewTask()"
                 :disabled="isButtonDisabled"
-                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem]  border-[#007305] hover:border-none bg-transparent hover:bg-base"
+                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
               >
                 SAVE
               </button>

@@ -2,9 +2,6 @@ import {defineStore} from "pinia"
 import {reactive, ref} from "vue"
 
 export const useStatusStyleStore = defineStore("statusStyleStore", () => {
-  const selectedColor = ref(null)
-
-
   const statusCustomStyle = (selectedColor) => {
     return {
       "bg-[#043109]  text-[#4ec84b]": selectedColor === "#1A9338",
@@ -45,6 +42,8 @@ export const useStatusStyleStore = defineStore("statusStyleStore", () => {
     "#4B0082",
     "#BE6F26",
   ])
+
+  
 
   return {
     statusCustomStyle,

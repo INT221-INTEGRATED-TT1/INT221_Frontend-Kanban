@@ -1,5 +1,5 @@
 <script setup>
-import {ref, onBeforeMount, reactive} from "vue"
+import {ref, onBeforeMount, reactive, watch} from "vue"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore.js"
@@ -8,6 +8,7 @@ import {
   getAllStatuses,
   deleteStatusTransfer,
 } from "@/libs/FetchAPI"
+import StatusSetting from "@/components/StatusSetting.vue"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import TitleIcon from "@/components/icons/TitleIcon.vue"
@@ -21,6 +22,7 @@ import "vue3-toastify/dist/index.css"
 import AstronautStopSmile from "@/components/icons/AstronautStopSmile.vue"
 import AstronautStopSignBlack from "@/components/icons/AstronautStopSignBlack.vue"
 import DeleteConfirmationStatus from "@/components/DeleteConfirmationStatus.vue"
+import SettingIcon from "@/components/icons/SettingIcon.vue"
 
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
@@ -62,7 +64,23 @@ const deleteStatus = async (deleteId) => {
   }
 }
 
+const newTransferStatusId = ref(-1)
+
 const deleteTransfer = async (oldDeleteId, newDeleteId) => {
+  utilityStore.transactionDisable = true
+  const filterOldStatus = utilityStore.statusManager.getStatus().filter((status) => status.id === oldDeleteId)[0]
+  const filterNewStatus = utilityStore.statusManager.getStatus().filter((status) => status.id === newDeleteId)[0]
+  newTransferStatusId.value = newDeleteId
+  if((filterOldStatus.count + filterNewStatus.count) > utilityStore.limitStatusNumber && filterNewStatus.name !== 'No Status' && filterNewStatus.name !== 'Done') {
+    toast(`Cannot transfer to ${filterNewStatus.name} number of tasks in ${filterOldStatus.name} status exceeds the limit. Please choose another status to transfer to.`, {
+      type: "error",
+      timeout: 2000,
+      theme: "dark",
+      transition: "flip",
+      position: "bottom-right",
+    })
+    return
+  }
   const response = await deleteStatusTransfer(oldDeleteId, newDeleteId)
   if (response.status === 200) {
     utilityStore.statusManager.deleteTransferStatus(oldDeleteId, newDeleteId)
@@ -75,6 +93,7 @@ const deleteTransfer = async (oldDeleteId, newDeleteId) => {
       position: "bottom-right",
     })
   } else if (response.status === 404) {
+    utilityStore.disableTransfer = false
     toast("An  error has occurred, the status does not exist", {
       type: "error",
       timeout: 2000,
@@ -86,7 +105,7 @@ const deleteTransfer = async (oldDeleteId, newDeleteId) => {
 }
 
 const newStatus = reactive({
-  id: "",
+  id: -1,
   name: "",
   description: "",
   color: "",
@@ -98,6 +117,10 @@ const selectStatus = (status) => {
   newStatus.color = status.color
   newStatus.id = status.id
 }
+
+watch(newStatus, () => {
+  newStatus.id !== newTransferStatusId.value ? utilityStore.transactionDisable = false : utilityStore.transactionDisable = true
+})
 
 onBeforeMount(async () => {
   try {
@@ -153,6 +176,13 @@ onBeforeMount(async () => {
             </button>
           </div>
         </router-link>
+
+        <button
+          class="itbkk-status-setting hover:bg-[#1f1f1f] px-1 tracking-wider rounded-xl border border-[#E3E3E3] border-opacity-50"
+          @click="utilityStore.limitStatus"
+        >
+          <SettingIcon />
+        </button>
       </div>
     </div>
 
@@ -220,7 +250,9 @@ onBeforeMount(async () => {
                   @click="router.push(`/status/${statuses.id}/edit`)"
                   class="itbkk-button-edit"
                   :disabled="
-                    statuses.name === 'No Status' || statuses.name === 'Done' ? disabledActionButton : false
+                    statuses.name === 'No Status' || statuses.name === 'Done'
+                      ? disabledActionButton
+                      : false
                   "
                   :class="{
                     'opacity-50 cursor-not-allowed':
@@ -242,7 +274,9 @@ onBeforeMount(async () => {
                   class="itbkk-button-delete"
                   @click="deleteModal(statuses)"
                   :disabled="
-                    statuses.name === 'No Status' || statuses.name === 'Done' ? disabledActionButton : false
+                    statuses.name === 'No Status' || statuses.name === 'Done'
+                      ? disabledActionButton
+                      : false
                   "
                   :class="{
                     'opacity-50 cursor-not-allowed ':
@@ -356,7 +390,7 @@ onBeforeMount(async () => {
           </button>
           <button
             @click="deleteTransfer(utilityStore.selectedId, newStatus.id)"
-            :disabled="newStatus.name === utilityStore.statusTitle"
+            :disabled="newStatus.name === utilityStore.statusTitle || utilityStore.transactionDisable"
             class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
           >
             SAVE
@@ -365,6 +399,10 @@ onBeforeMount(async () => {
       </div>
     </section>
     <!-- transfer status -->
+
+    <!-- status limit setting -->
+    <StatusSetting />
+    <!-- status limit setting -->
 
     <!-- delete confirmation Status -->
     <DeleteConfirmationStatus
