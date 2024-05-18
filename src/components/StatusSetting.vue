@@ -8,7 +8,7 @@ const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const inputLimitNumber = ref(10)
 const disableSaveButton = ref(true)
-
+const toggle = ref(utilityStore.isLimitEnable)
 const computeExceedTaskLimit = computed(() => {
   return utilityStore.statusManager
     .getStatus()
@@ -19,13 +19,18 @@ const computeExceedTaskLimit = computed(() => {
         status.name !== "Done"
     )
 })
-// watch((inputLimitNumber) ,(newValue)=>{
-//   console.log(newValue);
-// })
 
+
+const cancel = ()=>{
+  if(toggle.value !== utilityStore.isLimitEnable){
+    toggle.value = utilityStore.isLimitEnable
+  }
+  utilityStore.showStatusSettingMenu = false
+}
 
 
 const enableStatusLimit = () => {
+  utilityStore.isLimitEnable = toggle.value
   utilityStore.limitStatusNumber = inputLimitNumber.value
   utilityStore.showStatusSettingMenu = false
   disableSaveButton.value = true
@@ -64,7 +69,7 @@ const enableStatusLimit = () => {
           <label class="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              v-model="utilityStore.isLimitEnable"
+              v-model="toggle"
               class="itbkk-limit-task sr-only peer"
               @change="disableSaveButton = false"
             />
@@ -73,7 +78,7 @@ const enableStatusLimit = () => {
             ></div>
             <span
               class="ms-3 text-sm font-medium text-[#FFFFFF] dark:text-gray-300 tracking-wider"
-              >{{ utilityStore.isLimitEnable ? "Enabled" : "Disabled" }}</span
+              >{{ toggle ? "Enabled" : "Disabled" }}</span
             >
           </label>
 
@@ -82,16 +87,16 @@ const enableStatusLimit = () => {
             v-model="inputLimitNumber"
             type="number"
             min="1"
-            :disabled="!utilityStore.isLimitEnable"
+            :disabled="!toggle"
             :class="{
-              'cursor-not-allowed opacity-50': utilityStore.isLimitEnable === false,
+              'cursor-not-allowed opacity-50': toggle === false,
             }"
           />
         </div>
 
         <div
           class="flex gap-x-3 items-center"
-          v-show="utilityStore.isLimitEnable"
+          v-show="toggle"
         >
           <WarningIcon />
 
@@ -102,7 +107,7 @@ const enableStatusLimit = () => {
         </div>
         <div
           class="flex flex-wrap w-full gap-3"
-          v-show="utilityStore.isLimitEnable"
+          v-show="toggle"
         >
           <div
             v-for="(status, index) in computeExceedTaskLimit"
@@ -118,7 +123,7 @@ const enableStatusLimit = () => {
         <div class="flex justify-end gap-x-[1rem]">
           <button
             class="itbkk-button-cancel btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
-            @click="utilityStore.showStatusSettingMenu = false"
+            @click="cancel"
           >
             Cancel
           </button>
