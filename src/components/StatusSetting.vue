@@ -8,7 +8,7 @@ const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const inputLimitNumber = ref(10)
 const disableSaveButton = ref(true)
-
+const toggle = ref(utilityStore.isLimitEnable)
 const computeExceedTaskLimit = computed(() => {
   return utilityStore.statusManager
     .getStatus()
@@ -19,11 +19,18 @@ const computeExceedTaskLimit = computed(() => {
         status.name !== "Done"
     )
 })
-// watch((inputLimitNumber) ,(newValue)=>{
-//   console.log(newValue);
-// })
+
+
+const cancel = ()=>{
+  if(toggle.value !== utilityStore.isLimitEnable){
+    toggle.value = utilityStore.isLimitEnable
+  }
+  utilityStore.showStatusSettingMenu = false
+}
+
 
 const enableStatusLimit = () => {
+  utilityStore.isLimitEnable = toggle.value
   utilityStore.limitStatusNumber = inputLimitNumber.value
   utilityStore.showStatusSettingMenu = false
   disableSaveButton.value = true
@@ -32,11 +39,11 @@ const enableStatusLimit = () => {
 
 <template>
   <div
-    class="fixed inset-0 backdrop-blur-md flex justify-center items-center z-30"
+    class="itbkk-modal-setting fixed inset-0 backdrop-blur-md flex justify-center items-center z-30"
     v-if="utilityStore.showStatusSettingMenu"
   >
     <div
-      class="itbkk-message bg-[#18181B] rounded-lg w-[35rem] h-auto flex flex-col"
+      class=" bg-[#18181B] rounded-lg w-[35rem] h-auto flex flex-col"
     >
       <h1
         class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6"
@@ -46,7 +53,7 @@ const enableStatusLimit = () => {
       <div class="divider m-0"></div>
       <div class="p-10 flex flex-col gap-y-6">
         <div
-          class="itbkk-button-message text-[#D8D8D8] text-opacity-75 break-keep tracking-wide"
+          class=" text-[#D8D8D8] text-opacity-75 break-keep tracking-wide"
         >
           User can limit the number of tasks in a status by setting the Maximum
           tasks in each status.
@@ -62,8 +69,8 @@ const enableStatusLimit = () => {
           <label class="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              v-model="utilityStore.isLimitEnable"
-              class="sr-only peer"
+              v-model="toggle"
+              class="itbkk-limit-task sr-only peer"
               @change="disableSaveButton = false"
             />
             <div
@@ -71,25 +78,25 @@ const enableStatusLimit = () => {
             ></div>
             <span
               class="ms-3 text-sm font-medium text-[#FFFFFF] dark:text-gray-300 tracking-wider"
-              >{{ utilityStore.isLimitEnable ? "Enabled" : "Disabled" }}</span
+              >{{ toggle ? "Enabled" : "Disabled" }}</span
             >
           </label>
 
           <input
-            class="w-[5rem] p-1 rounded-lg text-center pl-5 border border-[#71717A]"
+            class="itbkk-max-task w-[5rem] p-1 rounded-lg text-center pl-5 border border-[#71717A]"
             v-model="inputLimitNumber"
             type="number"
             min="1"
-            :disabled="!utilityStore.isLimitEnable"
+            :disabled="!toggle"
             :class="{
-              'cursor-not-allowed': utilityStore.isLimitEnable === false,
+              'cursor-not-allowed opacity-50': toggle === false,
             }"
           />
         </div>
 
         <div
           class="flex gap-x-3 items-center"
-          v-show="utilityStore.isLimitEnable"
+          v-show="toggle"
         >
           <WarningIcon />
 
@@ -100,7 +107,7 @@ const enableStatusLimit = () => {
         </div>
         <div
           class="flex flex-wrap w-full gap-3"
-          v-show="utilityStore.isLimitEnable"
+          v-show="toggle"
         >
           <div
             v-for="(status, index) in computeExceedTaskLimit"
@@ -116,7 +123,7 @@ const enableStatusLimit = () => {
         <div class="flex justify-end gap-x-[1rem]">
           <button
             class="itbkk-button-cancel btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
-            @click="utilityStore.showStatusSettingMenu = false"
+            @click="cancel"
           >
             Cancel
           </button>

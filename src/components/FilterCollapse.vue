@@ -24,7 +24,7 @@ onBeforeMount(async () => {
 <template>
   <div class="mb-5 collapse">
     <h1
-      class="flex items-center text-normal gap-x-3 collapse-title tracking-wider"
+      class="itbkk-status-filter flex items-center text-normal gap-x-3 collapse-title tracking-wider"
     >
       <FilterIcon /> Filters
     </h1>
@@ -36,7 +36,7 @@ onBeforeMount(async () => {
         <div
           v-for="(status, index) in utilityStore.statusManager.getStatus()"
           :key="index"
-          class="rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border  border-[#2e2e2e] cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
+          class="itbkk-filter-item rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border  border-[#2e2e2e] cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
           :class="
             status.filtered === true
               ? statusStyleStore.statusCustomStyle(status.color)

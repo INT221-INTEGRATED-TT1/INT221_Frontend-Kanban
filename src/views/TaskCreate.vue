@@ -1,5 +1,5 @@
 <script setup>
-import {ref, reactive, computed, onBeforeMount} from "vue"
+import {ref, reactive, computed, onBeforeMount, watch} from "vue"
 import {createTask, getAllStatuses} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
@@ -32,18 +32,50 @@ const newTask = reactive({
 const selectStatus = (name, color, id) => {
   newStatus.name = name
   newStatus.color = color
+  newStatus.id = id
   newTask.status = id
 }
+const filterStatus = ref({})
 
 const isButtonDisabled = computed(() => {
+  if (newStatus.id !== filterStatus.value.id ) {
+    utilityStore.transactionDisable = false
+  }
+  else if (newStatus.id === filterStatus.value.id) {
+    utilityStore.transactionDisable = true
+  }
   return !newTask.title || utilityStore.transactionDisable
 })
 
 const createNewTask = async () => {
   utilityStore.transactionDisable = true
+  const filterStatusId = utilityStore.statusManager
+    .getStatus()
+    .filter((status) => status.id === newStatus.id)
+
+  filterStatus.value = filterStatusId[0]
+  console.log(filterStatus.value)
+  if (
+    filterStatusId[0].count >= utilityStore.limitStatusNumber &&
+    utilityStore.isLimitEnable === true && filterStatusId[0].name !== "No Status" && filterStatusId[0].name !== "Done" 
+  ) {
+    toast(
+      `The Status ${newStatus.name} will have to many tasks. Please make progress and update status of existing tasks first.`,
+      {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      }
+    )
+
+    return
+  }
+
   try {
     const response = await createTask(newTask)
-    console.log(newTask)
+    // console.log(newTask)
 
     if (response.status === 201) {
       utilityStore.tasksManager.addTask(response.data)
@@ -58,9 +90,8 @@ const createNewTask = async () => {
           position: "bottom-right",
         })
       })
-    }
-
-    if (response.status === 400) {
+    } else if (response.status === 400) {
+      utilityStore.transactionDisable = false
       toast("Please fill in the required fields", {
         type: "error",
         timeout: 2000,
