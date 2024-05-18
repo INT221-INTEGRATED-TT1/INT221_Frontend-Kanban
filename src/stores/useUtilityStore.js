@@ -14,6 +14,8 @@ export const useUtilityStore = defineStore("utility", () => {
   const selectedColor = ref(null)
   const disableTransfer = ref(false)
   const transactionDisable = ref(false)
+  const isLimitEnable = ref(false)
+  const limitStatusNumber = ref(null)
 
   const confirmDeleteStatus = (statuses) => {
     selectedId.value = statuses.id
@@ -30,7 +32,7 @@ export const useUtilityStore = defineStore("utility", () => {
     taskTitleConfirm.value = taskTitle
   }
 
-  const limitStatus = () =>{
+  const limitStatus = () => {
     showStatusSettingMenu.value = true
   }
 
@@ -47,6 +49,8 @@ export const useUtilityStore = defineStore("utility", () => {
     disableTransfer,
     transactionDisable,
     showStatusSettingMenu,
-    limitStatus
+    limitStatus,
+    isLimitEnable,
+    limitStatusNumber,
   }
 })
