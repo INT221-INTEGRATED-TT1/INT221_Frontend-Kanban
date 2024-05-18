@@ -15,6 +15,7 @@ const newStatus = reactive({
   name: "",
   description: "",
   color: statusStyleStore.presetColors[5],
+  limitMaximumTask: 0
 })
 
 const updateColor = (index) => {
