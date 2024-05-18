@@ -15,6 +15,7 @@ export const useUtilityStore = defineStore("utility", () => {
   const disableTransfer = ref(false)
   const transactionDisable = ref(false)
   const isLimitEnable = ref(false)
+  const limitStatusNumber = ref(null)
 
   const confirmDeleteStatus = (statuses) => {
     selectedId.value = statuses.id
@@ -49,6 +50,7 @@ export const useUtilityStore = defineStore("utility", () => {
     transactionDisable,
     showStatusSettingMenu,
     limitStatus,
-    isLimitEnable
+    isLimitEnable,
+    limitStatusNumber,
   }
 })

@@ -7,6 +7,7 @@ import WarningIcon from "@/components/icons/WarningIcon.vue"
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const inputLimitNumber = ref(10)
+const disableSaveButton = ref(true)
 
 const computeExceedTaskLimit = computed(() => {
   return utilityStore.statusManager
@@ -21,6 +22,12 @@ const computeExceedTaskLimit = computed(() => {
 // watch((inputLimitNumber) ,(newValue)=>{
 //   console.log(newValue);
 // })
+
+const enableStatusLimit = () => {
+  utilityStore.limitStatusNumber = inputLimitNumber.value
+  utilityStore.showStatusSettingMenu = false
+  disableSaveButton.value = true
+}
 </script>
 
 <template>
@@ -57,6 +64,7 @@ const computeExceedTaskLimit = computed(() => {
               type="checkbox"
               v-model="utilityStore.isLimitEnable"
               class="sr-only peer"
+              @change="disableSaveButton = false"
             />
             <div
               class="relative w-11 h-6 bg-transparent peer-focus:outline-none ring-2 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#406EF0]"
@@ -73,11 +81,16 @@ const computeExceedTaskLimit = computed(() => {
             type="number"
             min="1"
             :disabled="!utilityStore.isLimitEnable"
-            :class="{'cursor-not-allowed': utilityStore.isLimitEnable === false}"
+            :class="{
+              'cursor-not-allowed': utilityStore.isLimitEnable === false,
+            }"
           />
         </div>
 
-        <div class="flex gap-x-3 items-center" v-show="utilityStore.isLimitEnable">
+        <div
+          class="flex gap-x-3 items-center"
+          v-show="utilityStore.isLimitEnable"
+        >
           <WarningIcon />
 
           <div class="text-[13px] text-[#D69C27] tracking-wider">
@@ -85,7 +98,10 @@ const computeExceedTaskLimit = computed(() => {
             can be added to these statuses at this time.
           </div>
         </div>
-        <div class="flex flex-wrap w-full gap-3" v-show="utilityStore.isLimitEnable">
+        <div
+          class="flex flex-wrap w-full gap-3"
+          v-show="utilityStore.isLimitEnable"
+        >
           <div
             v-for="(status, index) in computeExceedTaskLimit"
             :key="index"
@@ -106,7 +122,8 @@ const computeExceedTaskLimit = computed(() => {
           </button>
           <button
             class="itbkk-button-confirm btn text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] hover:border-none hover:bg-base"
-            @click=""
+            @click="enableStatusLimit()"
+            :disabled="disableSaveButton"
           >
             Save
           </button>

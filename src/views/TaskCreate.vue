@@ -4,10 +4,11 @@ import {createTask, getAllStatuses} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
-import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
+import WarningIcon from "@/components/icons/WarningIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
@@ -76,15 +77,6 @@ const createNewTask = async () => {
     console.log(error)
   }
 }
-
-onBeforeMount(async () => {
-  try {
-    const fetchStatus = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchStatus)
-  } catch {
-    console.log("kuy")
-  }
-})
 </script>
 
 <template>
@@ -198,7 +190,15 @@ onBeforeMount(async () => {
           <!-- Description -->
 
           <!-- button operation -->
-          <div class="flex justify-end">
+          <div class="flex justify-between">
+            <div
+              :class="utilityStore.isLimitEnable ? '' : 'invisible'"
+              class="text-[#D69C27] flex items-center gap-x-3"
+            >
+              <WarningIcon width="20" height="20" />
+              <span class="mt-1 tracking-wider">Limit Statuses is enabled</span>
+            </div>
+
             <div class="flex gap-x-3">
               <button
                 @click="router.push('/')"
@@ -209,7 +209,7 @@ onBeforeMount(async () => {
               <button
                 @click="createNewTask()"
                 :disabled="isButtonDisabled"
-                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem]  border-[#007305] hover:border-none bg-transparent hover:bg-base"
+                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
               >
                 SAVE
               </button>

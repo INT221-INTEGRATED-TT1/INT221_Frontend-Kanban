@@ -12,6 +12,7 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
+import WarningIcon from "@/components/icons/WarningIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
@@ -137,8 +138,6 @@ onBeforeMount(async () => {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
     // console.log(task.value)
-    const fetchStatus = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchStatus)
 
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
@@ -304,6 +303,14 @@ onBeforeMount(async () => {
               {{ formatTimezone() }}
             </div>
           </div>
+
+          <div
+              :class="utilityStore.isLimitEnable ? '' : 'invisible'"
+              class="text-[#D69C27] flex items-center gap-x-2"
+            >
+              <WarningIcon width="15" height="15" />
+              <span class=" tracking-wider text-xs">Limit Statuses is enabled</span>
+            </div>
 
           <div class="flex gap-x-3">
             <button
