@@ -6,9 +6,6 @@ import WarningIcon from "@/components/icons/WarningIcon.vue"
 
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
-// const inputLimitNumber = ref(utilityStore.limitStatusNumber)
-// const disableSaveButton = ref(true)
-// const toggle = ref(utilityStore.isLimitEnable)
 
 const limitStatusState = reactive({
   inputLimitNumber: utilityStore.limitStatusNumber,
