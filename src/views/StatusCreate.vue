@@ -90,7 +90,7 @@ const createNewStatus = async () => {
       >
         <div
           :class="statusStyleStore.statusCustomStyle(newStatus.color)"
-          class="flex items-center justify-center rounded-3xl px-3 h-[2.2rem] font-bold text-[16px] tracking-wider"
+          class="flex items-center justify-center rounded-3xl min-w-20 px-3 h-[2.2rem] font-bold text-[16px] tracking-wider"
         >
           <span>
             {{ newStatus.name }}
