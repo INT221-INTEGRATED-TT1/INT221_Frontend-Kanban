@@ -70,8 +70,8 @@ const deleteTransfer = async (oldDeleteId, newDeleteId) => {
   utilityStore.transactionDisable = true
   const filterOldStatus = utilityStore.statusManager.getStatus().filter((status) => status.id === oldDeleteId)[0]
   const filterNewStatus = utilityStore.statusManager.getStatus().filter((status) => status.id === newDeleteId)[0]
-  newTransferStatusId.value = newDeleteId
-  if((filterOldStatus.count + filterNewStatus.count) > utilityStore.limitStatusNumber && filterNewStatus.name !== 'No Status' && filterNewStatus.name !== 'Done') {
+  if((filterOldStatus.count + filterNewStatus.count) > utilityStore.limitStatusNumber && filterNewStatus.name !== 'No Status' && filterNewStatus.name !== 'Done' && utilityStore.isLimitEnable) {
+   newTransferStatusId.value = newDeleteId
     toast(`Cannot transfer to ${filterNewStatus.name} number of tasks in ${filterOldStatus.name} status exceeds the limit. Please choose another status to transfer to.`, {
       type: "error",
       timeout: 2000,

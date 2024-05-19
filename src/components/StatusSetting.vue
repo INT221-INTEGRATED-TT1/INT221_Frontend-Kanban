@@ -10,6 +10,8 @@ const inputLimitNumber = ref(utilityStore.limitStatusNumber)
 const disableSaveButton = ref(true)
 const toggle = ref(utilityStore.isLimitEnable)
 
+const 
+
 const computeExceedTaskLimit = computed(() => {
   return utilityStore.statusManager
     .getStatus()
@@ -39,7 +41,10 @@ const cancelLimit = () => {
 }
 
 watch(inputLimitNumber, (newValue) => {
-  newValue === utilityStore.limitStatusNumber ? disableSaveButton.value = true : disableSaveButton.value = false
+  newValue === utilityStore.limitStatusNumber &&
+  newValue !== utilityStore.limitStatusNumber
+    ? (disableSaveButton.value = true)
+    : (disableSaveButton.value = false)
 })
 
 watch(toggle, (newValue) => {
