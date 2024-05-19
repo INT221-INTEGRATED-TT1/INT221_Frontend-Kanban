@@ -1,52 +1,67 @@
 <script setup>
-import {ref, computed, watch} from "vue"
+import {computed, watch, reactive} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
 
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
-const inputLimitNumber = ref(utilityStore.limitStatusNumber)
-const disableSaveButton = ref(true)
-const toggle = ref(utilityStore.isLimitEnable)
+// const inputLimitNumber = ref(utilityStore.limitStatusNumber)
+// const disableSaveButton = ref(true)
+// const toggle = ref(utilityStore.isLimitEnable)
+
+const limitStatusState = reactive({
+  inputLimitNumber: utilityStore.limitStatusNumber,
+  disableSaveButton: true,
+  toggleLimit: utilityStore.isLimitEnable,
+})
 
 const computeExceedTaskLimit = computed(() => {
   return utilityStore.statusManager
     .getStatus()
     .filter(
       (status) =>
-        status.count >= inputLimitNumber.value &&
+        status.count >= limitStatusState.inputLimitNumber &&
         status.name !== "No Status" &&
         status.name !== "Done"
     )
 })
 
 const enableStatusLimit = () => {
-  utilityStore.isLimitEnable = toggle.value
-  utilityStore.limitStatusNumber = inputLimitNumber.value
+  utilityStore.isLimitEnable = limitStatusState.toggleLimit
+  utilityStore.limitStatusNumber = limitStatusState.inputLimitNumber
   utilityStore.showStatusSettingMenu = false
-  disableSaveButton.value = true
+  limitStatusState.disableSaveButton = true
 }
 
 const cancelLimit = () => {
-  inputLimitNumber.value = utilityStore.limitStatusNumber
-  disableSaveButton.value = true
-  toggle.value !== utilityStore.isLimitEnable
-    ? (toggle.value = utilityStore.isLimitEnable)
+  limitStatusState.inputLimitNumber = utilityStore.limitStatusNumber
+  limitStatusState.disableSaveButton = true
+  limitStatusState.toggleLimit !== utilityStore.isLimitEnable
+    ? (limitStatusState.toggleLimit = utilityStore.isLimitEnable)
     : ""
 
   utilityStore.showStatusSettingMenu = false
 }
 
-watch(inputLimitNumber, (newValue) => {
-  newValue === utilityStore.limitStatusNumber ? disableSaveButton.value = true : disableSaveButton.value = false
-})
+watch(
+  () => limitStatusState.inputLimitNumber,
+  (newLimitNumber) => {
+    newLimitNumber === utilityStore.limitStatusNumber &&
+    newLimitNumber !== utilityStore.limitStatusNumber
+      ? (limitStatusState.disableSaveButton = true)
+      : (limitStatusState.disableSaveButton = false)
+  }
+)
 
-watch(toggle, (newValue) => {
-  newValue === true && utilityStore.isLimitEnable === false
-    ? (toggle.value = true)
-    : ""
-})
+watch(
+  () => limitStatusState.toggleLimit,
+  (newToggle) => {
+    newToggle === true && utilityStore.isLimitEnable === false
+      ? (limitStatusState.toggleLimit = true)
+      : ""
+  }
+)
 </script>
 
 <template>
@@ -77,32 +92,39 @@ watch(toggle, (newValue) => {
           <label class="inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              v-model="toggle"
+              v-model="limitStatusState.toggleLimit"
               class="itbkk-limit-task sr-only peer"
-              @change="disableSaveButton = !disableSaveButton"
+              @change="
+                limitStatusState.disableSaveButton =
+                  !limitStatusState.disableSaveButton
+              "
             />
             <div
               class="relative w-11 h-6 bg-transparent peer-focus:outline-none ring-2 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#406EF0]"
             ></div>
             <span
               class="ms-3 text-sm font-medium text-[#FFFFFF] dark:text-gray-300 tracking-wider"
-              >{{ toggle ? "Enabled" : "Disabled" }}</span
+              >{{ limitStatusState.toggleLimit ? "Enabled" : "Disabled" }}</span
             >
           </label>
 
           <input
             class="itbkk-max-task w-[5rem] p-1 rounded-lg text-center pl-5 border border-[#71717A]"
-            v-model="inputLimitNumber"
+            v-model="limitStatusState.inputLimitNumber"
             type="number"
             min="1"
-            :disabled="!toggle"
+            :disabled="!limitStatusState.toggleLimit"
             :class="{
-              'cursor-not-allowed opacity-50': toggle === false,
+              'cursor-not-allowed opacity-50':
+                limitStatusState.toggleLimit === false,
             }"
           />
         </div>
 
-        <div class="flex gap-x-3 items-center" v-show="toggle">
+        <div
+          class="flex gap-x-3 items-center"
+          v-show="limitStatusState.toggleLimit"
+        >
           <WarningIcon />
 
           <div class="text-[13px] text-[#D69C27] tracking-wider">
@@ -110,7 +132,10 @@ watch(toggle, (newValue) => {
             can be added to these statuses at this time.
           </div>
         </div>
-        <div class="flex flex-wrap w-full gap-3" v-show="toggle">
+        <div
+          class="flex flex-wrap w-full gap-3"
+          v-show="limitStatusState.toggleLimit"
+        >
           <div
             v-for="(status, index) in computeExceedTaskLimit"
             :key="index"
@@ -125,14 +150,14 @@ watch(toggle, (newValue) => {
         <div class="flex justify-end gap-x-[1rem]">
           <button
             class="itbkk-button-cancel btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
-            @click="cancelLimit"
+            @click="cancelLimit()"
           >
             Cancel
           </button>
           <button
             class="itbkk-button-confirm btn text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] hover:border-none hover:bg-base"
             @click="enableStatusLimit()"
-            :disabled="disableSaveButton"
+            :disabled="limitStatusState.disableSaveButton"
           >
             Save
           </button>
