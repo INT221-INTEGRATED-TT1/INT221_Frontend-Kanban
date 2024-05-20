@@ -120,6 +120,8 @@ const editTaskData = async (newTask) => {
 
     if (response.status === 200) {
       utilityStore.tasksManager.editTask(route.params.id, response.data)
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === task.value.status.id)].count -= 1
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === newStatus.id)].count += 1
       utilityStore.transactionDisable = false
       router.push("/task")
       setTimeout(() => {

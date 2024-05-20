@@ -12,7 +12,7 @@ export default {
       },
     },
 
-    fontFamily: {Geist: "Geist, sans-serif", Inter: ["Inter var", "sans-serif"], Gemunu : ["Gemunu Libre", "sans-serif"]},
+    fontFamily: {Geist: "Geist, sans-serif", Inter: ["Inter var", "sans-serif"], Gemunu : ["Gemunu Libre", "sans-serif"] , Kalam: ["Kalam", "sans-serif"]},
     
   },
   plugins: [require("daisyui")],

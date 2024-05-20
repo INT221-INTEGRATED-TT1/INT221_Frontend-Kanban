@@ -1,107 +1,129 @@
 <script setup>
-import {ref, onBeforeMount, reactive, watch} from "vue"
-import router from "@/router/index.js"
-import {useUtilityStore} from "@/stores/useUtilityStore.js"
-import {useStatusStyleStore} from "@/stores/useStatusStyleStore.js"
+import { ref, onBeforeMount, reactive, watch } from "vue";
+import router from "@/router/index.js";
+import { useUtilityStore } from "@/stores/useUtilityStore.js";
+import { useStatusStyleStore } from "@/stores/useStatusStyleStore.js";
 import {
   deleteStatuses,
   getAllStatuses,
   deleteStatusTransfer,
-} from "@/libs/FetchAPI"
-import StatusSetting from "@/components/StatusSetting.vue"
-import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
-import GroupCode from "@/components/icons/GroupCode.vue"
-import TitleIcon from "@/components/icons/TitleIcon.vue"
-import DeleteIcon from "@/components/icons/DeleteIcon.vue"
-import DescIcon from "@/components/icons/DescIcon.vue"
-import EditTaskStatus from "@/components/icons/EditStatusIcon.vue"
-import Xmark from "@/components/icons/Xmark.vue"
-import DropdownIcon from "@/components/icons/DropdownIcon.vue"
-import {toast} from "vue3-toastify"
-import "vue3-toastify/dist/index.css"
-import AstronautStopSmile from "@/components/icons/AstronautStopSmile.vue"
-import AstronautStopSignBlack from "@/components/icons/AstronautStopSignBlack.vue"
-import DeleteConfirmationStatus from "@/components/DeleteConfirmationStatus.vue"
-import SettingIcon from "@/components/icons/SettingIcon.vue"
+} from "@/libs/FetchAPI";
+import StatusSetting from "@/components/StatusSetting.vue";
+import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue";
+import GroupCode from "@/components/icons/GroupCode.vue";
+import TitleIcon from "@/components/icons/TitleIcon.vue";
+import DeleteIcon from "@/components/icons/DeleteIcon.vue";
+import DescIcon from "@/components/icons/DescIcon.vue";
+import EditTaskStatus from "@/components/icons/EditStatusIcon.vue";
+import Xmark from "@/components/icons/Xmark.vue";
+import DropdownIcon from "@/components/icons/DropdownIcon.vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+import AstronautStopSmile from "@/components/icons/AstronautStopSmile.vue";
+import AstronautStopSignBlack from "@/components/icons/AstronautStopSignBlack.vue";
+import DeleteConfirmationStatus from "@/components/DeleteConfirmationStatus.vue";
+import SettingIcon from "@/components/icons/SettingIcon.vue";
 
-const utilityStore = useUtilityStore()
-const statusStyleStore = useStatusStyleStore()
-const disableBtn = ref(true)
+const utilityStore = useUtilityStore();
+const statusStyleStore = useStatusStyleStore();
+const disableBtn = ref(true);
 
 const disabledActionButton = () => {
   for (const status of utilityStore.statusManager.getStatus()) {
     if (status.name === "No Status") {
-      disableBtn.value = false
+      disableBtn.value = false;
     }
   }
-}
+};
 
 const deleteModal = (statuses) => {
-  newStatus.name = statuses.name
-  newStatus.color = statuses.color
-  utilityStore.confirmDeleteStatus(statuses)
-}
+  newStatus.name = statuses.name;
+  newStatus.color = statuses.color;
+  utilityStore.confirmDeleteStatus(statuses);
+};
 
 const deleteStatus = async (deleteId) => {
   // console.log(statuses.value)
-
   try {
-    const response = await deleteStatuses(deleteId)
+    const response = await deleteStatuses(deleteId);
     if (response.status === 200) {
-      utilityStore.statusManager.deleteStatus(deleteId)
-      utilityStore.showDeleteConfirmation = false
-      utilityStore.disableTransfer = false
+      utilityStore.statusManager.deleteStatus(deleteId);
+      utilityStore.showDeleteConfirmation = false;
+      utilityStore.disableTransfer = false;
+      utilityStore.transactionDisable = false;
       toast("The status has been deleted", {
         type: "success",
         timeout: 2000,
         theme: "dark",
         transition: "flip",
         position: "bottom-right",
-      })
+      });
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
+};
 
-const newTransferStatusId = ref(-1)
+const newTransferStatusId = ref(-1);
 
 const deleteTransfer = async (oldDeleteId, newDeleteId) => {
-  utilityStore.transactionDisable = true
-  const filterOldStatus = utilityStore.statusManager.getStatus().filter((status) => status.id === oldDeleteId)[0]
-  const filterNewStatus = utilityStore.statusManager.getStatus().filter((status) => status.id === newDeleteId)[0]
-  if((filterOldStatus.count + filterNewStatus.count) > utilityStore.limitStatusNumber && filterNewStatus.name !== 'No Status' && filterNewStatus.name !== 'Done' && utilityStore.isLimitEnable) {
-   newTransferStatusId.value = newDeleteId
-    toast(`Cannot transfer to ${filterNewStatus.name} number of tasks in ${filterOldStatus.name} status exceeds the limit. Please choose another status to transfer to.`, {
-      type: "error",
-      timeout: 2000,
-      theme: "dark",
-      transition: "flip",
-      position: "bottom-right",
-    })
-    return
+  utilityStore.transactionDisable = true;
+
+  const filterOldStatus = utilityStore.statusManager
+    .getStatus()
+    .filter((status) => status.id === oldDeleteId)[0];
+  const filterNewStatus = utilityStore.statusManager
+    .getStatus()
+    .filter((status) => status.id === newDeleteId)[0];
+  if (
+    filterOldStatus.count + filterNewStatus.count >
+      utilityStore.limitStatusNumber &&
+    filterNewStatus.name !== "No Status" &&
+    filterNewStatus.name !== "Done" &&
+    utilityStore.isLimitEnable
+  ) {
+    newTransferStatusId.value = newDeleteId;
+    toast(
+      `Cannot transfer to ${filterNewStatus.name} number of tasks in ${filterOldStatus.name} status exceeds the limit. Please choose another status to transfer to.`,
+      {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      }
+    );
+    return;
   }
-  const response = await deleteStatusTransfer(oldDeleteId, newDeleteId)
+  const response = await deleteStatusTransfer(oldDeleteId, newDeleteId);
   if (response.status === 200) {
-    utilityStore.statusManager.deleteTransferStatus(oldDeleteId, newDeleteId)
-    utilityStore.disableTransfer = false
+    utilityStore.statusManager.deleteTransferStatus(oldDeleteId, newDeleteId);
+    utilityStore.disableTransfer = false;
+    utilityStore.transactionDisable = false;
     toast("The task(s) have been transferred and the status has been deleted", {
       type: "success",
       timeout: 2000,
       theme: "dark",
       transition: "flip",
       position: "bottom-right",
-    })
+    });
   } else if (response.status === 404) {
-    utilityStore.disableTransfer = false
+    utilityStore.disableTransfer = false;
+    utilityStore.transactionDisable = true;
+
     toast("An  error has occurred, the status does not exist", {
       type: "error",
       timeout: 2000,
       theme: "dark",
       transition: "flip",
       position: "bottom-right",
-    })
+    });
   }
+};
+
+const cancelTransferStatus = () =>{
+  utilityStore.disableTransfer = false
+  utilityStore.transactionDisable = false
 }
 
 const newStatus = reactive({
@@ -109,34 +131,36 @@ const newStatus = reactive({
   name: "",
   description: "",
   color: "",
-})
+});
 
 const selectStatus = (status) => {
   // console.log(status)
-  newStatus.name = status.name
-  newStatus.color = status.color
-  newStatus.id = status.id
-}
+  newStatus.name = status.name;
+  newStatus.color = status.color;
+  newStatus.id = status.id;
+};
 
 watch(newStatus, () => {
-  newStatus.id !== newTransferStatusId.value ? utilityStore.transactionDisable = false : utilityStore.transactionDisable = true
-})
+  newStatus.id !== newTransferStatusId.value
+    ? (utilityStore.transactionDisable = false)
+    : (utilityStore.transactionDisable = true);
+});
 
 onBeforeMount(async () => {
   try {
-    const fetchData = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchData)
+    const fetchData = await getAllStatuses();
+    utilityStore.statusManager.addStatuses(fetchData);
 
     for (const status of utilityStore.statusManager.getStatus()) {
       if (status.description === null) {
-        status.description = "No description is provided"
+        status.description = "No description is provided";
       }
     }
     // console.log(utilityStore.statusManager.getStatus())
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-})
+});
 </script>
 
 <template>
@@ -334,7 +358,7 @@ onBeforeMount(async () => {
               There is some task associated with the
               <h1
                 class="font-bold tracking-wider break-all"
-                :style="{color: utilityStore.selectedColor}"
+                :style="{ color: utilityStore.selectedColor }"
               >
                 {{ utilityStore.statusTitle }}
               </h1>
@@ -383,14 +407,17 @@ onBeforeMount(async () => {
 
         <div class="flex justify-center pt-6 gap-x-5">
           <button
-            @click="utilityStore.disableTransfer = false"
+            @click="cancelTransferStatus()"
             class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none bg-transparent hover:bg-base"
           >
             CANCEL
           </button>
           <button
             @click="deleteTransfer(utilityStore.selectedId, newStatus.id)"
-            :disabled="newStatus.name === utilityStore.statusTitle || utilityStore.transactionDisable"
+            :disabled="
+              newStatus.name === utilityStore.statusTitle ||
+              utilityStore.transactionDisable
+            "
             class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
           >
             SAVE

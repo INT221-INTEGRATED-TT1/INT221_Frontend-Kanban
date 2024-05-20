@@ -79,6 +79,7 @@ const createNewTask = async () => {
 
     if (response.status === 201) {
       utilityStore.tasksManager.addTask(response.data)
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === newStatus.id)].count += 1
       router.push("/task")
       utilityStore.transactionDisable = false
       setTimeout(() => {

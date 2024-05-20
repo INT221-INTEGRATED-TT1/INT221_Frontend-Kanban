@@ -8,6 +8,7 @@ import TestLen from "@/components/TestLen.vue"
 import StatusCreate from "@/views/StatusCreate.vue"
 import StatusManage from "@/views/StatusManage.vue"
 import StatusEdit from "@/views/StatusEdit.vue"
+import TeamPage from "@/views/TeamPage.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL), // base url
@@ -45,6 +46,11 @@ const router = createRouter({
       component: NotFound,
       name: "not-found",
     },
+    {
+      path:"/team",
+      component: TeamPage,
+      name:"team"
+    }
     // {path:"/test", component: TestLen}
   ],
 })
