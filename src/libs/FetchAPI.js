@@ -7,15 +7,23 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
 
   if (direction || sortBy || filterStatuses) {
     const params = new URLSearchParams()
+
     if (direction) {
       params.append("direction", direction)
     }
     if (sortBy) {
       params.append("sortBy", sortBy)
+      if (filterStatuses.length === 0) {
+        params.delete("sortBy")
+      }
     }
     if (filterStatuses) {
       for (let index = 0; index < filterStatuses.length; index++) {
-        params.append("filterStatuses", filterStatuses[index])
+        if (filterStatuses[index] === "") {
+          params.delete("filterStatuses")
+        } else {
+          params.append("filterStatuses", filterStatuses[index])
+        }
       }
     }
     url += `?${params.toString()}`
@@ -296,5 +304,5 @@ export {
   editStatus,
   deleteStatuses,
   deleteStatusTransfer,
-  toggleStatusLimit
+  toggleStatusLimit,
 }

@@ -1,6 +1,6 @@
 <script setup>
 import {ref, reactive, computed, onBeforeMount, watch} from "vue"
-import {createTask, getAllStatuses} from "@/libs/FetchAPI"
+import {createTask} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -35,13 +35,16 @@ const selectStatus = (name, color, id) => {
   newStatus.id = id
   newTask.status = id
 }
+
 const filterStatus = ref({})
 
 const isButtonDisabled = computed(() => {
-  if (newStatus.id !== filterStatus.value.id ) {
+  if (newStatus.id !== filterStatus.value.id && utilityStore.isLimitEnable) {
     utilityStore.transactionDisable = false
-  }
-  else if (newStatus.id === filterStatus.value.id) {
+  } else if (
+    newStatus.id === filterStatus.value.id &&
+    utilityStore.isLimitEnable
+  ) {
     utilityStore.transactionDisable = true
   }
   return !newTask.title || utilityStore.transactionDisable
@@ -57,7 +60,10 @@ const createNewTask = async () => {
   console.log(filterStatus.value)
   if (
     filterStatusId[0].count >= utilityStore.limitStatusNumber &&
-    utilityStore.isLimitEnable === true && filterStatusId[0].name !== "No Status" && filterStatusId[0].name !== "Done" 
+    utilityStore.isLimitEnable === true &&
+    filterStatusId[0].name !== "No Status" &&
+    filterStatusId[0].name !== "Done" &&
+    utilityStore.isLimitEnable
   ) {
     toast(
       `The Status ${newStatus.name} will have to many tasks. Please make progress and update status of existing tasks first.`,
@@ -69,7 +75,7 @@ const createNewTask = async () => {
         position: "bottom-right",
       }
     )
-
+    utilityStore.transactionDisable = true
     return
   }
 
@@ -78,10 +84,17 @@ const createNewTask = async () => {
     // console.log(newTask)
 
     if (response.status === 201) {
-      utilityStore.tasksManager.addTask(response.data)
-      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === newStatus.id)].count += 1
-      router.push("/task")
       utilityStore.transactionDisable = false
+      // newStatus.id = 1
+      utilityStore.tasksManager.addTask(response.data)
+      utilityStore.statusManager.getStatus()[
+        utilityStore.statusManager
+          .getStatus()
+          .findIndex((status) => status.id === newStatus.id)
+      ].count += 1
+
+      router.push("/task")
+      filterStatus.value = {}
       setTimeout(() => {
         toast("The task has been successfully added", {
           type: "success",
@@ -102,10 +115,6 @@ const createNewTask = async () => {
       })
     }
   } catch (error) {
-    // toast("An error has occurred, please try again", {
-    //   type: "error",
-    //   timeout: 2000,
-    // })
     console.log(error)
   }
 }

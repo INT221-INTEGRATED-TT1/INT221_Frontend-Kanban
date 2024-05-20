@@ -19,6 +19,7 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
 
     sortDirection.value = direction
     selectedOption.value = direction
+    
     if (!filterStatusArray.value.includes(filterStatuses)) {
       filterStatusArray.value.push(filterStatuses)
     } else if (filterStatusArray.value.includes(filterStatuses)) {
@@ -26,7 +27,7 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
       if (index !== -1) {
         filterStatusArray.value.splice(index, 1)
       }
-    }
+    } 
 
     const sorted = await getAllTasks(
       sortDirection.value,
