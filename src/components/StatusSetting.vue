@@ -2,7 +2,10 @@
 import {computed, watch, reactive} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
+import {toggleStatusLimit} from "@/libs/FetchAPI"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
+import {toast} from "vue3-toastify"
+import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
@@ -24,11 +27,44 @@ const computeExceedTaskLimit = computed(() => {
     )
 })
 
-const enableStatusLimit = () => {
+const enableStatusLimit = async () => {
   utilityStore.isLimitEnable = limitStatusState.toggleLimit
   utilityStore.limitStatusNumber = limitStatusState.inputLimitNumber
-  utilityStore.showStatusSettingMenu = false
-  limitStatusState.disableSaveButton = true
+  try{
+    const newtoggleStatusLimit = {
+      limitMaximumTask: utilityStore.isLimitEnable,
+      limit: utilityStore.limitStatusNumber}
+    const response = await toggleStatusLimit(newtoggleStatusLimit)
+    if (response.status === 200) {
+      utilityStore.showStatusSettingMenu = false
+      limitStatusState.disableSaveButton = true
+      if(utilityStore.isLimitEnable){
+        setTimeout(() => {
+          toast(`The Kanban board will limit the number of tasks in each status to ${utilityStore.limitStatusNumber}.`, {
+            type: "success",
+            timeout: 2000,
+            theme: "dark",
+            transition: "flip",
+            position: "bottom-right",
+          })
+        })
+      }
+      else{
+        setTimeout(() => {
+          toast(`The kanban board has disabled the task limit in each status.`, {
+            type: "error",
+            timeout: 2000,
+            theme: "dark",
+            transition: "flip",
+            position: "bottom-right",
+          })
+        })
+      }
+    }
+  }
+  catch (error) {
+    console.log(error)
+  }
 }
 
 const cancelLimit = () => {

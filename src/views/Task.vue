@@ -23,9 +23,12 @@ const statusStyleStore = useStatusStyleStore()
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
+    const findStatusIdfromTask = utilityStore.tasksManager.getTasks().filter(task => task.id === deleteId)[0].status.id
     const response = await deleteTasks(deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
+      console.log
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdfromTask)].count -= 1 
       utilityStore.showDeleteConfirmation = false
       toast("Task has been deleted", {
         type: "success",

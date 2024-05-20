@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,8 +11,9 @@
     src: url(/public/fonts/Geist-Regular.otf) format("opentype");
   }
 
-  html {
+  html body{
     @apply font-Geist;
+    
   }
 }
 
@@ -30,6 +32,11 @@
   animation-iteration-count: infinite;
   animation-direction: reverse;
   background: rgb(0, 0, 0);
+}
+.kalam-regular {
+  font-family: "Kalam", cursive;
+  font-weight: 400;
+  font-style: normal;
 }
 
 .required:after {

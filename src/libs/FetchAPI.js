@@ -261,6 +261,29 @@ const deleteStatusTransfer = async (oldId, newId) => {
   }
 }
 
+const toggleStatusLimit = async (newToggleStatus) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/maximum-task`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newToggleStatus),
+      }
+    )
+
+    return {
+      status: response.status,
+      message: "Task updated successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -273,4 +296,5 @@ export {
   editStatus,
   deleteStatuses,
   deleteStatusTransfer,
+  toggleStatusLimit
 }
