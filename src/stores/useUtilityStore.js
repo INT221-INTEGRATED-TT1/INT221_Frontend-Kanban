@@ -21,6 +21,7 @@ export const useUtilityStore = defineStore("utility", () => {
     selectedId.value = statuses.id
     statusTitle.value = statuses.name
     selectedColor.value = statuses.color
+    transactionDisable.value = true
     statuses.count > 0
       ? (disableTransfer.value = true)
       : (showDeleteConfirmation.value = true)
