@@ -30,39 +30,44 @@ const computeExceedTaskLimit = computed(() => {
 const enableStatusLimit = async () => {
   utilityStore.isLimitEnable = limitStatusState.toggleLimit
   utilityStore.limitStatusNumber = limitStatusState.inputLimitNumber
-  try{
+  try {
     const newtoggleStatusLimit = {
       limitMaximumTask: utilityStore.isLimitEnable,
-      limit: utilityStore.limitStatusNumber}
+      limit: utilityStore.limitStatusNumber,
+    }
     const response = await toggleStatusLimit(newtoggleStatusLimit)
     if (response.status === 200) {
       utilityStore.showStatusSettingMenu = false
       limitStatusState.disableSaveButton = true
-      if(utilityStore.isLimitEnable){
+      if (utilityStore.isLimitEnable) {
         setTimeout(() => {
-          toast(`The Kanban board will limit the number of tasks in each status to ${utilityStore.limitStatusNumber}.`, {
-            type: "success",
-            timeout: 2000,
-            theme: "dark",
-            transition: "flip",
-            position: "bottom-right",
-          })
+          toast(
+            `The kanban board now limits ${utilityStore.limitStatusNumber} tasks in each status.`,
+            {
+              type: "success",
+              timeout: 2000,
+              theme: "dark",
+              transition: "flip",
+              position: "bottom-right",
+            }
+          )
         })
-      }
-      else{
+      } else {
         setTimeout(() => {
-          toast(`The kanban board has disabled the task limit in each status.`, {
-            type: "error",
-            timeout: 2000,
-            theme: "dark",
-            transition: "flip",
-            position: "bottom-right",
-          })
+          toast(
+            `The kanban board has disabled the task limit in each status.`,
+            {
+              type: "success",
+              timeout: 2000,
+              theme: "dark",
+              transition: "flip",
+              position: "bottom-right",
+            }
+          )
         })
       }
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.log(error)
   }
 }
@@ -90,6 +95,26 @@ watch(
 watch(
   () => limitStatusState.toggleLimit,
   (newToggle) => {
+    if (newToggle === true) {
+      toast(
+        `The Kanban board will limit the number of tasks in each status to ${limitStatusState.inputLimitNumber}.`,
+        {
+          type: "info",
+          timeout: 2000,
+          theme: "dark",
+          transition: "flip",
+          position: "bottom-right",
+        }
+      )
+    } else {
+      toast(`The kanban board has disabled the task limit in each status.`, {
+        type: "info",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      })
+    }
     newToggle === true && utilityStore.isLimitEnable === false
       ? (limitStatusState.toggleLimit = true)
       : ""
