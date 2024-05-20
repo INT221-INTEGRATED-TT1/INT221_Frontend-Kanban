@@ -3,12 +3,14 @@ import {ref, reactive, onBeforeMount, computed, onMounted} from "vue"
 import router from "@/router"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore"
+import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
 import {getStatus, editStatus} from "@/libs/FetchAPI"
 import Xmark from "@/components/icons/Xmark.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
+const statusStyleStore = useStatusStyleStore()
 const route = useRoute()
 const status = ref([])
 
@@ -20,7 +22,7 @@ const updateStatus = reactive({
 
 const updateColor = (index) => {
   // console.log(updateStatus.color)
-  updateStatus.color = utilityStore.presetColors[index]
+  updateStatus.color = statusStyleStore.presetColors[index]
   utilityStore.selectedColor = index
 }
 
@@ -94,7 +96,7 @@ onBeforeMount(async () => {
         class="w-full h-[5.5rem] mt-5 bg-[#313131] flex justify-center items-center"
       >
         <div
-          :class="utilityStore.statusCustomStyle(updateStatus.color)"
+          :class="statusStyleStore.statusCustomStyle(updateStatus.color)"
           class="flex items-center justify-center rounded-3xl px-3 w-auto h-[2.2rem] font-bold text-[16px] tracking-wider"
         >
           <span>
@@ -109,7 +111,7 @@ onBeforeMount(async () => {
           rows="1"
           maxlength="50"
           required
-          class="itbkk-status-name resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-2"
+          class="itbkk-status-name resize-none w-full rounded-xl bg-[#272727] text-[#ECECEC] border-[#71717A] border-2 p-2"
           placeholder="Enter status name"
           v-model.trim="updateStatus.name"
         ></textarea>
@@ -118,7 +120,7 @@ onBeforeMount(async () => {
         <textarea
           rows="3"
           maxlength="200"
-          class="itbkk-status-description resize-none w-full rounded-xl bg-[#272727] border-[#71717A] border-2 p-3 my-4"
+          class="itbkk-status-description resize-none w-full rounded-xl bg-[#272727] text-[#ECECEC] border-[#71717A] border-2 p-3 my-4"
           placeholder="Enter your description"
           v-model.trim="updateStatus.description"
         ></textarea>
@@ -134,7 +136,7 @@ onBeforeMount(async () => {
         class="grid grid-cols-6 grid-rows-2 gap-y-4 justify-items-center pt-4 px-20"
       >
         <div
-          v-for="(color, index) in utilityStore.presetColors"
+          v-for="(color, index) in statusStyleStore.presetColors"
           :key="index"
           :style="{backgroundColor: color}"
           :class="{'opacity-50': utilityStore.selectedColor === index}"
@@ -148,14 +150,14 @@ onBeforeMount(async () => {
         <div class="flex gap-x-3">
           <button
             @click="router.back()"
-            class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+            class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none bg-transparent hover:bg-base"
           >
             CANCEL
           </button>
           <button
             @click="editStatusData(updateStatus)"
             :disabled="isButtonDisabled"
-            class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+            class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
           >
             SAVE
           </button>

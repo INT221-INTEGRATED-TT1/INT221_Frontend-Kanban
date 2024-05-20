@@ -1,16 +1,19 @@
 <script setup>
-import {ref, reactive, computed, onBeforeMount} from "vue"
+import {ref, reactive, computed, onBeforeMount, watch} from "vue"
 import {createTask, getAllStatuses} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
+import WarningIcon from "@/components/icons/WarningIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
+const statusStyleStore = useStatusStyleStore()
 
 const newStatus = reactive({
   id: 1,
@@ -29,17 +32,56 @@ const newTask = reactive({
 const selectStatus = (name, color, id) => {
   newStatus.name = name
   newStatus.color = color
+  newStatus.id = id
   newTask.status = id
 }
+const filterStatus = ref({})
+
+const isButtonDisabled = computed(() => {
+  if (newStatus.id !== filterStatus.value.id ) {
+    utilityStore.transactionDisable = false
+  }
+  else if (newStatus.id === filterStatus.value.id) {
+    utilityStore.transactionDisable = true
+  }
+  return !newTask.title || utilityStore.transactionDisable
+})
 
 const createNewTask = async () => {
+  utilityStore.transactionDisable = true
+  const filterStatusId = utilityStore.statusManager
+    .getStatus()
+    .filter((status) => status.id === newStatus.id)
+
+  filterStatus.value = filterStatusId[0]
+  console.log(filterStatus.value)
+  if (
+    filterStatusId[0].count >= utilityStore.limitStatusNumber &&
+    utilityStore.isLimitEnable === true && filterStatusId[0].name !== "No Status" && filterStatusId[0].name !== "Done" 
+  ) {
+    toast(
+      `The Status ${newStatus.name} will have to many tasks. Please make progress and update status of existing tasks first.`,
+      {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      }
+    )
+
+    return
+  }
+
   try {
     const response = await createTask(newTask)
-    console.log(newTask)
+    // console.log(newTask)
 
     if (response.status === 201) {
       utilityStore.tasksManager.addTask(response.data)
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === newStatus.id)].count += 1
       router.push("/task")
+      utilityStore.transactionDisable = false
       setTimeout(() => {
         toast("The task has been successfully added", {
           type: "success",
@@ -49,9 +91,8 @@ const createNewTask = async () => {
           position: "bottom-right",
         })
       })
-    }
-
-    if (response.status === 400) {
+    } else if (response.status === 400) {
+      utilityStore.transactionDisable = false
       toast("Please fill in the required fields", {
         type: "error",
         timeout: 2000,
@@ -68,24 +109,11 @@ const createNewTask = async () => {
     console.log(error)
   }
 }
-
-const isButtonDisabled = computed(() => {
-  return !newTask.title
-})
-
-onBeforeMount(async () => {
-  try {
-    const fetchStatus = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchStatus)
-  } catch {
-    console.log("kuy")
-  }
-})
 </script>
 
 <template>
   <section
-    class="fixed inset-0 flex items-center justify-center backdrop-blur-md"
+    class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-md"
   >
     <div
       class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 transition ease-in-out"
@@ -131,7 +159,7 @@ onBeforeMount(async () => {
                 tabindex="0"
                 role="button"
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.statusCustomStyle(newStatus.color)"
+                :class="statusStyleStore.statusCustomStyle(newStatus.color)"
               >
                 {{ newStatus.name }}
                 <span><DropdownIcon /></span>
@@ -144,7 +172,7 @@ onBeforeMount(async () => {
                     v-for="status in utilityStore.statusManager.getStatus()"
                     :key="status.id"
                     @click="selectStatus(status.name, status.color, status.id)"
-                    :class="utilityStore.statusCustomStyle(status.color)"
+                    :class="statusStyleStore.statusCustomStyle(status.color)"
                     class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
                   >
                     {{ status.name }}
@@ -194,18 +222,26 @@ onBeforeMount(async () => {
           <!-- Description -->
 
           <!-- button operation -->
-          <div class="flex justify-end">
+          <div class="flex justify-between">
+            <div
+              :class="utilityStore.isLimitEnable ? '' : 'invisible'"
+              class="text-[#D69C27] flex items-center gap-x-3"
+            >
+              <WarningIcon width="20" height="20" />
+              <span class="mt-1 tracking-wider">Limit Statuses is enabled</span>
+            </div>
+
             <div class="flex gap-x-3">
               <button
                 @click="router.push('/')"
-                class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+                class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none hover:bg-opacity-30 bg-transparent"
               >
                 CANCEL
               </button>
               <button
                 @click="createNewTask()"
                 :disabled="isButtonDisabled"
-                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
               >
                 SAVE
               </button>

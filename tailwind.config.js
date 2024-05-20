@@ -8,16 +8,16 @@ export default {
         headline: "#FFFFFF",
         secondary: "#E3E3E3",
         normal: "#FFFFFF",
-        gradient: "",
+        // gradient: "",
       },
     },
 
-    fontFamily: {Geist: "Geist, sans-serif", Inter: ["Inter var", "sans-serif"], Gemunu : ["Gemunu Libre", "sans-serif"]},
+    fontFamily: {Geist: "Geist, sans-serif", Inter: ["Inter var", "sans-serif"], Gemunu : ["Gemunu Libre", "sans-serif"] , Kalam: ["Kalam", "sans-serif"]},
     
   },
   plugins: [require("daisyui")],
+  darkMode: 'false',
   daisyui: {
-    // themes: true,
-    // base: true,
-  }
+    // themes: ['light'],
+  },
 }

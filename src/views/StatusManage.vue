@@ -1,12 +1,14 @@
 <script setup>
-import {ref, onBeforeMount, reactive} from "vue"
+import {ref, onBeforeMount, reactive, watch} from "vue"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore.js"
 import {
   deleteStatuses,
   getAllStatuses,
   deleteStatusTransfer,
 } from "@/libs/FetchAPI"
+import StatusSetting from "@/components/StatusSetting.vue"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import TitleIcon from "@/components/icons/TitleIcon.vue"
@@ -19,8 +21,11 @@ import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import AstronautStopSmile from "@/components/icons/AstronautStopSmile.vue"
 import AstronautStopSignBlack from "@/components/icons/AstronautStopSignBlack.vue"
+import DeleteConfirmationStatus from "@/components/DeleteConfirmationStatus.vue"
+import SettingIcon from "@/components/icons/SettingIcon.vue"
 
 const utilityStore = useUtilityStore()
+const statusStyleStore = useStatusStyleStore()
 const disableBtn = ref(true)
 
 const disabledActionButton = () => {
@@ -59,7 +64,23 @@ const deleteStatus = async (deleteId) => {
   }
 }
 
+const newTransferStatusId = ref(-1)
+
 const deleteTransfer = async (oldDeleteId, newDeleteId) => {
+  utilityStore.transactionDisable = true
+  const filterOldStatus = utilityStore.statusManager.getStatus().filter((status) => status.id === oldDeleteId)[0]
+  const filterNewStatus = utilityStore.statusManager.getStatus().filter((status) => status.id === newDeleteId)[0]
+  if((filterOldStatus.count + filterNewStatus.count) > utilityStore.limitStatusNumber && filterNewStatus.name !== 'No Status' && filterNewStatus.name !== 'Done' && utilityStore.isLimitEnable) {
+   newTransferStatusId.value = newDeleteId
+    toast(`Cannot transfer to ${filterNewStatus.name} number of tasks in ${filterOldStatus.name} status exceeds the limit. Please choose another status to transfer to.`, {
+      type: "error",
+      timeout: 2000,
+      theme: "dark",
+      transition: "flip",
+      position: "bottom-right",
+    })
+    return
+  }
   const response = await deleteStatusTransfer(oldDeleteId, newDeleteId)
   if (response.status === 200) {
     utilityStore.statusManager.deleteTransferStatus(oldDeleteId, newDeleteId)
@@ -72,6 +93,7 @@ const deleteTransfer = async (oldDeleteId, newDeleteId) => {
       position: "bottom-right",
     })
   } else if (response.status === 404) {
+    utilityStore.disableTransfer = false
     toast("An  error has occurred, the status does not exist", {
       type: "error",
       timeout: 2000,
@@ -83,7 +105,7 @@ const deleteTransfer = async (oldDeleteId, newDeleteId) => {
 }
 
 const newStatus = reactive({
-  id: "",
+  id: -1,
   name: "",
   description: "",
   color: "",
@@ -95,6 +117,10 @@ const selectStatus = (status) => {
   newStatus.color = status.color
   newStatus.id = status.id
 }
+
+watch(newStatus, () => {
+  newStatus.id !== newTransferStatusId.value ? utilityStore.transactionDisable = false : utilityStore.transactionDisable = true
+})
 
 onBeforeMount(async () => {
   try {
@@ -150,6 +176,13 @@ onBeforeMount(async () => {
             </button>
           </div>
         </router-link>
+
+        <button
+          class="itbkk-status-setting hover:bg-[#1f1f1f] px-1 tracking-wider rounded-xl border border-[#E3E3E3] border-opacity-50"
+          @click="utilityStore.limitStatus"
+        >
+          <SettingIcon />
+        </button>
       </div>
     </div>
 
@@ -158,7 +191,7 @@ onBeforeMount(async () => {
         <thead
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
-          <tr class="itbkk-item">
+          <tr class="itbkk-item border-none">
             <th class="rounded-tl-xl"></th>
             <th>
               <div class="flex gap-x-3 items-center">
@@ -178,12 +211,13 @@ onBeforeMount(async () => {
         <tbody>
           <tr
             v-for="(statuses, index) in utilityStore.statusManager.getStatus()"
+            class="border-none"
           >
-            <td class="w-[8rem]">{{ ++index }}</td>
+            <td class="w-[8rem] text-[#dcc6c6]">{{ ++index }}</td>
             <td class="itbkk-status-name text-start w-[30rem]">
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-fit px-5 text-center tracking-normal font-Inter"
-                :class="utilityStore.statusCustomStyle(statuses.color)"
+                :class="statusStyleStore.statusCustomStyle(statuses.color)"
               >
                 <span>
                   {{ statuses.name }}
@@ -207,8 +241,8 @@ onBeforeMount(async () => {
               <div
                 class="tooltip tooltip-edit"
                 :data-tip="
-                  statuses.name === 'No Status'
-                    ? 'Cannot Edit No Status'
+                  statuses.name === 'No Status' || statuses.name === 'Done'
+                    ? 'Cannot Edit'
                     : 'Edit'
                 "
               >
@@ -216,11 +250,13 @@ onBeforeMount(async () => {
                   @click="router.push(`/status/${statuses.id}/edit`)"
                   class="itbkk-button-edit"
                   :disabled="
-                    statuses.name === 'No Status' ? disabledActionButton : false
+                    statuses.name === 'No Status' || statuses.name === 'Done'
+                      ? disabledActionButton
+                      : false
                   "
                   :class="{
                     'opacity-50 cursor-not-allowed':
-                      statuses.name === 'No Status',
+                      statuses.name === 'No Status' || statuses.name === 'Done',
                   }"
                 >
                   <EditTaskStatus />
@@ -229,8 +265,8 @@ onBeforeMount(async () => {
               <div
                 class="tooltip text-normal tooltip-error"
                 :data-tip="
-                  statuses.name === 'No Status'
-                    ? 'Cannot Delete No Status'
+                  statuses.name === 'No Status' || statuses.name === 'Done'
+                    ? 'Cannot Delete'
                     : 'Delete'
                 "
               >
@@ -238,11 +274,13 @@ onBeforeMount(async () => {
                   class="itbkk-button-delete"
                   @click="deleteModal(statuses)"
                   :disabled="
-                    statuses.name === 'No Status' ? disabledActionButton : false
+                    statuses.name === 'No Status' || statuses.name === 'Done'
+                      ? disabledActionButton
+                      : false
                   "
                   :class="{
                     'opacity-50 cursor-not-allowed ':
-                      statuses.name === 'No Status',
+                      statuses.name === 'No Status' || statuses.name === 'Done',
                   }"
                 >
                   <DeleteIcon width="22" height="31" />
@@ -292,7 +330,7 @@ onBeforeMount(async () => {
           </div>
 
           <div class="pt-16">
-            <div class="tracking-wide text-opacity-[0.43]">
+            <div class="tracking-wide text-opacity-[0.43] text-[#ECECEC]">
               There is some task associated with the
               <h1
                 class="font-bold tracking-wider break-all"
@@ -303,7 +341,9 @@ onBeforeMount(async () => {
               status.
             </div>
             <div class="flex items-center pt-10 gap-x-5">
-              <div class="font-Gemunu font-bold text-xl tracking-wider">
+              <div
+                class="font-Gemunu font-bold text-xl tracking-wider text-[#ECECEC]"
+              >
                 Transfer to
               </div>
               <!-- Status -->
@@ -312,14 +352,14 @@ onBeforeMount(async () => {
                   tabindex="0"
                   role="button"
                   class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center mx-auto gap-x-3 max-w-[10rem] break-all"
-                  :class="utilityStore.statusCustomStyle(newStatus.color)"
+                  :class="statusStyleStore.statusCustomStyle(newStatus.color)"
                 >
                   <h1 class="truncate">{{ newStatus.name }}</h1>
                   <span><DropdownIcon /></span>
                 </div>
 
                 <div
-                  class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-scroll cursor-pointer"
+                  class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 block max-h-52 overflow-y-auto cursor-pointer"
                 >
                   <ul
                     tabindex="0"
@@ -329,7 +369,7 @@ onBeforeMount(async () => {
                     <li
                       v-if="utilityStore.selectedId !== status.id"
                       @click="selectStatus(status)"
-                      :class="utilityStore.statusCustomStyle(status.color)"
+                      :class="statusStyleStore.statusCustomStyle(status.color)"
                       class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
                     >
                       {{ status.name }}
@@ -344,14 +384,14 @@ onBeforeMount(async () => {
         <div class="flex justify-center pt-6 gap-x-5">
           <button
             @click="utilityStore.disableTransfer = false"
-            class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+            class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none bg-transparent hover:bg-base"
           >
             CANCEL
           </button>
           <button
             @click="deleteTransfer(utilityStore.selectedId, newStatus.id)"
-            :disabled="newStatus.name === utilityStore.statusTitle"
-            class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+            :disabled="newStatus.name === utilityStore.statusTitle || utilityStore.transactionDisable"
+            class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
           >
             SAVE
           </button>
@@ -360,50 +400,15 @@ onBeforeMount(async () => {
     </section>
     <!-- transfer status -->
 
-    <!-- delete confirmation -->
-    <div>
-      <div
-        class="fixed inset-0 backdrop-blur-md flex justify-center items-center"
-        v-if="utilityStore.showDeleteConfirmation"
-      >
-        <div
-          class="itbkk-message bg-[#18181B] rounded-lg w-[30rem] h-auto flex flex-col"
-        >
-          <h1
-            class="text-[#DB1058] font-bold text-2xl text-opacity-80 flex px-10 pt-6"
-          >
-            Delete a Status
-          </h1>
-          <div class="divider m-0"></div>
-          <div class="p-10 flex flex-col gap-y-4">
-            <p
-              class="itbkk-button-message even:text-[#ECECEC] text-opacity-75 break-all tracking-wide"
-            >
-              Do you want to delete status "<span
-                class="font-bold tracking-wider"
-                :style="{color: utilityStore.selectedColor}"
-                >{{ utilityStore.statusTitle }}</span
-              >" ?
-            </p>
-            <div class="flex justify-end gap-x-[1rem]">
-              <button
-                class="itbkk-button-cancel btn text-xs font-semibold text-[#FFFFFF] bg-transparent text-opacity-70 border-none hover:bg-transparent"
-                @click="utilityStore.showDeleteConfirmation = false"
-              >
-                Cancel
-              </button>
-              <button
-                class="itbkk-button-confirm btn border-[#730000] text-xs font-bold bg-[#730000] hover:bg-opacity-35 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
-                @click="deleteStatus(utilityStore.selectedId)"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- delete confirmation -->
+    <!-- status limit setting -->
+    <StatusSetting />
+    <!-- status limit setting -->
+
+    <!-- delete confirmation Status -->
+    <DeleteConfirmationStatus
+      @delete-status="deleteStatus(utilityStore.selectedId)"
+    />
+    <!-- delete confirmation Status -->
   </main>
 
   <router-view />

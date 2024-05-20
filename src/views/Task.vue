@@ -1,29 +1,34 @@
 <script setup>
-import {ref, onMounted, onBeforeMount} from "vue"
-import {getAllTasks, deleteTasks, createTask} from "@/libs/FetchAPI.js"
+import {ref, onMounted, onBeforeMount, watch} from "vue"
+import {getAllTasks, deleteTasks, getAllStatuses} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
-import FilterIcon from "@/components/icons/FilterIcon.vue"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
-import TitleIcon from "@/components/icons/TitleIcon.vue"
-import StatusIcon from "@/components/icons/StatusIcon.vue"
-import AssigneesIcon from "@/components/icons/AssigneesIcon.vue"
 import MoreIcon from "@/components/icons/MoreIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import EditTaskIcon from "@/components/icons/EditTaskIcon.vue"
+import DeleteConfirmationTask from "@/components/DeleteConfirmationTask.vue"
+import FilterCollapse from "@/components/FilterCollapse.vue"
+import DropdownSortStatus from "@/components/DropdownSortStatus.vue"
+import DropdownSortAssignees from "@/components/DropdownSortAssignee.vue"
+import DropdownSortTitle from "@/components/DropdownSortTitle.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
-// const tasks = ref([])
 const utilityStore = useUtilityStore()
-
+const statusStyleStore = useStatusStyleStore()
+// const filteredStatus = ref([])
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
+    const findStatusIdfromTask = utilityStore.tasksManager.getTasks().filter(task => task.id === deleteId)[0].status.id
     const response = await deleteTasks(deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
+      console.log
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdfromTask)].count -= 1 
       utilityStore.showDeleteConfirmation = false
       toast("Task has been deleted", {
         type: "success",
@@ -51,14 +56,11 @@ onBeforeMount(async () => {
   try {
     const fetchTasks = await getAllTasks()
     utilityStore.tasksManager.addTasks(fetchTasks)
-    // console.log(utilityStore.tasksManager.getTasks())
 
     for (const task of utilityStore.tasksManager.getTasks()) {
-      if (task.assignees === null || task.assignees.trim().length === 0) {
-        task.assignees = "Unassigned"
-      }
-
-      // console.log(task.assignees);
+      task.assignees === null || task.assignees.trim().length === 0
+        ? (task.assignees = "Unassigned")
+        : ""
     }
   } catch (error) {
     console.log("Error fetching tasks : ", error)
@@ -83,6 +85,7 @@ onBeforeMount(async () => {
 
       <div class="flex items-center gap-x-3">
         <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
+
         <router-link to="/status/manage">
           <div
             class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer"
@@ -103,33 +106,28 @@ onBeforeMount(async () => {
       </div>
     </div>
 
-    <div class="pt-14">
+    <div class="pt-12">
+      <FilterCollapse />
+
       <table class="table border-collapse bg-[#141414] text-center">
         <thead
           class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
         >
-          <tr>
+          <tr class="border-none">
             <th class="rounded-tl-xl"></th>
-            <th class="flex gap-x-3 items-center">
-              <span><TitleIcon /></span>
-              Title
+            <th>
+              <DropdownSortTitle />
             </th>
             <th>
-              <div class="flex gap-x-3">
-                <span><AssigneesIcon /></span>Assignees
-              </div>
+              <DropdownSortAssignees />
             </th>
-            <th class="text-center">
-              <div class="flex gap-x-3">
-                <span><StatusIcon /></span>Status
-              </div>
-            </th>
+            <th><DropdownSortStatus /></th>
             <th class="rounded-tr-xl"></th>
           </tr>
         </thead>
         <tbody>
           <tr
-            class="itbkk-item"
+            class="itbkk-item border-none text-secondary"
             v-for="(task, index) in utilityStore.tasksManager.getTasks()"
             :key="task.id"
             v-if="utilityStore.tasksManager.getTasks().length > 0"
@@ -156,12 +154,12 @@ onBeforeMount(async () => {
               </div>
             </td>
             <td
-              class="itbkk-status tooltip before:max-w-none"
+              class="itbkk-status tooltip mt-1.5 before:max-w-none"
               :data-tip="task.status.name"
             >
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
-                :class="utilityStore.statusCustomStyle(task.status.color)"
+                :class="statusStyleStore.statusCustomStyle(task.status.color)"
               >
                 {{ task.status.name }}
               </div>
@@ -216,44 +214,9 @@ onBeforeMount(async () => {
     <router-view />
 
     <!-- delete confirmation -->
-    <div>
-      <div
-        class="fixed inset-0 backdrop-blur-md flex justify-center items-center"
-        v-if="utilityStore.showDeleteConfirmation"
-      >
-        <div
-          class="itbkk-message bg-[#18181B] rounded-lg w-[30rem] h-auto flex flex-col"
-        >
-          <h1
-            class="text-[#DB1058] font-bold text-2xl text-opacity-80 flex px-10 pt-6"
-          >
-            Delete a Task
-          </h1>
-          <div class="divider m-0"></div>
-          <div class="p-10 flex flex-col gap-y-6">
-            <p
-              class="itbkk-button-message even:text-[#ECECEC] text-opacity-75 break-all"
-            >
-              Do you want to delete task "{{ utilityStore.taskTitleConfirm }}"?
-            </p>
-            <div class="flex justify-end gap-x-[1rem]">
-              <button
-                class="itbkk-button-cancel btn text-xs font-semibold text-[#FFFFFF] bg-transparent text-opacity-70 border-none hover:bg-transparent"
-                @click="utilityStore.showDeleteConfirmation = false"
-              >
-                Cancel
-              </button>
-              <button
-                class="itbkk-button-confirm btn border-[#730000] text-xs font-bold bg-[#730000] hover:bg-opacity-35 border-[##DB1058] hover:bg-[##730000] bg-opacity-[0.14] text-[#DB1058]"
-                @click="deleteTask(utilityStore.selectedId)"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <DeleteConfirmationTask
+      @delete-task="deleteTask(utilityStore.selectedId)"
+    />
     <!-- delete confirmation -->
   </main>
 </template>

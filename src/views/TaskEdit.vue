@@ -3,6 +3,7 @@ import {ref, onBeforeMount, computed, reactive} from "vue"
 import {getTask, editTask, getAllStatuses} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
 import router from "@/router/index.js"
 import Xmark from "@/components/icons/Xmark.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
@@ -11,6 +12,7 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
+import WarningIcon from "@/components/icons/WarningIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
@@ -31,6 +33,7 @@ import "vue3-toastify/dist/index.css"
 const task = ref({})
 const route = useRoute()
 const utilityStore = useUtilityStore()
+const statusStyleStore = useStatusStyleStore()
 
 const newStatus = reactive({
   id: "",
@@ -49,6 +52,7 @@ const updateTask = reactive({
 const selectStatus = (name, color, id) => {
   newStatus.name = name
   newStatus.color = color
+  newStatus.id = id
   updateTask.status = id
 }
 
@@ -87,13 +91,38 @@ const formatDateTime = (baseFormatDate) => {
 
   return formattedDate
 }
+const filterStatus = ref({})
 
 const editTaskData = async (newTask) => {
+  const filterStatusId = utilityStore.statusManager.getStatus().filter((status) => status.id === newStatus.id)
+  filterStatus.value = filterStatusId[0]
+  console.log(filterStatus.value)
+  if (
+    filterStatusId[0].count >= utilityStore.limitStatusNumber &&
+    utilityStore.isLimitEnable === true && filterStatusId[0].name !== "No Status" && filterStatusId[0].name !== "Done" 
+  ) {
+    toast(`The Status ${newStatus.name} will have to many tasks. Please make progress and update status of existing tasks first.`,
+      {
+        type: "error",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      }
+    )
+    utilityStore.transactionDisable = true
+    return
+  }
+
+
   try {
     const response = await editTask(route.params.id, newTask)
 
     if (response.status === 200) {
       utilityStore.tasksManager.editTask(route.params.id, response.data)
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === task.value.status.id)].count -= 1
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === newStatus.id)].count += 1
+      utilityStore.transactionDisable = false
       router.push("/task")
       setTimeout(() => {
         toast("The task has been updated", {
@@ -107,6 +136,7 @@ const editTaskData = async (newTask) => {
     }
 
     if (response.status === 404) {
+      utilityStore.transactionDisable = false
       toast("The task does not exist", {
         type: "error",
         timeout: 2000,
@@ -121,12 +151,18 @@ const editTaskData = async (newTask) => {
 }
 
 const isButtonDisabled = computed(() => {
+  if (newStatus.id !== filterStatus.value.id ) {
+    utilityStore.transactionDisable = false
+  }
+  else if (newStatus.id === filterStatus.value.id) {
+    utilityStore.transactionDisable = true
+  }
   return (
     (updateTask.title === task.value.title &&
       updateTask.description === task.value.description &&
       updateTask.assignees === task.value.assignees &&
       updateTask.status === task.value.status.id) ||
-    !updateTask.title
+    !updateTask.title || utilityStore.transactionDisable
   )
 })
 
@@ -135,8 +171,6 @@ onBeforeMount(async () => {
     const fetchTask = await getTask(route.params.id)
     task.value = fetchTask
     // console.log(task.value)
-    const fetchStatus = await getAllStatuses()
-    utilityStore.statusManager.addStatuses(fetchStatus)
 
     task.value.createdOn = formatDateTime(task.value.createdOn)
     task.value.updatedOn = formatDateTime(task.value.updatedOn)
@@ -160,7 +194,7 @@ onBeforeMount(async () => {
 
 <template>
   <section
-    class="fixed inset-0 flex items-center justify-center backdrop-blur-sm"
+    class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-sm"
   >
     <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10">
       <h1
@@ -197,7 +231,7 @@ onBeforeMount(async () => {
                 tabindex="0"
                 role="button"
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="utilityStore.statusCustomStyle(newStatus.color)"
+                :class="statusStyleStore.statusCustomStyle(newStatus.color)"
               >
                 {{ newStatus.name }}
                 <span><DropdownIcon /></span>
@@ -211,7 +245,7 @@ onBeforeMount(async () => {
                     v-for="status in utilityStore.statusManager.getStatus()"
                     :key="status.id"
                     @click="selectStatus(status.name, status.color, status.id)"
-                    :class="utilityStore.statusCustomStyle(status.color)"
+                    :class="statusStyleStore.statusCustomStyle(status.color)"
                     class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
                   >
                     {{ status.name }}
@@ -303,17 +337,25 @@ onBeforeMount(async () => {
             </div>
           </div>
 
+          <div
+              :class="utilityStore.isLimitEnable ? '' : 'invisible'"
+              class="text-[#D69C27] flex items-center gap-x-2"
+            >
+              <WarningIcon width="15" height="15" />
+              <span class=" tracking-wider text-xs">Limit Statuses is enabled</span>
+            </div>
+
           <div class="flex gap-x-3">
             <button
               @click="router.push('/')"
-              class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] bg-button"
+              class="itbkk-button-cancel btn border-[#DB1058] px-14  bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none hover:bg-opacity-30 bg-transparent"
             >
               CANCEL
             </button>
             <button
               :disabled="isButtonDisabled"
               @click="editTaskData(updateTask)"
-              class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] bg-button"
+              class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
             >
               SAVE
             </button>
