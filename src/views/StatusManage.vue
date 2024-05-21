@@ -3,6 +3,7 @@ import { ref, onBeforeMount, reactive, watch } from "vue";
 import router from "@/router/index.js";
 import { useUtilityStore } from "@/stores/useUtilityStore.js";
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore.js";
+import {useSortAndFilterStore} from "@/stores/useSortAndFilterStore.js"
 import {
   deleteStatuses,
   getAllStatuses,
@@ -26,6 +27,7 @@ import SettingIcon from "@/components/icons/SettingIcon.vue";
 
 const utilityStore = useUtilityStore();
 const statusStyleStore = useStatusStyleStore();
+const sortAndFilterStore = useSortAndFilterStore()
 const disableBtn = ref(true);
 
 const disabledActionButton = () => {
@@ -150,7 +152,8 @@ onBeforeMount(async () => {
   try {
     const fetchData = await getAllStatuses();
     utilityStore.statusManager.addStatuses(fetchData);
-
+    
+    sortAndFilterStore.filterStatusArray = []
     for (const status of utilityStore.statusManager.getStatus()) {
       if (status.description === null) {
         status.description = "No description is provided";
