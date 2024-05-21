@@ -12,8 +12,6 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
       params.append("direction", direction)
     }
     if (sortBy) {
-      
-
       if (sortBy.trim().length === 0) {
         params.delete("sortBy", sortBy)
       } else {
@@ -21,12 +19,15 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
       }
     }
     if (filterStatuses) {
+      console.log(filterStatuses)
       if (filterStatuses.length === 0) {
         params.delete("sortBy", sortBy)
       }
+
       for (let index = 0; index < filterStatuses.length; index++) {
         if (filterStatuses[index] === "") {
           params.delete("filterStatuses", filterStatuses[index])
+          // filterStatuses = []
         } else {
           params.append("filterStatuses", filterStatuses[index])
         }
