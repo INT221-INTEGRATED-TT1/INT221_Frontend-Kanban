@@ -10,11 +10,18 @@ const utilityStore = useUtilityStore()
 const sortAndFilterStore = useSortAndFilterStore()
 const statusStyleStore = useStatusStyleStore()
 
+// const clearFilterStatus = () =>{
+//   sortAndFilterStore.filterOrSortByStatus('','','','')
+//   utilityStore.statusManager.clearFilter()
+//   sortAndFilterStore.filterStatusArray = []
+// }
+
 onBeforeMount(async () => {
   try {
     const fetchStatuses = await getAllStatuses()
     utilityStore.statusManager.addStatuses(fetchStatuses)
     utilityStore.statusManager.addFilteredField()
+    
   } catch (error) {
     console.log(error)
   }
@@ -22,6 +29,10 @@ onBeforeMount(async () => {
 </script>
 
 <template>
+  <!-- <button @click="clearFilterStatus()">
+    clear
+  </button> -->
+
   <div class="mb-5 collapse">
     <h1
       class="itbkk-status-filter flex items-center text-normal gap-x-3 collapse-title tracking-wider"
@@ -36,7 +47,7 @@ onBeforeMount(async () => {
         <div
           v-for="(status, index) in utilityStore.statusManager.getStatus()"
           :key="index"
-          class="itbkk-filter-item rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border  border-[#2e2e2e] cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
+          class="itbkk-filter-item itbkk-status-choice rounded-2xl py-1 px-3 text-[14px] w-fit font-bold border border-[#2e2e2e] cursor-pointer hover:bg-base-300 truncate text-center tracking-normal font-Inter hover:duration-75"
           :class="
             status.filtered === true
               ? statusStyleStore.statusCustomStyle(status.color)
@@ -51,7 +62,6 @@ onBeforeMount(async () => {
             )
           "
         >
-        
           {{ status.name }}
         </div>
       </div>
