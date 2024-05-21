@@ -3,7 +3,7 @@ import {ref, reactive, onBeforeMount, computed, onMounted} from "vue"
 import router from "@/router"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore"
-import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import {getStatus, editStatus} from "@/libs/FetchAPI"
 import Xmark from "@/components/icons/Xmark.vue"
 import {toast} from "vue3-toastify"
@@ -35,6 +35,17 @@ const editStatusData = async (newStatus) => {
       setTimeout(() => {
         toast("The status has been edited", {
           type: "success",
+          timeout: 2000,
+          theme: "dark",
+          transition: "flip",
+          position: "bottom-right",
+        })
+      })
+    } else if (response.status === 400) {
+      utilityStore.transactionDisable = false
+      setTimeout(() => {
+        toast("An error has occurred, the status could not be added.", {
+          type: "error",
           timeout: 2000,
           theme: "dark",
           transition: "flip",
