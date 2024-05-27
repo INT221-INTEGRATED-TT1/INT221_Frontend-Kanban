@@ -110,7 +110,7 @@ const editTaskData = async (newTask) => {
         position: "bottom-right",
       }
     )
-    utilityStore.transactionDisable = true
+    // utilityStore.transactionDisable = true
     return
   }
 
