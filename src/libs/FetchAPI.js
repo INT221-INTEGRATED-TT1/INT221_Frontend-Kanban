@@ -1,7 +1,7 @@
 import router from "@/router"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
-
+// แก้ด้วย
 const getAllTasks = async (direction, sortBy, filterStatuses) => {
   let url = `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`
 
@@ -12,21 +12,21 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
       params.append("direction", direction)
     }
     if (sortBy) {
-      if (sortBy.trim().length === 0) {
-        params.delete("sortBy", sortBy)
+      if (sortBy.trim().length === 0 && filterStatuses.length === 0) {
+        params.delete("sortBy")
       } else {
         params.append("sortBy", sortBy)
       }
     }
     if (filterStatuses) {
-      console.log(filterStatuses)
-      if (filterStatuses.length === 0) {
-        params.delete("sortBy", sortBy)
-      }
+      // if (filterStatuses.length === 0) {
+      //   params.delete("sortBy")
+      //   params.delete("direction")
+      // }
 
       for (let index = 0; index < filterStatuses.length; index++) {
         if (filterStatuses[index] === "") {
-          params.delete("filterStatuses", filterStatuses[index])
+          params.delete("filterStatuses")
           // filterStatuses = []
         } else {
           params.append("filterStatuses", filterStatuses[index])

@@ -27,7 +27,7 @@ const sortAndFilterStore = useSortAndFilterStore()
         <li
           class="p-0"
           @click="
-            sortAndFilterStore.filterOrSortByStatus('ASC', 'assignees', '')
+            sortAndFilterStore.filterOrSortByStatus('ASC', 'assignees', '', '')
           "
           :class="{
             'text-white': sortAndFilterStore.selectedOption === 'ASC',
@@ -45,7 +45,7 @@ const sortAndFilterStore = useSortAndFilterStore()
         <li
           class="p-0"
           @click="
-            sortAndFilterStore.filterOrSortByStatus('DESC', 'assignees', '')
+            sortAndFilterStore.filterOrSortByStatus('DESC', 'assignees', '', '')
           "
           :class="{
             'text-white': sortAndFilterStore.selectedOption === 'DESC',
