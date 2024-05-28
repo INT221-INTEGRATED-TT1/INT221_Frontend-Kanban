@@ -6,6 +6,25 @@ import Nat from "../components/icons/TeamPage/Avatar/Nat.vue"
 import Line from "../components/icons/TeamPage/line.vue"
 import Line2 from "../components/icons/TeamPage/line2.vue"
 import Line3 from "../components/icons/TeamPage/line3.vue"
+import { reactive } from "vue";
+const animationState = reactive({
+  frontEnd: false,
+  devOps: false,
+  backEnd: false
+})
+const handleAnimation = (name)=>{
+  console.log("executed");
+  if(name === "frontend"){
+    animationState.frontEnd = true
+  }
+  else if(name === "devops"){
+  animationState.devOps = true
+}
+else {
+  animationState.backEnd = true
+}
+
+}
 
 </script>
 <template>
@@ -18,7 +37,7 @@ import Line3 from "../components/icons/TeamPage/line3.vue"
         </div>
         
         <div class="p-5 ">
-          <GroupCode  class="delay-[5000ms] animate-pulse" />
+          <GroupCode  class="delay-[5000ms] animate-pulse max-w-[10rem]" />
         </div>
       </div>
       <div class="divider"></div>
@@ -27,11 +46,11 @@ import Line3 from "../components/icons/TeamPage/line3.vue"
           <Poom />
           <p class="font-bold">@PAPANGKORN</p>
         </div>
-        <div class="relative col-span-2 border border-[#454545] overflow-hidden border-dashed p-11 flex items-center justify-center cursor-pointer">
+        <div class="relative col-span-2 border border-[#454545] overflow-hidden border-dashed p-11 flex items-center justify-center cursor-pointer" >
           <p class="absolute text-7xl kalam-regular font-bold  pt-3 text-[#D5D1BD] hover:scale-95 z-10"> FrontEnd
           
           </p>
-          <Line class="absolute z-10"/>  
+          <Line class="absolute z-10 " :class="{drawLine:animationState.frontEnd}" @mouseover="handleAnimation('frontend')" style="stroke-dasharray: 0, 1000;"  />  
         </div>
         <div class="flex items-center flex-col gap-6 justify-center border border-[#454545] border-r-0 border-dashed">
 
@@ -40,7 +59,7 @@ import Line3 from "../components/icons/TeamPage/line3.vue"
         </div>
         <div class="relative flex items-center justify-center col-span-2 border border-[#454545] border-dashed p-11">
           <p class="text-7xl kalam-regular  font-bold  pt-3 text-[#D5D1BD]"> DevOps </p>
-          <Line2 class="absolute z-10 mr-[15%]"/> 
+          <Line2 class="absolute z-10 mr-[15%]" :class="{drawLine:animationState.devOps}" @mouseover="handleAnimation('devops')" style="stroke-dasharray: 0, 1000;"/> 
         </div>
         <div class="flex items-center flex-col gap-6 justify-center border border-[#454545] border-r-0 border-dashed">
 
@@ -50,17 +69,22 @@ import Line3 from "../components/icons/TeamPage/line3.vue"
         </div>
         <div class="relative flex items-center justify-center text-3xl col-span-2 border border-[#454545]  border-dashed p-11">
           <p class="kalam-regular text-7xl font-bold  pt-3 text-[#D5D1BD]"> BackEnd </p>
-          <Line3 class="absolute z-10 mt-28"/> 
+          <Line3 class="absolute z-10 mt-28" :class="{drawLine:animationState.backEnd}" @mouseover="handleAnimation('backend')" style="stroke-dasharray: 0, 1000;"/> 
         
         </div>
       </div>
+     <div class="flex items-center justify-center p-7">
+      © CopyRight IT Bangmod Kradan Kanban TT-1
+
+     </div>
     </div>
+    
   </div>
 </template>
 
 
 
-<style>
+<style >
 .typewriter p {
   color: #fff;
   @apply font-Inter;
@@ -89,6 +113,21 @@ import Line3 from "../components/icons/TeamPage/line3.vue"
 .glow {
   text-shadow: rgba(214,212,210,0.9) 0px 0px 39px;
 
+}
+
+
+@keyframes drawLine {
+    0% {
+        stroke-dasharray: 0, 1000;
+    }
+    100% {
+        stroke-dasharray: 1000, 0;
+    }
+}
+
+.drawLine path {
+    animation: drawLine 1s ease-in forwards;
+    
 }
 
 

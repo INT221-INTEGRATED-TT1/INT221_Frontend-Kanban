@@ -6,16 +6,5 @@
 
 </template>
 <style>
-@keyframes drawLine {
-    0% {
-        stroke-dasharray: 0, 1000;
-    }
-    100% {
-        stroke-dasharray: 1000, 0;
-    }
-}
 
-#ex6 path {
-    animation: drawLine 1s ease-in forwards;
-}
 </style>
