@@ -10,7 +10,9 @@
 <div align="center">
 <img src = "./readme/poster-2.png" style = "border-radius:10px">
 </div>
-
+<div align="center">
+<img src = "./readme/poster-3.png" style = "border-radius:10px">
+</div>
 
 [See design system](https://www.figma.com/design/PBECxmprRuOT3Goo6uceJt/Design?node-id=0-1&t=NjntetTKDm2LaAEI-1)
 
