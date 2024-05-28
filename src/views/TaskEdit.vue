@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, computed, reactive} from "vue"
-import {getTask, editTask, getAllStatuses} from "@/libs/FetchAPI.js"
+import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
@@ -150,13 +150,13 @@ const editTaskData = async (newTask) => {
   }
 }
 
-const isButtonDisabled = computed(() => {
+const isButtonDisable = computed(() => {
   if (newStatus.id !== filterStatus.value.id ) {
     utilityStore.transactionDisable = false
   }
-  else if (newStatus.id === filterStatus.value.id) {
-    utilityStore.transactionDisable = true
-  }
+  // else if (newStatus.id === filterStatus.value.id) {
+  //   utilityStore.transactionDisable = true
+  // }
   return (
     (updateTask.title === task.value.title &&
       updateTask.description === task.value.description &&
@@ -353,7 +353,7 @@ onBeforeMount(async () => {
               CANCEL
             </button>
             <button
-              :disabled="isButtonDisabled"
+              :disabled="isButtonDisable"
               @click="editTaskData(updateTask)"
               class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
             >

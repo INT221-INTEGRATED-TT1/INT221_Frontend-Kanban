@@ -56,7 +56,7 @@ onBeforeMount(async () => {
           @click="
             sortAndFilterStore.filterOrSortByStatus(
               sortAndFilterStore.sortDirection,
-              'status.name',
+              sortAndFilterStore.currentSortBy,
               status.name,
               status.id
             )

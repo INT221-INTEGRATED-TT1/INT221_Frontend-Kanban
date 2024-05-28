@@ -1,10 +1,10 @@
 import router from "@/router"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
-
+// แก้ด้วย
 const getAllTasks = async (direction, sortBy, filterStatuses) => {
   let url = `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`
-
+  console.log(filterStatuses)
   if (direction || sortBy || filterStatuses) {
     const params = new URLSearchParams()
 
@@ -13,29 +13,24 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
     }
     if (sortBy) {
       if (sortBy.trim().length === 0) {
-        params.delete("sortBy", sortBy)
+        params.delete("sortBy")
       } else {
         params.append("sortBy", sortBy)
       }
     }
-    if (filterStatuses) {
-      console.log(filterStatuses)
-      if (filterStatuses.length === 0) {
-        params.delete("sortBy", sortBy)
-      }
-
+    if (filterStatuses.length) {
       for (let index = 0; index < filterStatuses.length; index++) {
         if (filterStatuses[index] === "") {
-          params.delete("filterStatuses", filterStatuses[index])
-          // filterStatuses = []
-        } else {
-          params.append("filterStatuses", filterStatuses[index])
+          
+        } else if(filterStatuses) {
+        params.append("filterStatuses", filterStatuses[index])
         }
       }
     }
+  
     url += `?${params.toString()}`
   }
-  console.log(url)
+  // console.log(url)
   const response = await fetch(url)
 
   if (!response.ok) {

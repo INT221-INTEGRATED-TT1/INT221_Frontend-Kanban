@@ -8,6 +8,8 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
   const filterStatusArray = ref([])
   const sortDirection = ref("")
   const selectedOption = ref("")
+  const currentSortBy= ref("createdOn")
+  const disableSort = ref(true)
 
   const filterOrSortByStatus = async (
     direction,
@@ -19,8 +21,11 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
 
     sortDirection.value = direction
     selectedOption.value = direction
+    currentSortBy.value = sortBy
+
+    sortDirection.value === direction ? disableSort.value : disableSort.value = false
     
-    if (!filterStatusArray.value.includes(filterStatuses)) {
+    if (!filterStatusArray.value.includes(filterStatuses) && filterStatuses != '') {
       filterStatusArray.value.push(filterStatuses)
     } else if (filterStatusArray.value.includes(filterStatuses)) {
       const index = filterStatusArray.value.indexOf(filterStatuses)
@@ -31,7 +36,7 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
 
     const sorted = await getAllTasks(
       sortDirection.value,
-      sortBy,
+      currentSortBy.value,
       filterStatusArray.value
     )
     utilityStore.tasksManager.addTasks(sorted)
@@ -48,5 +53,6 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
     sortDirection,
     selectedOption,
     filterOrSortByStatus,
+    currentSortBy,
   }
 })
