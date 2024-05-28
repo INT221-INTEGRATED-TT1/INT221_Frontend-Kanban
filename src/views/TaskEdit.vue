@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, computed, reactive} from "vue"
-import {getTask, editTask, getAllStatuses} from "@/libs/FetchAPI.js"
+import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
