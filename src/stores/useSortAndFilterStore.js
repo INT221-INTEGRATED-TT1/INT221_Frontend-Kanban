@@ -8,6 +8,7 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
   const filterStatusArray = ref([])
   const sortDirection = ref("")
   const selectedOption = ref("")
+  const disableSort = ref(true)
 
   const filterOrSortByStatus = async (
     direction,
@@ -19,6 +20,8 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
 
     sortDirection.value = direction
     selectedOption.value = direction
+
+    sortDirection.value === direction ? disableSort.value : disableSort.value = false
     
     if (!filterStatusArray.value.includes(filterStatuses)) {
       filterStatusArray.value.push(filterStatuses)

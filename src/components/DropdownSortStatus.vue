@@ -7,7 +7,6 @@ import SortRecently from "@/components/icons/SortRecently.vue"
 import SelectedDot from "@/components/icons/SelectedDot.vue"
 import StatusIcon from "@/components/icons/StatusIcon.vue"
 
-
 const sortAndFilterStore = useSortAndFilterStore()
 </script>
 
@@ -30,8 +29,7 @@ const sortAndFilterStore = useSortAndFilterStore()
           sortAndFilterStore.filterOrSortByStatus('ASC', 'status.name', '', '')
         "
         :class="{
-          'text-white':
-            sortAndFilterStore.selectedOption === 'ASC',
+          'text-white': sortAndFilterStore.selectedOption === 'ASC',
         }"
       >
         <span
@@ -47,8 +45,7 @@ const sortAndFilterStore = useSortAndFilterStore()
           sortAndFilterStore.filterOrSortByStatus('DESC', 'status.name', '', '')
         "
         :class="{
-          'text-white':
-            sortAndFilterStore.selectedOption === 'DESC',
+          'text-white': sortAndFilterStore.selectedOption === 'DESC',
         }"
       >
         <span
