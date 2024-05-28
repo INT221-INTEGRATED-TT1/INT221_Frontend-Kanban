@@ -12,25 +12,24 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
       params.append("direction", direction)
     }
     if (sortBy) {
-      if (sortBy.trim().length === 0 && filterStatuses.length === 0) {
+      if (sortBy.trim().length === 0) {
         params.delete("sortBy")
       } else {
         params.append("sortBy", sortBy)
       }
     }
     if (filterStatuses) {
-      // if (filterStatuses.length === 0) {
-      //   params.delete("sortBy")
-      //   params.delete("direction")
-      // }
+      if (filterStatuses.length === 0) {
+        params.delete("sortBy")
+        params.delete("direction")
+      }
 
       for (let index = 0; index < filterStatuses.length; index++) {
-        if (filterStatuses[index] === "") {
-          params.delete("filterStatuses")
-          // filterStatuses = []
-        } else {
-          params.append("filterStatuses", filterStatuses[index])
-        }
+        // if (filterStatuses[index] === "") {
+        //   params.delete("filterStatuses")
+        // } else if(filterStatuses) {
+        params.append("filterStatuses", filterStatuses[index])
+        // }
       }
     }
     url += `?${params.toString()}`
