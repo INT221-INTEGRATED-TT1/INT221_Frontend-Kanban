@@ -4,7 +4,7 @@ import "vue3-toastify/dist/index.css"
 // แก้ด้วย
 const getAllTasks = async (direction, sortBy, filterStatuses) => {
   let url = `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`
-
+  console.log(filterStatuses)
   if (direction || sortBy || filterStatuses) {
     const params = new URLSearchParams()
 
@@ -18,23 +18,26 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
         params.append("sortBy", sortBy)
       }
     }
-    if (filterStatuses) {
-      if (filterStatuses.length === 0) {
-        params.delete("sortBy")
-        params.delete("direction")
-      }
+    if (filterStatuses.length ) {
+      // if (filterStatuses.length === 0) {
+      //   params.delete("sortBy")
+      //   params.delete("direction")
+      // }
 
       for (let index = 0; index < filterStatuses.length; index++) {
-        // if (filterStatuses[index] === "") {
-        //   params.delete("filterStatuses")
-        // } else if(filterStatuses) {
+        if (filterStatuses[index] === "") {
+          
+        } else if(filterStatuses) {
         params.append("filterStatuses", filterStatuses[index])
-        // }
+        }
       }
     }
+    // if (filterStatuses[0] === '') {
+    //   params.delete("filterStatuses")
+    // }
     url += `?${params.toString()}`
   }
-  console.log(url)
+  // console.log(url)
   const response = await fetch(url)
 
   if (!response.ok) {
