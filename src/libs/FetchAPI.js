@@ -19,11 +19,6 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
       }
     }
     if (filterStatuses.length ) {
-      // if (filterStatuses.length === 0) {
-      //   params.delete("sortBy")
-      //   params.delete("direction")
-      // }
-
       for (let index = 0; index < filterStatuses.length; index++) {
         if (filterStatuses[index] === "") {
           
@@ -32,9 +27,7 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
         }
       }
     }
-    // if (filterStatuses[0] === '') {
-    //   params.delete("filterStatuses")
-    // }
+  
     url += `?${params.toString()}`
   }
   // console.log(url)
