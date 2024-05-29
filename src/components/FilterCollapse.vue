@@ -10,12 +10,6 @@ const utilityStore = useUtilityStore()
 const sortAndFilterStore = useSortAndFilterStore()
 const statusStyleStore = useStatusStyleStore()
 
-// const clearFilterStatus = () =>{
-//   sortAndFilterStore.filterOrSortByStatus('','','','')
-//   utilityStore.statusManager.clearFilter()
-//   sortAndFilterStore.filterStatusArray = []
-// }
-
 onBeforeMount(async () => {
   try {
     const fetchStatuses = await getAllStatuses()
@@ -29,9 +23,6 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <!-- <button @click="clearFilterStatus()">
-    clear
-  </button> -->
 
   <div class="mb-5 collapse">
     <h1
