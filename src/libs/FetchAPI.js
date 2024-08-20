@@ -294,6 +294,29 @@ const toggleStatusLimit = async (newToggleStatus) => {
   }
 }
 
+const authenticateUser = async (userCredentials) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/authentications/login`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userCredentials),
+      }
+    )
+
+    return {
+      status: response.status,
+      message: "successfully get user info",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -307,4 +330,5 @@ export {
   deleteStatuses,
   deleteStatusTransfer,
   toggleStatusLimit,
+  authenticateUser,
 }

@@ -5,32 +5,43 @@ import loginPoster3 from '../components/icons/loginPoster3.png'
 import MicrosoftLogo from '../components/icons/MicrosoftLogo.vue'
 import errorIcon from '../components/icons/errorLoginIcon.vue'
 import warningIcon from '../components/icons/WarningIcon.vue'
+import {authenticateUser} from "@/libs/FetchAPI"
+import router from "@/router/index.js"
 
 import { ref, reactive, watch, computed } from "vue"
 
-const username = ref('')
-const password = ref('')
+const userCredentials = reactive({
+    userName : "",
+    password : "",
+})
 const errorLogin = ref(false)
 const problemLogin = ref(false)
 const disableLoginBtn = ref(false)
 
 const isLoginButtonDisabled = computed(() => {
-    // console.log(username.value, typeof(password.value))
-    return !(username.value.length > 0 && password.value.length > 0) || disableLoginBtn.value
+    return !(userCredentials.userName && userCredentials.password) || disableLoginBtn.value
 })
 
-const checkLoginUser = () => {
-    if(username.value.length > 50  || password.value.length > 14) {
-        errorLogin.value = true
-        problemLogin.value = false
-        // disableLoginBtn.value = true
-        return
-    }
-    else{
-        //errorLogin.value = false
-        //problemLogin.value = true
-        // errorLogin.value = true
-        // problemLogin.value = false
+const verifyUserCredentials = async () => {
+    try {
+        const response = await authenticateUser(userCredentials)
+        if (response.status === 200) {
+            errorLogin.value = false
+            problemLogin.value = false
+            localStorage.setItem("JWT_TOKEN", response.data.access_token)
+            console.log(localStorage.getItem("JWT_TOKEN"))
+            router.push(`/task`)
+        }
+        else if (response.status === 400 || response.status === 401){
+            errorLogin.value = true
+            problemLogin.value = false
+        }
+        else{
+            errorLogin.value = false
+            problemLogin.value = true
+        }
+    } catch (error) {
+        console.log(error)
     }
 }
 
@@ -53,7 +64,7 @@ const checkLoginUser = () => {
                     <input id="itbkk-username" class="itbkk-username mt-2 block w-full p-3 border border-[#373737] focus:border-white rounded-md shadow-sm focus:outline-none
                         bg-[#1F1F1F] placeholder-white placeholder-opacity-30" 
                         placeholder="Enter your username"
-                        v-model="username"
+                        v-model="userCredentials.userName"
                         maxlength="50"
                         >
                 </div>
@@ -62,13 +73,13 @@ const checkLoginUser = () => {
                     <input type="password" id="itbkk-password" class="itbkk-password mt-2 block w-full p-3 border border-[#373737] focus:border-white rounded-md shadow-sm focus:outline-none
                         bg-[#1F1F1F] placeholder-white placeholder-opacity-30" 
                         placeholder="Enter your password"
-                        v-model="password"
+                        v-model="userCredentials.password"
                         maxlength="14"
                         >
                 </div>
                 <button class="itbkk-button-signin w-full btn bg-white hover:bg-black hover:text-white text-black py-3 font-Geist font-medium rounded-md transition"
                     :disabled="isLoginButtonDisabled"
-                    @click="checkLoginUser">
+                    @click="verifyUserCredentials">
                     Sign In
                 </button>
                 <button class="w-full btn mt-5 bg-[#2F2F2F] hover:bg-black hover:text-white text-white py-3 font-Geist font-medium rounded-md transition">
