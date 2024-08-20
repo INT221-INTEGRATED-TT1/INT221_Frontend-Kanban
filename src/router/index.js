@@ -9,12 +9,13 @@ import StatusCreate from "@/views/StatusCreate.vue"
 import StatusManage from "@/views/StatusManage.vue"
 import StatusEdit from "@/views/StatusEdit.vue"
 import TeamPage from "@/views/TeamPage.vue"
+import LoginPage from "@/views/LoginPage.vue"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL), // base url
 
   routes: [
-    {path: "/", redirect: "/task"},
+    {path: "/", redirect: "/login"},
     {
       path: "/task",
       component: Task,
@@ -50,9 +51,18 @@ const router = createRouter({
       path:"/team",
       component: TeamPage,
       name:"team"
-    }
+    },
+    
+    {
+      path: "/login",
+      component: LoginPage,
+      name: "login"
+    },
+    
     // {path:"/test", component: TestLen}
-  ],
+
+  ]
+
 })
 
 export default router
