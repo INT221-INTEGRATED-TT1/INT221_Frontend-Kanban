@@ -242,7 +242,7 @@ const createNewTask = async () => {
 
             <div class="flex gap-x-3">
               <button
-                @click="router.push('/')"
+                @click="router.push('/task')"
                 class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none hover:bg-opacity-30 bg-transparent"
               >
                 CANCEL

@@ -228,7 +228,7 @@ onBeforeMount(async () => {
 
           <div class="flex gap-x-3">
             <button
-              @click="router.push('/')"
+              @click="router.push('/task')"
               class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-none hover:bg-opacity-30"
             >
               OK
