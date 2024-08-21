@@ -112,7 +112,7 @@ onBeforeMount(async () => {
         </router-link>
         <div
           class="bg-[#1D1D1F] px-4 py-2 rounded-2xl flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
-          <button class="text-normal font-Inter">
+          <button class="itbkk-fullname text-normal font-Inter">
             {{ userStore.userIdentity.name}}
           </button>
           <span>

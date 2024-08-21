@@ -78,6 +78,7 @@ const verifyUserCredentials = async () => {
                         >
                 </div>
                 <button class="itbkk-button-signin w-full btn bg-white hover:bg-black hover:text-white text-black py-3 font-Geist font-medium rounded-md transition"
+                    :class="isLoginButtonDisabled ? 'disabled' : '' " 
                     :disabled="isLoginButtonDisabled"
                     @click="verifyUserCredentials">
                     Sign In
