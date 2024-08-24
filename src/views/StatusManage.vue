@@ -4,6 +4,7 @@ import router from "@/router/index.js";
 import { useUtilityStore } from "@/stores/useUtilityStore.js";
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore.js";
 import {useSortAndFilterStore} from "@/stores/useSortAndFilterStore.js"
+import {useUserStore} from "@/stores/useUserStore"
 import {
   deleteStatuses,
   getAllStatuses,
@@ -28,6 +29,7 @@ import SettingIcon from "@/components/icons/SettingIcon.vue";
 const utilityStore = useUtilityStore();
 const statusStyleStore = useStatusStyleStore();
 const sortAndFilterStore = useSortAndFilterStore()
+const userStore = useUserStore()
 const disableBtn = ref(true);
 
 const disabledActionButton = () => {
@@ -149,6 +151,9 @@ watch(newStatus, () => {
 });
 
 onBeforeMount(async () => {
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
+  userStore.userIdentity = { ...JSON.parse(decodedData) }
   try {
     const fetchData = await getAllStatuses();
     utilityStore.statusManager.addStatuses(fetchData);
@@ -170,7 +175,7 @@ onBeforeMount(async () => {
   <main class="w-screen h-screen overflow-y-auto bg-animation p-[4rem]">
     <div class="flex justify-between">
       <div>
-        <router-link to="/">
+        <router-link to="/task">
           <h1
             class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand"
           >
@@ -185,7 +190,7 @@ onBeforeMount(async () => {
 
       <div class="flex items-center gap-x-3">
         <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
-        <router-link to="/">
+        <router-link to="/task">
           <div
             class="itbkk-button-home bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.35rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer"
           >
@@ -203,6 +208,16 @@ onBeforeMount(async () => {
             </button>
           </div>
         </router-link>
+
+        <div
+          class="bg-[#1D1D1F] px-4 py-2 rounded-2xl flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
+          <button class="text-normal font-Inter">
+            {{ userStore.userIdentity.name}}
+          </button>
+          <span>
+              <DropdownIcon />
+            </span>
+        </div>
 
         <button
           class="itbkk-status-setting hover:bg-[#1f1f1f] px-1 tracking-wider rounded-xl border border-[#E3E3E3] border-opacity-50"
