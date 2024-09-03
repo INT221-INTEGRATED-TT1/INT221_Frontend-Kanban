@@ -1,0 +1,121 @@
+<script setup>
+import { ref, onMounted, onBeforeMount, watch, reactive } from "vue"
+import router from "@/router/index.js"
+import GroupCode from "@/components/icons/GroupCode.vue"
+import FilterCollapse from "@/components/FilterCollapse.vue"
+import AboutBoardIcon from "@/components/icons/AboutBoard.vue"
+import DeleteIcon from "@/components/icons/DeleteIcon.vue";
+
+const testData = reactive([{
+    boardName: "Todo Planning to travelll27",
+    createdBy: "Natsaran",
+    createdOn: "16 Jan 2024",
+},
+{
+    boardName: "Todo Planning to travelsssssssssssssss40",
+    createdBy: "Natsaran",
+    createdOn: "16 Jan 2024",
+},
+{
+    boardName: "Todo Planning to travelssssssssssssssssssss",
+    createdBy: "Natsaran",
+    createdOn: "16 Jan 2024",
+},
+{
+    boardName: "Todo asdasd to dasda",
+    createdBy: "Natsaran",
+    createdOn: "16 Jan 2024",
+},
+{
+    boardName: "Todo asdasd to dasda",
+    createdBy: "Natsaran",
+    createdOn: "16 Jan 2024",
+},
+{
+    boardName: "Todo asdasd to dasda",
+    createdBy: "Natsaran",
+    createdOn: "16 Jan 2024",
+},
+{
+    boardName: "Todo asdasd to dasda",
+    createdBy: "Natsaran",
+    createdOn: "16 Jan 2024",
+},
+{
+    boardName: "Todo asdasd to dasda",
+    createdBy: "Natsaran",
+    createdOn: "16 Jan 2024",
+},
+])
+
+const testEmptyData = reactive('')
+
+console.log(Object.keys(testData).length)
+
+</script>
+
+<template>
+    <main class="w-screen h-screen overflow-y-auto bg-animation p-[8rem] pt-[4rem]">
+        <!-- Team Logo -->
+        <div class="flex justify-between">
+            <div>
+                <router-link to="/board">
+                    <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
+                        IT-BangMod Kradan Kanban
+                    </h1>
+                </router-link>
+                <div class="ml-[22rem] tracking-in-expand-2">
+                    <GroupCode />
+                </div>
+            </div>
+        </div>
+        <!-- Boad List Header & Add New board Button -->
+        <div class="flex justify-center items-center mt-2">
+            <h1 class="text-headline font-extrabold text-3xl tracking-wider mx-auto pl-44">Board List</h1>
+            <router-link :to="{ name: 'create-board' }">
+                <div
+                    class="flex items-center bg-[#E3E3E3] py-1 px-5 rounded text-black text-sm font-semibold tracking-wid hover:bg-opacity-90">
+                    <div class="text-center">Create personal board</div>
+                </div>
+            </router-link>
+        </div>
+        <!-- Lists of the boards -->
+        <div v-if="testData.length > 0"
+            class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem] ">
+            <div v-for="i in testData"
+                class="space-y-10 p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
+                @click="router.push(`/task`)">
+                <!-- <div class="flex gap-4"> -->
+                <div class="flex items-center h-16" :data-tip="i.boardName.length > 24 ? i.boardName : ''"
+                    :class="i.boardName.length > 24 ? 'tooltip' : ''">
+                    <div class="self-center pr-2">
+                        <AboutBoardIcon width="40" height="48" />
+                    </div>
+                    <p class="text-2xl font-semibold text-wrap truncate text-start">{{ i.boardName }}</p>
+                </div>
+                <!-- <div class="flex items-center justify-between font-Geist tracking-wider text-white space-y-1"> -->
+                <!-- <p class="text-2xl font-semibold">Todo Planning to travel</p> -->
+                <!-- <p class="text-xs font-light opacity-55">Created At 16 Jan 2024</p> -->
+                <!-- <p class="text-sm font-medium ">By Natsaran</p> -->
+                <!-- </div> -->
+                <!-- </div> -->
+                <div class="flex items-end justify-between ">
+                    <div>
+                        <p class="text-sm font-medium ">By {{ i.createdBy }}</p>
+                        <p class="text-xs font-light opacity-55">Created At {{ i.createdOn }}</p>
+                    </div>
+                    <button class="tooltip tooltip-error text-normal" data-tip="Delete">
+                        <DeleteIcon width="28" height="37" />
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div v-else>
+            <h1 class="text-center p-44 text-white text-opacity-40 font-Inter text-[24px] tracking-wider">No personal
+                board</h1>
+        </div>
+        <router-view />
+    </main>
+</template>
+
+<style scoped></style>

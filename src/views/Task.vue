@@ -1,10 +1,10 @@
 <script setup>
-import {ref, onMounted, onBeforeMount, watch} from "vue"
-import {getAllTasks, deleteTasks, getAllStatuses} from "@/libs/FetchAPI.js"
+import { ref, onMounted, onBeforeMount, watch } from "vue"
+import { getAllTasks, deleteTasks, getAllStatuses } from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
-import {useUtilityStore} from "@/stores/useUtilityStore.js"
-import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import {useUserStore} from "@/stores/useUserStore"
+import { useUtilityStore } from "@/stores/useUtilityStore.js"
+import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
+import { useUserStore } from "@/stores/useUserStore"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import MoreIcon from "@/components/icons/MoreIcon.vue"
@@ -16,7 +16,7 @@ import DropdownSortStatus from "@/components/DropdownSortStatus.vue"
 import DropdownSortAssignees from "@/components/DropdownSortAssignee.vue"
 import DropdownSortTitle from "@/components/DropdownSortTitle.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
-import {toast} from "vue3-toastify"
+import { toast } from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
@@ -31,7 +31,7 @@ const deleteTask = async (deleteId) => {
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
       console.log
-      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdfromTask)].count -= 1 
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdfromTask)].count -= 1
       utilityStore.showDeleteConfirmation = false
       toast("Task has been deleted", {
         type: "success",
@@ -58,9 +58,9 @@ const deleteTask = async (deleteId) => {
 onBeforeMount(async () => {
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
   // console.log(JWT_TOKEN.split('.'))
-  const decodedData = window.atob(JWT_TOKEN.split('.')[1]); 
+  const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
   // console.log(JSON.parse(decodedData))
-  userStore.userIdentity = {...JSON.parse(decodedData)}
+  userStore.userIdentity = { ...JSON.parse(decodedData) }
   console.log(userStore.userIdentity)
   try {
     const fetchTasks = await getAllTasks()
@@ -81,9 +81,11 @@ onBeforeMount(async () => {
   <main class="w-screen h-screen overflow-y-auto bg-animation p-[4rem]">
     <div class="flex justify-between">
       <div>
-        <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
-          IT-BangMod Kradan Kanban
-        </h1>
+        <router-link to="/board">
+          <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
+            IT-BangMod Kradan Kanban
+          </h1>
+        </router-link>
 
         <div class="ml-[22rem] tracking-in-expand-2">
           <GroupCode />
@@ -99,7 +101,7 @@ onBeforeMount(async () => {
             Manage Status
           </div>
         </router-link>
-        <router-link :to="{name: 'create-task'}">
+        <router-link :to="{ name: 'create-task' }">
           <div
             class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
             <span>
@@ -113,11 +115,11 @@ onBeforeMount(async () => {
         <div
           class="bg-[#1D1D1F] px-4 py-2 rounded-2xl flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
           <button class="itbkk-fullname text-normal font-Inter">
-            {{ userStore.userIdentity.name}}
+            {{ userStore.userIdentity.name }}
           </button>
           <span>
-              <DropdownIcon />
-            </span>
+            <DropdownIcon />
+          </span>
         </div>
       </div>
     </div>
@@ -154,11 +156,10 @@ onBeforeMount(async () => {
               </div>
             </td>
             <td class="itbkk-assignees text-opacity-90 text-center italic">
-              <div class="bg-[#1A1B1D] rounded-md px-1 py-2 text-wrap tracking-wide" :class="
-                  task.assignees === 'Unassigned'
-                    ? 'italic text-gray-500'
-                    : 'text-[#F99B1D]'
-                ">
+              <div class="bg-[#1A1B1D] rounded-md px-1 py-2 text-wrap tracking-wide" :class="task.assignees === 'Unassigned'
+            ? 'italic text-gray-500'
+            : 'text-[#F99B1D]'
+          ">
                 {{ task.assignees }}
               </div>
             </td>
@@ -225,6 +226,7 @@ onBeforeMount(async () => {
     animation-timing-function: ease-in;
     opacity: 0;
   }
+
   38% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
@@ -232,36 +234,42 @@ onBeforeMount(async () => {
     animation-timing-function: ease-out;
     opacity: 1;
   }
+
   55% {
     -webkit-transform: translateY(-65px);
     transform: translateY(-65px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   72% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
   }
+
   81% {
     -webkit-transform: translateY(-28px);
     transform: translateY(-28px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   90% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
   }
+
   95% {
     -webkit-transform: translateY(-8px);
     transform: translateY(-8px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   100% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
@@ -269,6 +277,7 @@ onBeforeMount(async () => {
     animation-timing-function: ease-out;
   }
 }
+
 @keyframes bounce-in-top {
   0% {
     -webkit-transform: translateY(-500px);
@@ -277,6 +286,7 @@ onBeforeMount(async () => {
     animation-timing-function: ease-in;
     opacity: 0;
   }
+
   38% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
@@ -284,36 +294,42 @@ onBeforeMount(async () => {
     animation-timing-function: ease-out;
     opacity: 1;
   }
+
   55% {
     -webkit-transform: translateY(-65px);
     transform: translateY(-65px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   72% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
   }
+
   81% {
     -webkit-transform: translateY(-28px);
     transform: translateY(-28px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   90% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
   }
+
   95% {
     -webkit-transform: translateY(-8px);
     transform: translateY(-8px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   100% {
     -webkit-transform: translateY(0);
     transform: translateY(0);

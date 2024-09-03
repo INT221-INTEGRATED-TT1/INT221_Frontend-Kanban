@@ -32,13 +32,18 @@ const togglePasswordVisibility = () => {
 
 const verifyUserCredentials = async () => {
     try {
+        if (userCredentials.userName.trim.length <= 0 || userCredentials.password.trim.length <= 0 || userCredentials.userName.length > 50 || userCredentials.password.length > 14
+        ) {
+            errorLogin.value = true
+            return
+        }
         const response = await authenticateUser(userCredentials)
         if (response.status === 200) {
             errorLogin.value = false
             problemLogin.value = false
             localStorage.setItem("JWT_TOKEN", response.data.access_token)
             console.log(localStorage.getItem("JWT_TOKEN"))
-            router.push(`/task`)
+            router.push(`/board`)
         }
         else if (response.status === 400 || response.status === 401) {
             errorLogin.value = true
@@ -56,7 +61,7 @@ const verifyUserCredentials = async () => {
 </script>
 
 <template>
-    <div class="min-h-screen min-w-screen flex bg-[#1F1F1F]">
+    <div class="min-h-screen min-w-screen flex bg-animation">
         <div class="w-2/5 flex items-center justify-center font-Inter tracking-wider">
             <div class="w-full max-w-md p-8 rounded-lg">
                 <h1 class="text-5xl text-white mb-3">Welcome Back</h1>
@@ -77,13 +82,13 @@ const verifyUserCredentials = async () => {
                     <label for="itbkk-username" class="block pt-5 text-white opacity-40">Username</label>
                     <input id="itbkk-username" class="itbkk-username mt-2 block w-full p-3 border border-[#373737] focus:border-white rounded-md shadow-sm focus:outline-none
                         bg-[#1F1F1F] placeholder-white placeholder-opacity-30" placeholder="Enter your username"
-                        v-model="userCredentials.userName" maxlength="50">
+                        v-model="userCredentials.userName" maxlength="50" @keydown.enter="verifyUserCredentials">
                 </div>
                 <div class="mb-6 font-Geist relative">
                     <label for="itbkk-password" class="block text-white opacity-40">Password</label>
                     <input :type="showPassword ? 'text' : 'password'" id="itbkk-password" class="itbkk-password mt-2 block w-full p-3 border border-[#373737] focus:border-white rounded-md shadow-sm focus:outline-none
                       bg-[#1F1F1F] placeholder-white placeholder-opacity-30" placeholder="Enter your password"
-                        v-model="userCredentials.password" maxlength="14">
+                        v-model="userCredentials.password" maxlength="14" @keydown.enter="verifyUserCredentials">
                     <button type="button" @click="togglePasswordVisibility"
                         class="absolute inset-y-14 right-0 pr-3 flex items-center w-auto">
                         <eyeIcon v-if="showPassword" />
