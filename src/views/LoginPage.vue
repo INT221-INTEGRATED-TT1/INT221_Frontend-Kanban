@@ -31,12 +31,12 @@ const togglePasswordVisibility = () => {
 };
 
 const verifyUserCredentials = async () => {
-    try {
-        if (userCredentials.userName.trim.length <= 0 || userCredentials.password.trim.length <= 0 || userCredentials.userName.length > 50 || userCredentials.password.length > 14
+    if (userCredentials.userName.length <= 0 || userCredentials.password.length <= 0 || userCredentials.userName.length > 50 || userCredentials.password.length > 14
         ) {
             errorLogin.value = true
             return
         }
+    try {
         const response = await authenticateUser(userCredentials)
         if (response.status === 200) {
             errorLogin.value = false
@@ -89,11 +89,11 @@ const verifyUserCredentials = async () => {
                     <input :type="showPassword ? 'text' : 'password'" id="itbkk-password" class="itbkk-password mt-2 block w-full p-3 border border-[#373737] focus:border-white rounded-md shadow-sm focus:outline-none
                       bg-[#1F1F1F] placeholder-white placeholder-opacity-30" placeholder="Enter your password"
                         v-model="userCredentials.password" maxlength="14" @keydown.enter="verifyUserCredentials">
-                    <button type="button" @click="togglePasswordVisibility"
+                    <div type="button" @click="togglePasswordVisibility"
                         class="absolute inset-y-14 right-0 pr-3 flex items-center w-auto">
                         <eyeIcon v-if="showPassword" />
                         <eyeOffIcon v-else />
-                    </button>
+                    </div>
                 </div>
                 <button
                     class="itbkk-button-signin w-full btn bg-white hover:bg-black hover:text-white text-black py-3 font-Geist font-medium rounded-md transition"
