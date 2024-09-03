@@ -175,7 +175,7 @@ onBeforeMount(async () => {
   <main class="w-screen h-screen overflow-y-auto bg-animation p-[4rem]">
     <div class="flex justify-between">
       <div>
-        <router-link to="/task">
+        <router-link to="/board">
           <h1
             class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand"
           >
