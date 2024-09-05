@@ -152,8 +152,10 @@ watch(newStatus, () => {
 
 onBeforeMount(async () => {
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
-  const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
-  userStore.userIdentity = { ...JSON.parse(decodedData) }
+  if (JWT_TOKEN) {
+    const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
+    userStore.userIdentity = { ...JSON.parse(decodedData) }
+  }
   try {
     const fetchData = await getAllStatuses();
     utilityStore.statusManager.addStatuses(fetchData);

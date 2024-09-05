@@ -57,11 +57,10 @@ const deleteTask = async (deleteId) => {
 
 onBeforeMount(async () => {
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
-  // console.log(JWT_TOKEN.split('.'))
-  const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
-  // console.log(JSON.parse(decodedData))
-  userStore.userIdentity = { ...JSON.parse(decodedData) }
-  console.log(userStore.userIdentity)
+  if (JWT_TOKEN) {
+    const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
+    userStore.userIdentity = { ...JSON.parse(decodedData) }
+  }
   try {
     const fetchTasks = await getAllTasks()
     utilityStore.tasksManager.addTasks(fetchTasks)
@@ -157,8 +156,8 @@ onBeforeMount(async () => {
             </td>
             <td class="itbkk-assignees text-opacity-90 text-center italic">
               <div class="bg-[#1A1B1D] rounded-md px-1 py-2 text-wrap tracking-wide" :class="task.assignees === 'Unassigned'
-            ? 'italic text-gray-500'
-            : 'text-[#F99B1D]'
+          ? 'italic text-gray-500'
+          : 'text-[#F99B1D]'
           ">
                 {{ task.assignees }}
               </div>
