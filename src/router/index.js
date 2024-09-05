@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from "vue-router"
+import { createRouter, createWebHistory } from "vue-router"
 import Task from "@/views/Task.vue"
 import TaskModalDetail from "@/views/TaskModalDetail.vue"
 import NotFound from "@/components/NotFound.vue"
@@ -12,12 +12,13 @@ import TeamPage from "@/views/TeamPage.vue"
 import LoginPage from "@/views/LoginPage.vue"
 import BoardHome from "@/views/BoardHome.vue"
 import BoardCreate from "@/views/BoardCreate.vue"
+import { authorizedUser } from "@/libs/FetchAPI"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL), // base url
 
   routes: [
-    {path: "/", redirect: "/login"},
+    { path: "/", redirect: "/login" },
     {
       path: "/:pathMatch(.*)*",
       component: NotFound,
@@ -36,21 +37,21 @@ const router = createRouter({
           path: ":id/edit",
           component: TaskEdit,
         },
-        {path: "add", component: TaskCreate, name: "create-task"},
+        { path: "add", component: TaskCreate, name: "create-task" },
       ],
     },
     {
       path: "/status/manage",
       component: StatusManage,
       children: [
-        {path: "/status/add", component: StatusCreate, name: "create-task-status"},
-        {path: "/status/:id/edit", component: StatusEdit, name: "edit-task-status"},
+        { path: "/status/add", component: StatusCreate, name: "create-task-status" },
+        { path: "/status/:id/edit", component: StatusEdit, name: "edit-task-status" },
       ],
     },
     {
-      path:"/team",
+      path: "/team",
       component: TeamPage,
-      name:"team"
+      name: "team"
     },
     {
       path: "/login",
@@ -66,9 +67,7 @@ const router = createRouter({
         //   path: ":id",
         //   component: BoardHome,
         // },
-        {path: "add", component: BoardCreate, name: "create-board"},
-        // {path: "add", component: TaskCreate, name: "create-task"},
-
+        { path: "add", component: BoardCreate, name: "create-board" },
       ],
     },
     // {path: "/board/add", component: BoardCreate, name: "create-board"}
@@ -76,5 +75,44 @@ const router = createRouter({
   ]
 
 })
+
+// Global navigation guard
+router.beforeEach(async (to, from, next) => {
+  const accessToken = localStorage.getItem("JWT_TOKEN");
+  console.log(accessToken);
+  if (accessToken) {
+    console.log(to);
+    try {
+      const response = await authorizedUser(accessToken);
+      if (response.status === 200) {
+        console.log('Authentication Pass');
+        if (to.name === 'login') {
+          // If authenticated user tries to access login page, redirect to /board
+          next('/board');
+        } else {
+          // Proceed to the intended route
+          next();
+        }
+      } else {
+        // Handle unexpected status codes by redirecting to /board
+        localStorage.removeItem("JWT_TOKEN")
+        next('/login');
+      }
+    } catch (error) {
+      console.error("Authentication check failed:", error);
+      // Redirect to login page on authentication failure
+      next('/login');
+    }
+  } else {
+    if (to.name !== 'login') {
+      // If not authenticated, redirect to login
+      next('/login');
+    } else {
+      // If already on the login page, proceed
+      next();
+    }
+  }
+});
+
 
 export default router

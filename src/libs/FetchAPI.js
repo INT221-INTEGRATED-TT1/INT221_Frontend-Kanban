@@ -1,10 +1,10 @@
 import router from "@/router"
-import {toast} from "vue3-toastify"
+import { toast } from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 // แก้ด้วย
 const getAllTasks = async (direction, sortBy, filterStatuses) => {
   let url = `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`
-  console.log(filterStatuses)
+  // console.log(filterStatuses)
   if (direction || sortBy || filterStatuses) {
     const params = new URLSearchParams()
 
@@ -21,13 +21,13 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
     if (filterStatuses.length) {
       for (let index = 0; index < filterStatuses.length; index++) {
         if (filterStatuses[index] === "") {
-          
-        } else if(filterStatuses) {
-        params.append("filterStatuses", filterStatuses[index])
+
+        } else if (filterStatuses) {
+          params.append("filterStatuses", filterStatuses[index])
         }
       }
     }
-  
+
     url += `?${params.toString()}`
   }
   // console.log(url)
@@ -68,7 +68,7 @@ const getTask = async (id) => {
 }
 
 const createTask = async (newTask) => {
-  let createTask = {...newTask}
+  let createTask = { ...newTask }
 
   createTask.assignees.trim().length === 0 ? (createTask.assignees = null) : ""
   createTask.description.trim().length === 0
@@ -83,7 +83,7 @@ const createTask = async (newTask) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({...createTask}),
+        body: JSON.stringify({ ...createTask }),
       }
     )
     // console.log(createTask)
@@ -186,7 +186,7 @@ const getStatus = async (statusId) => {
 }
 
 const createStatus = async (newStatus) => {
-  let createStatus = {...newStatus}
+  let createStatus = { ...newStatus }
   createStatus.description.trim().length === 0
     ? (createStatus.description = null)
     : ""
@@ -317,6 +317,28 @@ const authenticateUser = async (userCredentials) => {
   }
 }
 
+const authorizedUser = async (accessToken) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/authentications/validate-token`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+        },
+      }
+    )
+
+    return {
+      status: response.status,
+      message: "Authorized user successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -331,4 +353,5 @@ export {
   deleteStatusTransfer,
   toggleStatusLimit,
   authenticateUser,
+  authorizedUser,
 }

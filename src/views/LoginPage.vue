@@ -32,10 +32,10 @@ const togglePasswordVisibility = () => {
 
 const verifyUserCredentials = async () => {
     if (userCredentials.userName.length <= 0 || userCredentials.password.length <= 0 || userCredentials.userName.length > 50 || userCredentials.password.length > 14
-        ) {
-            errorLogin.value = true
-            return
-        }
+    ) {
+        errorLogin.value = true
+        return
+    }
     try {
         const response = await authenticateUser(userCredentials)
         if (response.status === 200) {
