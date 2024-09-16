@@ -4,7 +4,7 @@ import router from "@/router"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import {getStatus, editStatus} from "@/libs/FetchAPI"
+import {getStatus3, editStatus3} from "@/libs/FetchAPI"
 import Xmark from "@/components/icons/Xmark.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
@@ -28,10 +28,10 @@ const updateColor = (index) => {
 
 const editStatusData = async (newStatus) => {
   try {
-    const response = await editStatus(route.params.id, newStatus)
+    const response = await editStatus3(route.params.boardID, route.params.statusID, newStatus)
     if (response.status === 200) {
-      utilityStore.statusManager.editStatus(route.params.id, newStatus)
-      router.push("/status/manage")
+      utilityStore.statusManager.editStatus(route.params.statusID, newStatus)
+      router.push(`/board/${route.params.boardID}/status`)
       setTimeout(() => {
         toast("The status has been edited", {
           type: "success",
@@ -69,15 +69,15 @@ const isButtonDisabled = computed(() => {
 
 onBeforeMount(async () => {
   try {
-    const fetchData = await getStatus(route.params.id)
+    const fetchData = await getStatus3(route.params.boardID, route.params.statusID)
     status.value = fetchData
     // console.log(status.value);
     // console.log(fetchData);
     // console.log(typeof status.value.id)
 
-    updateStatus.name = status.value.name
-    updateStatus.description = status.value.description
-    updateStatus.color = status.value.color
+    updateStatus.name = status.value.statusName
+    updateStatus.description = status.value.statusDescription
+    updateStatus.color = status.value.statusColor
   } catch (error) {
     console.log(error)
   }

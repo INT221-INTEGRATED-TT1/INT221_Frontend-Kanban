@@ -1,18 +1,20 @@
 <script setup>
 import {ref, onBeforeMount} from "vue"
-import {getAllStatuses} from "@/libs/FetchAPI.js"
+import {getAllStatuses3} from "@/libs/FetchAPI.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useSortAndFilterStore} from "@/stores/useSortAndFilterStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
+import {useRoute} from "vue-router"
 import FilterIcon from "@/components/icons/FilterIcon.vue"
 
+const route = useRoute()
 const utilityStore = useUtilityStore()
 const sortAndFilterStore = useSortAndFilterStore()
 const statusStyleStore = useStatusStyleStore()
 
 onBeforeMount(async () => {
   try {
-    const fetchStatuses = await getAllStatuses()
+    const fetchStatuses = await getAllStatuses3(route.params.boardID)
     utilityStore.statusManager.addStatuses(fetchStatuses)
     utilityStore.statusManager.addFilteredField()
     

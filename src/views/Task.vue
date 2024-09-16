@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeMount, watch } from "vue"
-import { getAllTasks, deleteTasks, getAllStatuses } from "@/libs/FetchAPI.js"
+import { getAllTasks3, deleteTask3, getAllStatuses } from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
@@ -17,8 +17,10 @@ import DropdownSortAssignees from "@/components/DropdownSortAssignee.vue"
 import DropdownSortTitle from "@/components/DropdownSortTitle.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import { toast } from "vue3-toastify"
+import {useRoute} from "vue-router"
 import "vue3-toastify/dist/index.css"
 
+const route = useRoute()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const userStore = useUserStore()
@@ -26,11 +28,12 @@ const userStore = useUserStore()
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
-    const findStatusIdfromTask = utilityStore.tasksManager.getTasks().filter(task => task.id === deleteId)[0].status.id
-    const response = await deleteTasks(deleteId)
+    const findStatusIdfromTask = utilityStore.tasksManager.getTasks().filter(task => task.taskID === deleteId)[0].statuses3.statusID
+    console.log(findStatusIdfromTask)
+    const response = await deleteTask3(route.params.boardID,deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
-      console.log
+      // console.log
       utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdfromTask)].count -= 1
       utilityStore.showDeleteConfirmation = false
       toast("Task has been deleted", {
@@ -62,9 +65,12 @@ onBeforeMount(async () => {
     userStore.userIdentity = { ...JSON.parse(decodedData) }
   }
   try {
-    const fetchTasks = await getAllTasks()
+    // console.log(route.params.boardID)
+    const fetchTasks = await getAllTasks3(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
-
+    utilityStore.selectedBoardId = route.params.boardID
+    console.log(utilityStore.selectedBoardId)
+    console.log(fetchTasks)
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
         ? (task.assignees = "Unassigned")
@@ -94,7 +100,7 @@ onBeforeMount(async () => {
       <div class="flex items-center gap-x-3">
         <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
 
-        <router-link to="/status/manage">
+        <router-link :to="`/board/${route.params.boardID}/status`">
           <div
             class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer">
             Manage Status
@@ -144,14 +150,14 @@ onBeforeMount(async () => {
         </thead>
         <tbody>
           <tr class="itbkk-item border-none text-secondary"
-            v-for="(task, index) in utilityStore.tasksManager.getTasks()" :key="task.id"
+            v-for="(task, index) in utilityStore.tasksManager.getTasks()" :key="task.taskID"
             v-if="utilityStore.tasksManager.getTasks().length > 0">
             <td>{{ ++index }}</td>
             <td
               class="itbkk-title cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
-              @click="router.push(`/task/${task.id}`)">
+              @click="router.push(`/board/${route.params.boardID}/task/${task.taskID}`)">
               <div class="w-[20rem] mx-auto truncate tracking-wider">
-                {{ task.title }}
+                {{ task.taskTitle }}
               </div>
             </td>
             <td class="itbkk-assignees text-opacity-90 text-center italic">
@@ -162,11 +168,11 @@ onBeforeMount(async () => {
                 {{ task.assignees }}
               </div>
             </td>
-            <td class="itbkk-status tooltip mt-1.5 before:max-w-none" :data-tip="task.status.name">
+            <td class="itbkk-status tooltip mt-1.5 before:max-w-none" :data-tip="task.statuses3.statusName">
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
-                :class="statusStyleStore.statusCustomStyle(task.status.color)">
-                {{ task.status.name }}
+                :class="statusStyleStore.statusCustomStyle(task.statuses3.statusColor)">
+                {{ task.statuses3.statusName }}
               </div>
             </td>
             <td>
@@ -178,14 +184,14 @@ onBeforeMount(async () => {
                 <ul tabindex="0"
                   class="dropdown-content z-[1] menu shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-box w-32">
                   <li class="itbkk-button-edit cursor-pointer p-1 hover:rounded-md"
-                    @click="router.push(`/task/${task.id}/edit`)">
+                    @click="router.push(`task/${task.taskID}/edit`)">
                     <span class="font-Inter tracking-wider font-semibold">
                       <EditTaskIcon />Edit
                     </span>
                   </li>
                   <div class="divider m-0 h-0"></div>
                   <li class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
-                    @click="utilityStore.confirmDeleteTask(task.id, task.title)">
+                    @click="utilityStore.confirmDeleteTask(task.taskID, task.taskTitle)">
                     <span class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold">
                       <DeleteIcon />Delete
                     </span>

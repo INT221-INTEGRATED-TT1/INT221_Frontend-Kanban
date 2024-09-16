@@ -4,7 +4,6 @@ class TaskManagement {
   }
 
   addTasks(newTask) {
-    
     this.tasks = newTask
   }
 
