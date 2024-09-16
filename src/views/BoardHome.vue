@@ -1,56 +1,99 @@
 <script setup>
 import { ref, onMounted, onBeforeMount, watch, reactive } from "vue"
+import { getAllBoards } from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import FilterCollapse from "@/components/FilterCollapse.vue"
 import AboutBoardIcon from "@/components/icons/AboutBoard.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue";
+import { useUserStore } from "@/stores/useUserStore"
+import { useUtilityStore } from "@/stores/useUtilityStore.js"
 
-const testData = reactive([{
-    boardName: "Todo Planning to travelll27",
-    createdBy: "Natsaran",
-    createdOn: "16 Jan 2024",
-},
-{
-    boardName: "Todo Planning to travelsssssssssssssss40",
-    createdBy: "Natsaran",
-    createdOn: "16 Jan 2024",
-},
-{
-    boardName: "Todo Planning to travelssssssssssssssssssss",
-    createdBy: "Natsaran",
-    createdOn: "16 Jan 2024",
-},
-{
-    boardName: "Todo asdasd to dasda",
-    createdBy: "Natsaran",
-    createdOn: "16 Jan 2024",
-},
-{
-    boardName: "Todo asdasd to dasda",
-    createdBy: "Natsaran",
-    createdOn: "16 Jan 2024",
-},
-{
-    boardName: "Todo asdasd to dasda",
-    createdBy: "Natsaran",
-    createdOn: "16 Jan 2024",
-},
-{
-    boardName: "Todo asdasd to dasda",
-    createdBy: "Natsaran",
-    createdOn: "16 Jan 2024",
-},
-{
-    boardName: "Todo asdasd to dasda",
-    createdBy: "Natsaran",
-    createdOn: "16 Jan 2024",
-},
-])
+// const testData = reactive([{
+//     boardName: "Todo Planning to travelll27",
+//     createdBy: "Natsaran",
+//     createdOn: "16 Jan 2024",
+// },
+// {
+//     boardName: "Todo Planning to travelsssssssssssssss40",
+//     createdBy: "Natsaran",
+//     createdOn: "16 Jan 2024",
+// },
+// {
+//     boardName: "Todo Planning to travelssssssssssssssssssss",
+//     createdBy: "Natsaran",
+//     createdOn: "16 Jan 2024",
+// },
+// {
+//     boardName: "Todo asdasd to dasda",
+//     createdBy: "Natsaran",
+//     createdOn: "16 Jan 2024",
+// },
+// {
+//     boardName: "Todo asdasd to dasda",
+//     createdBy: "Natsaran",
+//     createdOn: "16 Jan 2024",
+// },
+// {
+//     boardName: "Todo asdasd to dasda",
+//     createdBy: "Natsaran",
+//     createdOn: "16 Jan 2024",
+// },
+// {
+//     boardName: "Todo asdasd to dasda",
+//     createdBy: "Natsaran",
+//     createdOn: "16 Jan 2024",
+// },
+// {
+//     boardName: "Todo asdasd to dasda",
+//     createdBy: "Natsaran",
+//     createdOn: "16 Jan 2024",
+// },
+// ])
+const userStore = useUserStore()
+const utilityStore = useUtilityStore()
+// const testEmptyData = reactive('')
 
-const testEmptyData = reactive('')
+// console.log(Object.keys(testData).length)
 
-console.log(Object.keys(testData).length)
+const formatDateTime = (baseFormatDate) => {
+  const date = new Date(baseFormatDate)
+  const options = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }
+  const formattedDate = date
+    .toLocaleString("en-GB", options)
+    .replace(/\//g, "/")
+    .replace(",", "")
+
+  return formattedDate
+}
+
+onBeforeMount(async () => {
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  if (JWT_TOKEN) {
+    const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
+    userStore.userIdentity = { ...JSON.parse(decodedData) }
+  }
+  try {
+    const fetchBoards = await getAllBoards()
+    utilityStore.boardManager.addBoards(fetchBoards)
+    
+    console.log(fetchBoards)
+    for (const task of utilityStore.tasksManager.getTasks()) {
+      task.assignees === null || task.assignees.trim().length === 0
+        ? (task.assignees = "Unassigned")
+        : ""
+    }
+  } catch (error) {
+    console.log("Error fetching tasks : ", error)
+  }
+})
 
 </script>
 
@@ -80,18 +123,18 @@ console.log(Object.keys(testData).length)
             </router-link>
         </div>
         <!-- Lists of the boards -->
-        <div v-if="testData.length > 0"
+        <div v-if="utilityStore.boardManager.getBoards().length > 0"
             class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem] ">
-            <div v-for="i in testData"
+            <div v-for="(board, index) in utilityStore.boardManager.getBoards()" :key="board.boardID"
                 class="space-y-10 p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
-                @click="router.push(`/task`)">
+                @click="router.push(`/board/${board.boardID}/task`)"> 
                 <!-- <div class="flex gap-4"> -->
-                <div class="flex items-center h-16" :data-tip="i.boardName.length > 24 ? i.boardName : ''"
-                    :class="i.boardName.length > 24 ? 'tooltip' : ''">
+                <div class="flex items-center h-16" :data-tip="board.boardName.length > 24 ? board.boardName : ''"
+                    :class="board.boardName.length > 24 ? 'tooltip' : ''">
                     <div class="self-center pr-2">
                         <AboutBoardIcon width="40" height="48" />
                     </div>
-                    <p class="text-2xl font-semibold text-wrap truncate text-start">{{ i.boardName }}</p>
+                    <p class="text-2xl font-semibold text-wrap truncate text-start">{{ board.boardName }}</p>
                 </div>
                 <!-- <div class="flex items-center justify-between font-Geist tracking-wider text-white space-y-1"> -->
                 <!-- <p class="text-2xl font-semibold">Todo Planning to travel</p> -->
@@ -101,8 +144,8 @@ console.log(Object.keys(testData).length)
                 <!-- </div> -->
                 <div class="flex items-end justify-between ">
                     <div>
-                        <p class="text-sm font-medium ">By {{ i.createdBy }}</p>
-                        <p class="text-xs font-light opacity-55">Created At {{ i.createdOn }}</p>
+                        <p class="text-sm font-medium ">By {{ userStore.userIdentity.name }}</p>
+                        <p class="text-xs font-light opacity-55">Created At {{ formatDateTime(board.createOn) }}</p>
                     </div>
                     <button class="tooltip tooltip-error text-normal" data-tip="Delete">
                         <DeleteIcon width="28" height="37" />

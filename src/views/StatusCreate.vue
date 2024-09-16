@@ -2,14 +2,16 @@
 import {ref, reactive, watch, computed} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
-import {createStatus} from "@/libs/FetchAPI"
+import {createStatus3} from "@/libs/FetchAPI"
 import router from "@/router"
+import {useRoute} from "vue-router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
+const route = useRoute()
 
 const newStatus = reactive({
   name: "",
@@ -31,12 +33,12 @@ const isButtonDisabled = computed(() => {
 const createNewStatus = async () => {
   utilityStore.transactionDisable = true
   try {
-    const response = await createStatus(newStatus)
+    const response = await createStatus3(route.params.boardID ,newStatus)
     // console.log(response.data)
     if (response.status === 201) {
       // console.log(newStatus)
       utilityStore.statusManager.addStatus(response.data)
-      router.push("/status/manage")
+      router.push(`/board/${route.params.boardID}/status`)
       utilityStore.transactionDisable = false
 
       setTimeout(() => {
@@ -79,7 +81,7 @@ const createNewStatus = async () => {
         Create Status
       </h1>
       <div class="flex justify-end px-14">
-        <button @click="router.back()">
+        <button @click="router.push(`/board/${route.params.boardID}/status`)">
           <span><Xmark /></span>
         </button>
       </div>
@@ -154,7 +156,7 @@ const createNewStatus = async () => {
       <div class="flex justify-center pt-6">
         <div class="flex gap-x-3">
           <button
-            @click="router.back()"
+            @click="router.push(`/board/${route.params.boardID}/status`)"
             class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none bg-transparent hover:bg-base"
           >
             CANCEL

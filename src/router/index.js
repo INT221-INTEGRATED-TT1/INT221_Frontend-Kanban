@@ -24,30 +24,24 @@ const router = createRouter({
       component: NotFound,
       name: "not-found",
     },
-    {
-      path: "/task",
-      component: Task,
-      name: "task",
-      children: [
-        {
-          path: ":id",
-          component: TaskModalDetail,
-        },
-        {
-          path: ":id/edit",
-          component: TaskEdit,
-        },
-        { path: "add", component: TaskCreate, name: "create-task" },
-      ],
-    },
-    {
-      path: "/status/manage",
-      component: StatusManage,
-      children: [
-        { path: "/status/add", component: StatusCreate, name: "create-task-status" },
-        { path: "/status/:id/edit", component: StatusEdit, name: "edit-task-status" },
-      ],
-    },
+    // {
+    //   path: "/task",
+    //   component: Task,
+    //   name: "task",
+    //   children: [
+    //     { path: ":id", component: TaskModalDetail,},
+    //     { path: ":id/edit", component: TaskEdit,},
+    //     { path: "add", component: TaskCreate, name: "create-task" },
+    //   ],
+    // },
+    // {
+    //   path: "/status/manage",
+    //   component: StatusManage,
+    //   children: [
+    //     { path: "/status/add", component: StatusCreate, name: "create-task-status" },
+    //     { path: "/status/:id/edit", component: StatusEdit, name: "edit-task-status" },
+    //   ],
+    // },
     {
       path: "/team",
       component: TeamPage,
@@ -63,15 +57,30 @@ const router = createRouter({
       component: BoardHome,
       name: "board-home",
       children: [
-        // {
-        //   path: ":id",
-        //   component: BoardHome,
-        // },
         { path: "add", component: BoardCreate, name: "create-board" },
       ],
     },
     // {path: "/board/add", component: BoardCreate, name: "create-board"}
     // {path:"/test", component: TestLen}
+    {
+      path: "/board/:boardID/task",
+      component: Task,
+      name: "board-task",
+      children: [
+        { path: ":taskID", component: TaskModalDetail, },
+        { path: ":taskID/edit", component: TaskEdit, },
+        { path: "add", component: TaskCreate, name: "create-task" },
+      ],
+    },
+    {
+      path: "/board/:boardID/status",
+      component: StatusManage,
+      name: "board-status",
+      children: [
+        { path: "add", component: StatusCreate, name: "create-task-status" },
+        { path: ":statusID/edit", component: StatusEdit, name: "edit-task-status" },
+      ],
+    },
   ]
 
 })
@@ -79,13 +88,13 @@ const router = createRouter({
 // Global navigation guard
 router.beforeEach(async (to, from, next) => {
   const accessToken = localStorage.getItem("JWT_TOKEN");
-  console.log(accessToken);
+  // console.log(accessToken);
   if (accessToken) {
-    console.log(to);
+    // console.log(to);
     try {
       const response = await authorizedUser(accessToken);
       if (response.status === 200) {
-        console.log('Authentication Pass');
+        // console.log('Authentication Pass');
         if (to.name === 'login') {
           // If authenticated user tries to access login page, redirect to /board
           next('/board');
@@ -99,7 +108,7 @@ router.beforeEach(async (to, from, next) => {
         next('/login');
       }
     } catch (error) {
-      console.error("Authentication check failed:", error);
+      // console.error("Authentication check failed:", error);
       // Redirect to login page on authentication failure
       next('/login');
     }

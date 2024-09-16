@@ -1,11 +1,13 @@
 import {TaskManagement} from "@/libs/TaskManagement"
 import {StatusManagement} from "@/libs/statusManagement"
+import {BoardManagement} from "@/libs/BoardManagement"
 import {defineStore} from "pinia"
 import {ref} from "vue"
 
 export const useUtilityStore = defineStore("utility", () => {
   const tasksManager = ref(new TaskManagement())
   const statusManager = ref(new StatusManagement())
+  const boardManager = ref(new BoardManagement())
   const selectedId = ref("")
   const taskTitleConfirm = ref("")
   const statusTitle = ref("")
@@ -16,6 +18,7 @@ export const useUtilityStore = defineStore("utility", () => {
   const transactionDisable = ref(false)
   const isLimitEnable = ref(false)
   const limitStatusNumber = ref(10)
+  const selectedBoardId = ref('')
 
   const confirmDeleteStatus = (statuses) => {
     selectedId.value = statuses.id
@@ -53,5 +56,7 @@ export const useUtilityStore = defineStore("utility", () => {
     limitStatus,
     isLimitEnable,
     limitStatusNumber,
+    boardManager,
+    selectedBoardId,
   }
 })

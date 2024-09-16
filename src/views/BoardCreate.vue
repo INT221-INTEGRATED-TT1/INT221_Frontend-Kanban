@@ -1,5 +1,31 @@
 <script setup>
 import router from "@/router"
+import { reactive } from "vue"
+import { createBoard } from "@/libs/FetchAPI.js"
+import { useUserStore } from "@/stores/useUserStore"
+import { useUtilityStore } from "@/stores/useUtilityStore.js"
+
+const userStore = useUserStore()
+const utilityStore = useUtilityStore()
+const { userIdentity } = userStore
+const newBoard = reactive({
+  boardName: `${userIdentity.name} personal board`
+})
+const addNewBoard = async (newBoard) => {
+  try {
+    const response = await createBoard(newBoard)
+    if (response.status === 201) {
+      utilityStore.boardManager.addBoard(response.data)
+      router.push('/board')
+    }
+    else {
+      console.log('something went wrong')
+    }
+  }
+  catch (error) {
+    console.log(error)
+  }
+}
 </script>
 
 <template>
@@ -17,8 +43,9 @@ import router from "@/router"
         <!-- board name input -->
         <div>
           <input class="py-2 text-start rounded-lg border border-[#71717A] indent-4 text-white w-full"
-            placeholder="your board name" value="@User personal board" maxlength="120" />
-            <span class="flex justify-end mt-2 text-xs required text-normal opacity-45">1 / 120</span>
+            placeholder="your board name" maxlength="120" v-model.trim="newBoard.boardName" />
+          <span class="flex justify-end mt-2 text-xs required text-normal opacity-45">{{ newBoard.boardName.length }} /
+            120</span>
         </div>
         <!-- button -->
         <div class="flex justify-end gap-x-[1rem]">
@@ -28,7 +55,8 @@ import router from "@/router"
             Cancel
           </button>
           <button
-            class="btn px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base">
+            class="btn px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
+            @click="addNewBoard(newBoard)">
             Create
           </button>
         </div>
