@@ -4,10 +4,11 @@ import router from "@/router/index.js";
 import { useUtilityStore } from "@/stores/useUtilityStore.js";
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore.js";
 import {useSortAndFilterStore} from "@/stores/useSortAndFilterStore.js"
+import {useUserStore} from "@/stores/useUserStore"
 import {
-  deleteStatuses,
-  getAllStatuses,
-  deleteStatusTransfer,
+  deleteStatuses3,
+  getAllStatuses3,
+  deleteStatusTransfer3,
 } from "@/libs/FetchAPI";
 import StatusSetting from "@/components/StatusSetting.vue";
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue";
@@ -23,16 +24,19 @@ import "vue3-toastify/dist/index.css";
 import AstronautStopSmile from "@/components/icons/AstronautStopSmile.vue";
 import AstronautStopSignBlack from "@/components/icons/AstronautStopSignBlack.vue";
 import DeleteConfirmationStatus from "@/components/DeleteConfirmationStatus.vue";
+import {useRoute} from "vue-router"
 import SettingIcon from "@/components/icons/SettingIcon.vue";
 
+const route = useRoute()
 const utilityStore = useUtilityStore();
 const statusStyleStore = useStatusStyleStore();
 const sortAndFilterStore = useSortAndFilterStore()
+const userStore = useUserStore()
 const disableBtn = ref(true);
 
 const disabledActionButton = () => {
   for (const status of utilityStore.statusManager.getStatus()) {
-    if (status.name === "No Status") {
+    if (status.statusName === "No Status") {
       disableBtn.value = false;
     }
   }
@@ -47,7 +51,7 @@ const deleteModal = (statuses) => {
 const deleteStatus = async (deleteId) => {
   // console.log(statuses.value)
   try {
-    const response = await deleteStatuses(deleteId);
+    const response = await deleteStatuses3(route.params.boardID, deleteId);
     if (response.status === 200) {
       utilityStore.statusManager.deleteStatus(deleteId);
       utilityStore.showDeleteConfirmation = false;
@@ -97,7 +101,7 @@ const deleteTransfer = async (oldDeleteId, newDeleteId) => {
     );
     return;
   }
-  const response = await deleteStatusTransfer(oldDeleteId, newDeleteId);
+  const response = await deleteStatusTransfer3(route.params.boardID, oldDeleteId, newDeleteId);
   if (response.status === 200) {
     utilityStore.statusManager.deleteTransferStatus(oldDeleteId, newDeleteId);
     utilityStore.disableTransfer = false;
@@ -149,8 +153,13 @@ watch(newStatus, () => {
 });
 
 onBeforeMount(async () => {
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  if (JWT_TOKEN) {
+    const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
+    userStore.userIdentity = { ...JSON.parse(decodedData) }
+  }
   try {
-    const fetchData = await getAllStatuses();
+    const fetchData = await getAllStatuses3(route.params.boardID);
     utilityStore.statusManager.addStatuses(fetchData);
     
     sortAndFilterStore.filterStatusArray = []
@@ -164,13 +173,14 @@ onBeforeMount(async () => {
     console.log(error);
   }
 });
+
 </script>
 
 <template>
   <main class="w-screen h-screen overflow-y-auto bg-animation p-[4rem]">
     <div class="flex justify-between">
       <div>
-        <router-link to="/">
+        <router-link to="/board">
           <h1
             class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand"
           >
@@ -185,15 +195,15 @@ onBeforeMount(async () => {
 
       <div class="flex items-center gap-x-3">
         <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
-        <router-link to="/">
+        <router-link :to="`/board/${route.params.boardID}/task`">
           <div
             class="itbkk-button-home bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.35rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer"
           >
-            Home
+            Tasks
           </div>
         </router-link>
 
-        <router-link to="/status/add">
+        <router-link to="status/add">
           <div
             class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
           >
@@ -203,6 +213,16 @@ onBeforeMount(async () => {
             </button>
           </div>
         </router-link>
+
+        <div
+          class="bg-[#1D1D1F] px-4 py-2 rounded-2xl flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
+          <button class="text-normal font-Inter">
+            {{ userStore.userIdentity.name}}
+          </button>
+          <span>
+              <DropdownIcon />
+            </span>
+        </div>
 
         <button
           class="itbkk-status-setting hover:bg-[#1f1f1f] px-1 tracking-wider rounded-xl border border-[#E3E3E3] border-opacity-50"
@@ -274,7 +294,7 @@ onBeforeMount(async () => {
                 "
               >
                 <button
-                  @click="router.push(`/status/${statuses.id}/edit`)"
+                  @click="router.push(`status/${statuses.id}/edit`)"
                   class="itbkk-button-edit"
                   :disabled="
                     statuses.name === 'No Status' || statuses.name === 'Done'

@@ -1,9 +1,10 @@
 <script setup>
-import {ref, onMounted, onBeforeMount, watch} from "vue"
-import {getAllTasks, deleteTasks, getAllStatuses} from "@/libs/FetchAPI.js"
+import { ref, onMounted, onBeforeMount, watch } from "vue"
+import { getAllTasks3, deleteTask3, getAllStatuses } from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
-import {useUtilityStore} from "@/stores/useUtilityStore.js"
-import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
+import { useUtilityStore } from "@/stores/useUtilityStore.js"
+import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
+import { useUserStore } from "@/stores/useUserStore"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import MoreIcon from "@/components/icons/MoreIcon.vue"
@@ -14,21 +15,26 @@ import FilterCollapse from "@/components/FilterCollapse.vue"
 import DropdownSortStatus from "@/components/DropdownSortStatus.vue"
 import DropdownSortAssignees from "@/components/DropdownSortAssignee.vue"
 import DropdownSortTitle from "@/components/DropdownSortTitle.vue"
-import {toast} from "vue3-toastify"
+import DropdownIcon from "@/components/icons/DropdownIcon.vue"
+import { toast } from "vue3-toastify"
+import {useRoute} from "vue-router"
 import "vue3-toastify/dist/index.css"
 
+const route = useRoute()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
+const userStore = useUserStore()
 // const filteredStatus = ref([])
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
-    const findStatusIdfromTask = utilityStore.tasksManager.getTasks().filter(task => task.id === deleteId)[0].status.id
-    const response = await deleteTasks(deleteId)
+    const findStatusIdfromTask = utilityStore.tasksManager.getTasks().filter(task => task.taskID === deleteId)[0].statuses3.statusID
+    console.log(findStatusIdfromTask)
+    const response = await deleteTask3(route.params.boardID,deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
-      console.log
-      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdfromTask)].count -= 1 
+      // console.log
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdfromTask)].count -= 1
       utilityStore.showDeleteConfirmation = false
       toast("Task has been deleted", {
         type: "success",
@@ -53,10 +59,18 @@ const deleteTask = async (deleteId) => {
 }
 
 onBeforeMount(async () => {
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  if (JWT_TOKEN) {
+    const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
+    userStore.userIdentity = { ...JSON.parse(decodedData) }
+  }
   try {
-    const fetchTasks = await getAllTasks()
+    // console.log(route.params.boardID)
+    const fetchTasks = await getAllTasks3(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
-
+    utilityStore.selectedBoardId = route.params.boardID
+    console.log(utilityStore.selectedBoardId)
+    console.log(fetchTasks)
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
         ? (task.assignees = "Unassigned")
@@ -72,11 +86,11 @@ onBeforeMount(async () => {
   <main class="w-screen h-screen overflow-y-auto bg-animation p-[4rem]">
     <div class="flex justify-between">
       <div>
-        <h1
-          class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand"
-        >
-          IT-BangMod Kradan Kanban
-        </h1>
+        <router-link to="/board">
+          <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
+            IT-BangMod Kradan Kanban
+          </h1>
+        </router-link>
 
         <div class="ml-[22rem] tracking-in-expand-2">
           <GroupCode />
@@ -86,23 +100,32 @@ onBeforeMount(async () => {
       <div class="flex items-center gap-x-3">
         <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
 
-        <router-link to="/status/manage">
+        <router-link :to="`/board/${route.params.boardID}/status`">
           <div
-            class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer"
-          >
+            class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer">
             Manage Status
           </div>
         </router-link>
-        <router-link :to="{name: 'create-task'}">
+        <router-link :to="{ name: 'create-task' }">
           <div
-            class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
-          >
-            <span><CreateTaskIcon /></span>
+            class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
+            <span>
+              <CreateTaskIcon />
+            </span>
             <button class="itbkk-button-add text-normal text-opacity-75">
               Add Task
             </button>
           </div>
         </router-link>
+        <div
+          class="bg-[#1D1D1F] px-4 py-2 rounded-2xl flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
+          <button class="itbkk-fullname text-normal font-Inter">
+            {{ userStore.userIdentity.name }}
+          </button>
+          <span>
+            <DropdownIcon />
+          </span>
+        </div>
       </div>
     </div>
 
@@ -110,9 +133,7 @@ onBeforeMount(async () => {
       <FilterCollapse />
 
       <table class="table border-collapse bg-[#141414] text-center">
-        <thead
-          class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest"
-        >
+        <thead class="bg-[#38383b] text-headline text-opacity-75 text-[16px] tracking-widest">
           <tr class="border-none">
             <th class="rounded-tl-xl"></th>
             <th>
@@ -121,79 +142,59 @@ onBeforeMount(async () => {
             <th>
               <DropdownSortAssignees />
             </th>
-            <th><DropdownSortStatus /></th>
+            <th>
+              <DropdownSortStatus />
+            </th>
             <th class="rounded-tr-xl"></th>
           </tr>
         </thead>
         <tbody>
-          <tr
-            class="itbkk-item border-none text-secondary"
-            v-for="(task, index) in utilityStore.tasksManager.getTasks()"
-            :key="task.id"
-            v-if="utilityStore.tasksManager.getTasks().length > 0"
-          >
+          <tr class="itbkk-item border-none text-secondary"
+            v-for="(task, index) in utilityStore.tasksManager.getTasks()" :key="task.taskID"
+            v-if="utilityStore.tasksManager.getTasks().length > 0">
             <td>{{ ++index }}</td>
             <td
               class="itbkk-title cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
-              @click="router.push(`/task/${task.id}`)"
-            >
+              @click="router.push(`/board/${route.params.boardID}/task/${task.taskID}`)">
               <div class="w-[20rem] mx-auto truncate tracking-wider">
-                {{ task.title }}
+                {{ task.taskTitle }}
               </div>
             </td>
             <td class="itbkk-assignees text-opacity-90 text-center italic">
-              <div
-                class="bg-[#1A1B1D] rounded-md px-1 py-2 text-wrap tracking-wide"
-                :class="
-                  task.assignees === 'Unassigned'
-                    ? 'italic text-gray-500'
-                    : 'text-[#F99B1D]'
-                "
-              >
+              <div class="bg-[#1A1B1D] rounded-md px-1 py-2 text-wrap tracking-wide" :class="task.assignees === 'Unassigned'
+          ? 'italic text-gray-500'
+          : 'text-[#F99B1D]'
+          ">
                 {{ task.assignees }}
               </div>
             </td>
-            <td
-              class="itbkk-status tooltip mt-1.5 before:max-w-none"
-              :data-tip="task.status.name"
-            >
+            <td class="itbkk-status tooltip mt-1.5 before:max-w-none" :data-tip="task.statuses3.statusName">
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
-                :class="statusStyleStore.statusCustomStyle(task.status.color)"
-              >
-                {{ task.status.name }}
+                :class="statusStyleStore.statusCustomStyle(task.statuses3.statusColor)">
+                {{ task.statuses3.statusName }}
               </div>
             </td>
             <td>
               <div class="dropdown dropdown-bottom itbkk-button-action">
-                <div
-                  tabindex="0"
-                  role="button"
-                  class="btn bg-transparent outline-none border-none hover:bg-white hover:bg-opacity-[0.07]"
-                >
+                <div tabindex="0" role="button"
+                  class="btn bg-transparent outline-none border-none hover:bg-white hover:bg-opacity-[0.07]">
                   <MoreIcon />
                 </div>
-                <ul
-                  tabindex="0"
-                  class="dropdown-content z-[1] menu shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-box w-32"
-                >
-                  <li
-                    class="itbkk-button-edit cursor-pointer p-1 hover:rounded-md"
-                    @click="router.push(`/task/${task.id}/edit`)"
-                  >
-                    <span class="font-Inter tracking-wider font-semibold"
-                      ><EditTaskIcon />Edit</span
-                    >
+                <ul tabindex="0"
+                  class="dropdown-content z-[1] menu shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-box w-32">
+                  <li class="itbkk-button-edit cursor-pointer p-1 hover:rounded-md"
+                    @click="router.push(`task/${task.taskID}/edit`)">
+                    <span class="font-Inter tracking-wider font-semibold">
+                      <EditTaskIcon />Edit
+                    </span>
                   </li>
                   <div class="divider m-0 h-0"></div>
-                  <li
-                    class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
-                    @click="utilityStore.confirmDeleteTask(task.id, task.title)"
-                  >
-                    <span
-                      class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold"
-                      ><DeleteIcon />Delete</span
-                    >
+                  <li class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
+                    @click="utilityStore.confirmDeleteTask(task.taskID, task.taskTitle)">
+                    <span class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold">
+                      <DeleteIcon />Delete
+                    </span>
                   </li>
                 </ul>
               </div>
@@ -201,10 +202,7 @@ onBeforeMount(async () => {
           </tr>
 
           <tr v-else>
-            <td
-              colspan="4"
-              class="text-center font-bold text-xl text-headline text-opacity-50"
-            >
+            <td colspan="4" class="text-center font-bold text-xl text-headline text-opacity-50">
               No Task
             </td>
           </tr>
@@ -214,9 +212,7 @@ onBeforeMount(async () => {
     <router-view />
 
     <!-- delete confirmation -->
-    <DeleteConfirmationTask
-      @delete-task="deleteTask(utilityStore.selectedId)"
-    />
+    <DeleteConfirmationTask @delete-task="deleteTask(utilityStore.selectedId)" />
     <!-- delete confirmation -->
   </main>
 </template>
@@ -235,6 +231,7 @@ onBeforeMount(async () => {
     animation-timing-function: ease-in;
     opacity: 0;
   }
+
   38% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
@@ -242,36 +239,42 @@ onBeforeMount(async () => {
     animation-timing-function: ease-out;
     opacity: 1;
   }
+
   55% {
     -webkit-transform: translateY(-65px);
     transform: translateY(-65px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   72% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
   }
+
   81% {
     -webkit-transform: translateY(-28px);
     transform: translateY(-28px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   90% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
   }
+
   95% {
     -webkit-transform: translateY(-8px);
     transform: translateY(-8px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   100% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
@@ -279,6 +282,7 @@ onBeforeMount(async () => {
     animation-timing-function: ease-out;
   }
 }
+
 @keyframes bounce-in-top {
   0% {
     -webkit-transform: translateY(-500px);
@@ -287,6 +291,7 @@ onBeforeMount(async () => {
     animation-timing-function: ease-in;
     opacity: 0;
   }
+
   38% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
@@ -294,36 +299,42 @@ onBeforeMount(async () => {
     animation-timing-function: ease-out;
     opacity: 1;
   }
+
   55% {
     -webkit-transform: translateY(-65px);
     transform: translateY(-65px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   72% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
   }
+
   81% {
     -webkit-transform: translateY(-28px);
     transform: translateY(-28px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   90% {
     -webkit-transform: translateY(0);
     transform: translateY(0);
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
   }
+
   95% {
     -webkit-transform: translateY(-8px);
     transform: translateY(-8px);
     -webkit-animation-timing-function: ease-in;
     animation-timing-function: ease-in;
   }
+
   100% {
     -webkit-transform: translateY(0);
     transform: translateY(0);

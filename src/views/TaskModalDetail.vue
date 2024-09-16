@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, reactive} from "vue"
-import {getTask, getAllStatuses} from "@/libs/FetchAPI.js"
+import {getTask3, getAllStatuses} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
@@ -71,11 +71,11 @@ const statusAtt = reactive({
 
 onBeforeMount(async () => {
   try {
-    const fetchTask = await getTask(route.params.id)
+    const fetchTask = await getTask3(route.params.boardID,route.params.taskID)
     task.value = fetchTask
 
-    statusAtt.name = task.value.status.name
-    statusAtt.color = task.value.status.color
+    statusAtt.name = task.value.statuses3.statusName
+    statusAtt.color = task.value.statuses3.statusColor
 
     if (
       task.value.description === null ||
@@ -90,8 +90,8 @@ onBeforeMount(async () => {
       task.value.assignees = "Unassigned"
     }
 
-    task.value.createdOn = formatDateTime(task.value.createdOn)
-    task.value.updatedOn = formatDateTime(task.value.updatedOn)
+    task.value.createOn = formatDateTime(task.value.createOn)
+    task.value.updateOn = formatDateTime(task.value.updateOn)
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
@@ -112,7 +112,7 @@ onBeforeMount(async () => {
       </h1>
       <!-- close modal -->
       <div class="flex justify-end">
-        <button @click="router.push('/task')">
+        <button @click="router.push(`/board/${route.params.boardID}/task`)">
           <span><Xmark /></span>
         </button>
       </div>
@@ -121,7 +121,7 @@ onBeforeMount(async () => {
         <div
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5 break-all"
         >
-          {{ task.title }}
+          {{ task.taskTitle }}
         </div>
 
         <div class="grid grid-cols-1 grid-rows-4 gap-y-4">
@@ -174,7 +174,7 @@ onBeforeMount(async () => {
             <div
               class="itbkk-created-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
             >
-              {{ task.createdOn }}
+              {{ task.createOn }}
             </div>
           </div>
 
@@ -188,7 +188,7 @@ onBeforeMount(async () => {
             <div
               class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
             >
-              {{ task.updatedOn }}
+              {{ task.updateOn }}
             </div>
           </div>
 
@@ -228,7 +228,7 @@ onBeforeMount(async () => {
 
           <div class="flex gap-x-3">
             <button
-              @click="router.push('/')"
+              @click="router.push(`/board/${route.params.boardID}/task`)"
               class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-none hover:bg-opacity-30"
             >
               OK
