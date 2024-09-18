@@ -14,7 +14,7 @@ class TaskManagement {
 
   deleteTask(deleteId) {
     this.tasks.splice(
-      this.tasks.findIndex((task) => task.id === deleteId),
+      this.tasks.findIndex((task) => task.taskID === deleteId),
       1
     )
   }
