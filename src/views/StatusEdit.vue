@@ -40,7 +40,7 @@ const editStatusData = async (newStatus) => {
           transition: "flip",
           position: "bottom-right",
         })
-      })
+      },200)
     } else if (response.status === 400) {
       utilityStore.transactionDisable = false
       setTimeout(() => {

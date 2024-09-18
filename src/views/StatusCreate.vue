@@ -1,7 +1,7 @@
 <script setup>
 import {ref, reactive, watch, computed} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore"
-import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import {createStatus3} from "@/libs/FetchAPI"
 import router from "@/router"
 import {useRoute} from "vue-router"
@@ -17,7 +17,7 @@ const newStatus = reactive({
   name: "",
   description: "",
   color: statusStyleStore.presetColors[5],
-  limitMaximumTask: 0
+  limitMaximumTask: 0,
 })
 
 const updateColor = (index) => {
@@ -33,7 +33,7 @@ const isButtonDisabled = computed(() => {
 const createNewStatus = async () => {
   utilityStore.transactionDisable = true
   try {
-    const response = await createStatus3(route.params.boardID ,newStatus)
+    const response = await createStatus3(route.params.boardID, newStatus)
     // console.log(response.data)
     if (response.status === 201) {
       // console.log(newStatus)
@@ -42,14 +42,14 @@ const createNewStatus = async () => {
       utilityStore.transactionDisable = false
 
       setTimeout(() => {
-        toast("The status has been  added", {
+        toast("The status has been added", {
           type: "success",
           timeout: 2000,
           theme: "dark",
           transition: "flip",
           position: "bottom-right",
         })
-      })
+      }, 200)
     } else if (response.status === 500 || response.status === 400) {
       utilityStore.transactionDisable = false
       setTimeout(() => {

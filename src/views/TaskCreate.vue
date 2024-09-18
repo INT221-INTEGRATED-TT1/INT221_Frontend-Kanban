@@ -1,15 +1,15 @@
 <script setup>
-import { ref, reactive, computed, onBeforeMount, watch } from "vue"
-import { createTask3 } from "@/libs/FetchAPI"
+import {ref, reactive, computed, onBeforeMount, watch} from "vue"
+import {createTask3} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
-import { useUtilityStore } from "@/stores/useUtilityStore.js"
-import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
+import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
-import { toast } from "vue3-toastify"
+import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import {useRoute} from "vue-router"
 
@@ -105,7 +105,7 @@ const createNewTask = async () => {
           transition: "flip",
           position: "bottom-right",
         })
-      })
+      }, 200)
     } else if (response.status === 400) {
       utilityStore.transactionDisable = false
       toast("Please fill in the required fields", {
@@ -131,14 +131,22 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <section class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-md">
-    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 transition ease-in-out">
-      <h1 class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider">
+  <section
+    class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-md"
+  >
+    <div
+      class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 transition ease-in-out"
+    >
+      <h1
+        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
+      >
         Create Task
       </h1>
       <!-- close modal -->
       <div class="flex justify-end">
-        <button @click="router.push(`/board/${utilityStore.selectedBoardId}/task`)">
+        <button
+          @click="router.push(`/board/${utilityStore.selectedBoardId}/task`)"
+        >
           <span>
             <Xmark />
           </span>
@@ -150,36 +158,51 @@ onBeforeMount(() => {
         <div>
           <textarea
             class="itbkk-title bg-[#1A1B1D] rounded-xl outline-none resize-none w-full text-2xl font-semibold text-headline mt-5 p-4 pl-6"
-            maxlength="100" placeholder="Enter Task Title" required v-model.trim="newTask.title">
+            maxlength="100"
+            placeholder="Enter Task Title"
+            required
+            v-model.trim="newTask.title"
+          >
           </textarea>
-          <span class="required flex justify-end text-xs text-normal opacity-45">{{ newTask.title.length }} / 100</span>
+          <span class="required flex justify-end text-xs text-normal opacity-45"
+            >{{ newTask.title.length }} / 100</span
+          >
         </div>
 
         <div class="grid grid-cols-1 grid-rows-2 gap-y-8">
           <!-- Status -->
           <div class="flex gap-x-10 items-center">
             <div
-              class="itbkk-status text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-3">
+              class="itbkk-status text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-3"
+            >
               <span>
                 <StatusDetail />
-              </span> Status
+              </span>
+              Status
             </div>
             <div class="dropdown dropdown-right">
-              <div tabindex="0" role="button"
+              <div
+                tabindex="0"
+                role="button"
                 class="rounded-xl px-2 py-1 font-bold text-[16px] text-center tracking-wider flex items-center gap-x-3"
-                :class="statusStyleStore.statusCustomStyle(newStatus.color)">
+                :class="statusStyleStore.statusCustomStyle(newStatus.color)"
+              >
                 {{ newStatus.name }}
                 <span>
                   <DropdownIcon />
                 </span>
               </div>
               <div
-                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-auto cursor-pointer">
+                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-auto cursor-pointer"
+              >
                 <ul tabindex="0">
-                  <li v-for="status in utilityStore.statusManager.getStatus()" :key="status.id"
+                  <li
+                    v-for="status in utilityStore.statusManager.getStatus()"
+                    :key="status.id"
                     @click="selectStatus(status.name, status.color, status.id)"
                     :class="statusStyleStore.statusCustomStyle(status.color)"
-                    class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent">
+                    class="p-1 hover:bg-[#4D4D4D] hover:text-[#D8D8D8] transition ease-in-out duration-200 rounded-md bg-transparent"
+                  >
                     {{ status.name }}
                   </li>
                 </ul>
@@ -191,16 +214,25 @@ onBeforeMount(() => {
           <!-- Assignees -->
           <div class="flex gap-x-10 items-center">
             <div
-              class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
+              class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
+            >
               <span>
                 <AssigneeDetail />
-              </span> Assignees
+              </span>
+              Assignees
             </div>
 
             <div class="flex items-end gap-x-5">
-              <textarea maxlength="30" rows="1" placeholder="Enter Assignees" v-model.trim="newTask.assignees"
-                class="rounded-md bg-[#1A1B1D] text-[#F99B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem] outline-none"></textarea>
-              <span class="text-xs text-normal opacity-45">{{ newTask.assignees.length }} / 30</span>
+              <textarea
+                maxlength="30"
+                rows="1"
+                placeholder="Enter Assignees"
+                v-model.trim="newTask.assignees"
+                class="rounded-md bg-[#1A1B1D] text-[#F99B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem] outline-none"
+              ></textarea>
+              <span class="text-xs text-normal opacity-45"
+                >{{ newTask.assignees.length }} / 30</span
+              >
             </div>
           </div>
           <!-- Assignees -->
@@ -209,28 +241,41 @@ onBeforeMount(() => {
           <div class="flex flex-col">
             <textarea
               class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-5"
-              rows="4" placeholder="Enter Task Description" v-model.trim="newTask.description"
-              maxlength="500"></textarea>
-            <span class="text-xs text-normal opacity-45 flex justify-end pt-2">{{ newTask.description.length }} /
-              500</span>
+              rows="4"
+              placeholder="Enter Task Description"
+              v-model.trim="newTask.description"
+              maxlength="500"
+            ></textarea>
+            <span class="text-xs text-normal opacity-45 flex justify-end pt-2"
+              >{{ newTask.description.length }} / 500</span
+            >
           </div>
           <!-- Description -->
 
           <!-- button operation -->
           <div class="flex justify-between">
-            <div :class="utilityStore.isLimitEnable ? '' : 'invisible'"
-              class="text-[#D69C27] flex items-center gap-x-3">
+            <div
+              :class="utilityStore.isLimitEnable ? '' : 'invisible'"
+              class="text-[#D69C27] flex items-center gap-x-3"
+            >
               <WarningIcon width="20" height="20" />
               <span class="mt-1 tracking-wider">Limit Statuses is enabled</span>
             </div>
 
             <div class="flex gap-x-3">
-              <button @click="router.push(`/board/${utilityStore.selectedBoardId}/task`)"
-                class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none hover:bg-opacity-30 bg-transparent">
+              <button
+                @click="
+                  router.push(`/board/${utilityStore.selectedBoardId}/task`)
+                "
+                class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none hover:bg-opacity-30 bg-transparent"
+              >
                 CANCEL
               </button>
-              <button @click="createNewTask()" :disabled="isButtonDisabled"
-                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base">
+              <button
+                @click="createNewTask()"
+                :disabled="isButtonDisabled"
+                class="itbkk-button-confirm btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-[#007305] hover:border-none bg-transparent hover:bg-base"
+              >
                 SAVE
               </button>
             </div>
