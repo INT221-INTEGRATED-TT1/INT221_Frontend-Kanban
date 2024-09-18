@@ -28,13 +28,13 @@ const userStore = useUserStore()
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
-    const findStatusIdfromTask = utilityStore.tasksManager.getTasks().filter(task => task.taskID === deleteId)[0].statuses3.statusID
-    console.log(findStatusIdfromTask)
+    const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.taskID === deleteId)[0].statuses3.statusID
+    console.log(findStatusIdFromTask)
     const response = await deleteTask3(route.params.boardID,deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
       // console.log
-      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdfromTask)].count -= 1
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdFromTask)].count -= 1
       utilityStore.showDeleteConfirmation = false
       toast("Task has been deleted", {
         type: "success",
