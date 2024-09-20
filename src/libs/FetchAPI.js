@@ -298,7 +298,7 @@ const toggleStatusLimit = async (newToggleStatus) => {
 const authenticateUser = async (userCredentials) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/authentications/login`,
+      `${import.meta.env.VITE_BACKEND_URL}/login`,
       {
         method: "POST",
         headers: {
@@ -321,7 +321,7 @@ const authenticateUser = async (userCredentials) => {
 const authorizedUser = async (accessToken) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/authentications/validate-token`,
+      `${import.meta.env.VITE_BACKEND_URL}/login/validate-token`,
       {
         method: "GET",
         headers: {
@@ -499,6 +499,7 @@ const createTask3 = async (boardId, newTask) => {
       status: response.status,
       message: "Task created successfully",
       data: await response.json(),
+      
     }
   } catch (error) {
     throw error
