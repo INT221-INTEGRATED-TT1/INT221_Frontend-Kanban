@@ -14,13 +14,16 @@ class TaskManagement {
 
   deleteTask(deleteId) {
     this.tasks.splice(
-      this.tasks.findIndex((task) => task.taskID === deleteId),
+      this.tasks.findIndex((task) => task.id === deleteId),
       1
     )
   }
 
   editTask(taskId, newTask) {
-    // console.log("Task id is", taskId)
+    console.log(taskId);
+    
+    console.log(newTask);
+    
     newTask.assignees === null ? (newTask.assignees = "Unassigned") : ""
     newTask.description === null
       ? (newTask.description = "No Description Provided")
