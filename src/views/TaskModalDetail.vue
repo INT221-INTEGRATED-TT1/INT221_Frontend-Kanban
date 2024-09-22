@@ -74,8 +74,8 @@ onBeforeMount(async () => {
     const fetchTask = await getTask3(route.params.boardID,route.params.taskID)
     task.value = fetchTask
 
-    statusAtt.name = task.value.statuses3.statusName
-    statusAtt.color = task.value.statuses3.statusColor
+    statusAtt.name = task.value.statuses3.name
+    statusAtt.color = task.value.statuses3.color
 
     if (
       task.value.description === null ||
@@ -90,8 +90,8 @@ onBeforeMount(async () => {
       task.value.assignees = "Unassigned"
     }
 
-    task.value.createOn = formatDateTime(task.value.createOn)
-    task.value.updateOn = formatDateTime(task.value.updateOn)
+    task.value.createOn = formatDateTime(task.value.createdOn)
+    task.value.updateOn = formatDateTime(task.value.updated)
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }

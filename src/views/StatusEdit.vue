@@ -75,9 +75,9 @@ onBeforeMount(async () => {
     // console.log(fetchData);
     // console.log(typeof status.value.id)
 
-    updateStatus.name = status.value.statusName
-    updateStatus.description = status.value.statusDescription
-    updateStatus.color = status.value.statusColor
+    updateStatus.name = status.value.name
+    updateStatus.description = status.value.description
+    updateStatus.color = status.value.color
   } catch (error) {
     console.log(error)
   }

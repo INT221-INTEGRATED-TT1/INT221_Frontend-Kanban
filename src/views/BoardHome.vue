@@ -56,6 +56,8 @@ const utilityStore = useUtilityStore()
 
 // console.log(Object.keys(testData).length)
 
+
+
 const formatDateTime = (baseFormatDate) => {
   const date = new Date(baseFormatDate)
   const options = {
@@ -84,7 +86,8 @@ onBeforeMount(async () => {
     const fetchBoards = await getAllBoards()
     utilityStore.boardManager.addBoards(fetchBoards)
 
-    console.log(fetchBoards)
+    // console.log(fetchBoards)
+    console.log(utilityStore.boardManager.getBoards());
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
         ? (task.assignees = "Unassigned")
@@ -137,15 +140,16 @@ onBeforeMount(async () => {
     >
       <div
         v-for="(board, index) in utilityStore.boardManager.getBoards()"
-        :key="board.boardID"
+        :key="board.id"
         class="space-y-7 p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
-        @click="router.push(`/board/${board.boardID}/task`)"
+        @click="router.push(`/board/${board.id}/task`)"
       >
+      
         <!-- <div class="flex gap-4"> -->
         <div
           class="flex items-center min-h-16"
-          :data-tip="board.boardName.length > 10 ? board.boardName : ''"
-          :class="board.boardName.length > 10 ? 'tooltip' : ''"
+          :data-tip="board.name.length > 10 ? board.name : ''"
+          :class="board.name.length > 10 ? 'tooltip' : ''"
         >
           <div class="self-center pr-2">
             <AboutBoardIcon width="40" height="48" />
@@ -153,12 +157,12 @@ onBeforeMount(async () => {
           <p
             class="text-xl font-bold text-start"
             :class="
-              board.boardName.length > 24
+              board.name.length > 24
                 ? 'text-nowrap max-h-16 truncate'
                 : 'text-balance'
             "
           >
-            {{ board.boardName }}
+            {{ board.name }}
           </p>
         </div>
         <!-- <div class="flex items-center justify-between font-Geist tracking-wider text-white space-y-1"> -->
@@ -173,7 +177,7 @@ onBeforeMount(async () => {
               By {{ userStore.userIdentity.name }}
             </p>
             <p class="text-xs font-light opacity-55">
-              Created At {{ formatDateTime(board.createOn) }}
+              Created At {{ formatDateTime(board.createdOn) }}
             </p>
           </div>
           <button class="tooltip tooltip-error text-normal" data-tip="Delete">

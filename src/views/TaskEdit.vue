@@ -94,10 +94,12 @@ const formatDateTime = (baseFormatDate) => {
 const filterStatus = ref({})
 
 const editTaskData = async (newTask) => {
+  console.log("Editing Status");
+  
   const filterStatusId = utilityStore.statusManager
     .getStatus()
     .filter((status) => status.id === newStatus.id)
-  console.log(utilityStore.statusManager.getStatus())
+  
 
   console.log("filterStatusID", filterStatusId)
 
@@ -131,11 +133,11 @@ const editTaskData = async (newTask) => {
     )
 
     if (response.status === 200) {
-      utilityStore.tasksManager.editTask(route.params.boardID, response.data)
+      utilityStore.tasksManager.editTask(route.params.taskID, response.data)
       utilityStore.statusManager.getStatus()[
         utilityStore.statusManager
           .getStatus()
-          .findIndex((status) => status.id === task.value.statuses3.statusID)
+          .findIndex((status) => status.id === task.value.statuses3.id)
       ].count -= 1
       utilityStore.statusManager.getStatus()[
         utilityStore.statusManager
@@ -169,6 +171,7 @@ const editTaskData = async (newTask) => {
     console.log("Error updating task: ", error)
   }
 }
+console.log(filterStatus.value);
 
 const isButtonDisable = computed(() => {
   if (newStatus.id !== filterStatus.value.id) {
@@ -196,15 +199,15 @@ onBeforeMount(async () => {
     task.value.createOn = formatDateTime(task.value.createOn)
     task.value.updateOn = formatDateTime(task.value.updateOn)
 
-    updateTask.title = task.value.taskTitle
+    updateTask.title = task.value.title
     updateTask.description = task.value.description
     updateTask.assignees = task.value.assignees
-    updateTask.status3 = task.value.statuses3.statusID
+    updateTask.status3 = task.value.statuses3.id
 
-    newStatus.id = task.value.statuses3.statusID
-    newStatus.name = task.value.statuses3.statusName
-    newStatus.description = task.value.statuses3.statusDescription
-    newStatus.color = task.value.statuses3.statusColor
+    newStatus.id = task.value.statuses3.id
+    newStatus.name = task.value.statuses3.name
+    newStatus.description = task.value.statuses3.description
+    newStatus.color = task.value.statuses3.color
 
     // console.log(updateTask.status.length)
   } catch (error) {
@@ -338,7 +341,7 @@ onBeforeMount(async () => {
             <div
               class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
             >
-              {{ task.updatedOn }}
+              {{ task.updated }}
             </div>
           </div>
 

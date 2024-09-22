@@ -9,12 +9,14 @@ const userStore = useUserStore()
 const utilityStore = useUtilityStore()
 const { userIdentity } = userStore
 const newBoard = reactive({
-  boardName: `${userIdentity.name} personal board`
+  name: `${userIdentity.name} personal board`
 })
 const addNewBoard = async (newBoard) => {
   try {
     const response = await createBoard(newBoard)
     if (response.status === 201) {
+      console.log(response.data);
+      
       utilityStore.boardManager.addBoard(response.data)
       router.push('/board')
     }
@@ -43,8 +45,8 @@ const addNewBoard = async (newBoard) => {
         <!-- board name input -->
         <div>
           <input class="py-2 text-start rounded-lg border border-[#71717A] indent-4 text-white w-full"
-            placeholder="your board name" maxlength="120" v-model.trim="newBoard.boardName" />
-          <span class="flex justify-end mt-2 text-xs required text-normal opacity-45">{{ newBoard.boardName.length }} /
+            placeholder="your board name" maxlength="120" v-model.trim="newBoard.name" />
+          <span class="flex justify-end mt-2 text-xs required text-normal opacity-45">{{ newBoard.name.length }} /
             120</span>
         </div>
         <!-- button -->
