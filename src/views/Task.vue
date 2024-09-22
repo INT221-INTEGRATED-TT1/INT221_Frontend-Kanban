@@ -28,7 +28,7 @@ const userStore = useUserStore()
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
-    const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.taskID === deleteId)[0].statuses3.statusID
+    const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.id === deleteId)[0].statuses3.id
     console.log(findStatusIdFromTask)
     const response = await deleteTask3(route.params.boardID,deleteId)
     if (response.status === 200) {
