@@ -17,7 +17,7 @@ import DropdownSortAssignees from "@/components/DropdownSortAssignee.vue"
 import DropdownSortTitle from "@/components/DropdownSortTitle.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import { toast } from "vue3-toastify"
-import {useRoute} from "vue-router"
+import { useRoute } from "vue-router"
 import "vue3-toastify/dist/index.css"
 
 const route = useRoute()
@@ -30,7 +30,7 @@ const deleteTask = async (deleteId) => {
     // console.log(deleteId)
     const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.taskID === deleteId)[0].statuses3.statusID
     console.log(findStatusIdFromTask)
-    const response = await deleteTask3(route.params.boardID,deleteId)
+    const response = await deleteTask3(route.params.boardID, deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
       // console.log
@@ -129,7 +129,12 @@ onBeforeMount(async () => {
       </div>
     </div>
 
-    <div class="pt-12">
+    <div class="pt-10">
+      <div class="flex justify-end">
+        <router-link :to="{ name: 'share-task' }">
+          <button class="bg-[#338EF7] text-white text-center font-Geist text-sm px-4 py-1 rounded-sm self-end">Share</button>
+        </router-link>
+      </div>
       <FilterCollapse />
 
       <table class="table border-collapse bg-[#141414] text-center">
@@ -162,9 +167,9 @@ onBeforeMount(async () => {
             </td>
             <td class="itbkk-assignees text-opacity-90 text-center italic">
               <div class="bg-[#1A1B1D] rounded-md px-1 py-2 text-wrap tracking-wide" :class="task.assignees === 'Unassigned'
-          ? 'italic text-gray-500'
-          : 'text-[#F99B1D]'
-          ">
+                ? 'italic text-gray-500'
+                : 'text-[#F99B1D]'
+                ">
                 {{ task.assignees }}
               </div>
             </td>
