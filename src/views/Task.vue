@@ -28,7 +28,7 @@ const userStore = useUserStore()
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
-    const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.taskID === deleteId)[0].statuses3.statusID
+    const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.id === deleteId)[0].statuses3.id
     console.log(findStatusIdFromTask)
     const response = await deleteTask3(route.params.boardID, deleteId)
     if (response.status === 200) {
@@ -155,14 +155,14 @@ onBeforeMount(async () => {
         </thead>
         <tbody>
           <tr class="itbkk-item border-none text-secondary"
-            v-for="(task, index) in utilityStore.tasksManager.getTasks()" :key="task.taskID"
+            v-for="(task, index) in utilityStore.tasksManager.getTasks()" :key="task.id"
             v-if="utilityStore.tasksManager.getTasks().length > 0">
             <td>{{ ++index }}</td>
             <td
               class="itbkk-title cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
-              @click="router.push(`/board/${route.params.boardID}/task/${task.taskID}`)">
+              @click="router.push(`/board/${route.params.boardID}/task/${task.id}`)">
               <div class="w-[20rem] mx-auto truncate tracking-wider">
-                {{ task.taskTitle }}
+                {{ task.title }}
               </div>
             </td>
             <td class="itbkk-assignees text-opacity-90 text-center italic">
@@ -173,11 +173,11 @@ onBeforeMount(async () => {
                 {{ task.assignees }}
               </div>
             </td>
-            <td class="itbkk-status tooltip mt-1.5 before:max-w-none" :data-tip="task.statuses3.statusName">
+            <td class="itbkk-status tooltip mt-1.5 before:max-w-none" :data-tip="task.statuses3.name">
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
-                :class="statusStyleStore.statusCustomStyle(task.statuses3.statusColor)">
-                {{ task.statuses3.statusName }}
+                :class="statusStyleStore.statusCustomStyle(task.statuses3.color)">
+                {{ task.statuses3.name }}
               </div>
             </td>
             <td>
@@ -189,14 +189,14 @@ onBeforeMount(async () => {
                 <ul tabindex="0"
                   class="dropdown-content z-[1] menu shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-box w-32">
                   <li class="itbkk-button-edit cursor-pointer p-1 hover:rounded-md"
-                    @click="router.push(`task/${task.taskID}/edit`)">
+                    @click="router.push(`task/${task.id}/edit`)">
                     <span class="font-Inter tracking-wider font-semibold">
                       <EditTaskIcon />Edit
                     </span>
                   </li>
                   <div class="divider m-0 h-0"></div>
                   <li class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
-                    @click="utilityStore.confirmDeleteTask(task.taskID, task.taskTitle)">
+                    @click="utilityStore.confirmDeleteTask(task.id, task.title)">
                     <span class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold">
                       <DeleteIcon />Delete
                     </span>

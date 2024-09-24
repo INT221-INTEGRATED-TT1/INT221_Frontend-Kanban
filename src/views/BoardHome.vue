@@ -12,6 +12,8 @@ import {useUtilityStore} from "@/stores/useUtilityStore.js"
 const userStore = useUserStore()
 const utilityStore = useUtilityStore()
 
+
+
 const formatDateTime = (baseFormatDate) => {
   const date = new Date(baseFormatDate)
   const options = {
@@ -46,6 +48,7 @@ onBeforeMount(async () => {
     const fetchBoards = await getAllBoards()
     utilityStore.boardManager.addBoards(fetchBoards)
     console.log(fetchBoards)
+    console.log(utilityStore.boardManager.getBoards());
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
         ? (task.assignees = "Unassigned")
@@ -102,6 +105,7 @@ onBeforeMount(async () => {
         class="space-y-7 p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
         @click="selectBoard(board.id)"
       >
+      
         <!-- <div class="flex gap-4"> -->
         <div
           class="flex items-center min-h-16"
@@ -134,7 +138,7 @@ onBeforeMount(async () => {
               By {{ userStore.userIdentity.name }}
             </p>
             <p class="text-xs font-light opacity-55">
-              Created At {{ formatDateTime(board.createOn) }}
+              Created At {{ formatDateTime(board.createdOn) }}
             </p>
           </div>
           <button class="tooltip tooltip-error text-normal" data-tip="Delete">

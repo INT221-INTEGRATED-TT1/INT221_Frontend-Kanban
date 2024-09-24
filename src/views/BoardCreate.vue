@@ -15,6 +15,8 @@ const addNewBoard = async (newBoard) => {
   try {
     const response = await createBoard(newBoard)
     if (response.status === 201) {
+      console.log(response.data);
+      
       utilityStore.boardManager.addBoard(response.data)
       router.push('/board')
     }

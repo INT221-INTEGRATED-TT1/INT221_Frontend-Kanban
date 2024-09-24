@@ -364,6 +364,8 @@ const getAllBoards = async () => {
 const createBoard = async (newBoard) => {
   const accessToken = localStorage.getItem("JWT_TOKEN");
   const createBoard = { ...newBoard }
+  console.log(newBoard);
+  
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v3/boards`,
