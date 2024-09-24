@@ -9,52 +9,8 @@ import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import {useUserStore} from "@/stores/useUserStore"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 
-// const testData = reactive([{
-//     boardName: "Todo Planning to travelll27",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo Planning to travelsssssssssssssss40",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo Planning to travelssssssssssssssssssss",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// ])
 const userStore = useUserStore()
 const utilityStore = useUtilityStore()
-// const testEmptyData = reactive('')
-
-// console.log(Object.keys(testData).length)
 
 
 
@@ -76,6 +32,12 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
+const selectBoard = (selectBoardId) => {
+  const filterBoard = utilityStore.boardManager.getBoards().filter(board => board.id === selectBoardId)[0]
+  utilityStore.selectedBoard = {...filterBoard}
+  router.push(`/board/${selectBoardId}/task`)
+}
+
 onBeforeMount(async () => {
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN")
   if (JWT_TOKEN) {
@@ -85,8 +47,7 @@ onBeforeMount(async () => {
   try {
     const fetchBoards = await getAllBoards()
     utilityStore.boardManager.addBoards(fetchBoards)
-
-    // console.log(fetchBoards)
+    console.log(fetchBoards)
     console.log(utilityStore.boardManager.getBoards());
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
@@ -142,7 +103,7 @@ onBeforeMount(async () => {
         v-for="(board, index) in utilityStore.boardManager.getBoards()"
         :key="board.id"
         class="space-y-7 p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
-        @click="router.push(`/board/${board.id}/task`)"
+        @click="selectBoard(board.id)"
       >
       
         <!-- <div class="flex gap-4"> -->
