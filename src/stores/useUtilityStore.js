@@ -19,6 +19,13 @@ export const useUtilityStore = defineStore("utility", () => {
   const isLimitEnable = ref(false)
   const limitStatusNumber = ref(10)
   const selectedBoardId = ref('')
+  const selectedBoard = ref({
+    id : "",
+    name : "",
+    createdOn : "",
+    updatedOn : "",
+    ownerId : ""
+  })
 
   const confirmDeleteStatus = (statuses) => {
     selectedId.value = statuses.id
@@ -57,6 +64,7 @@ export const useUtilityStore = defineStore("utility", () => {
     isLimitEnable,
     limitStatusNumber,
     boardManager,
+    selectedBoard,
     selectedBoardId,
   }
 })

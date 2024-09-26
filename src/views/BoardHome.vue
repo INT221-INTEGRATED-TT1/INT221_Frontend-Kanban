@@ -3,16 +3,14 @@ import {ref, onMounted, onBeforeMount, watch, reactive} from "vue"
 import {getAllBoards} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import GroupCode from "@/components/icons/GroupCode.vue"
-import FilterCollapse from "@/components/FilterCollapse.vue"
 import AboutBoardIcon from "@/components/icons/AboutBoard.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import {useUserStore} from "@/stores/useUserStore"
+import UserSetting from "@/components/UserSetting.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 
 const userStore = useUserStore()
 const utilityStore = useUtilityStore()
-
-
 
 const formatDateTime = (baseFormatDate) => {
   const date = new Date(baseFormatDate)
@@ -79,6 +77,7 @@ onBeforeMount(async () => {
         </div>
       </div>
     </div>
+    <div class="flex justify-end mb-5"><UserSetting /></div>
     <!-- Boad List Header & Add New board Button -->
     <div class="flex justify-center items-center mt-2">
       <h1

@@ -1,7 +1,9 @@
 import {defineStore} from "pinia"
 import {ref} from "vue"
 import {useUtilityStore} from "./useUtilityStore"
-import {getAllTasks} from "@/libs/FetchAPI"
+import {getAllTasks3} from "@/libs/FetchAPI"
+import { useRoute } from "vue-router"
+
 
 export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
   const utilityStore = useUtilityStore()
@@ -10,7 +12,7 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
   const selectedOption = ref("")
   const currentSortBy= ref("createdOn")
   const disableSort = ref(true)
-
+  const route = useRoute()
   const filterOrSortByStatus = async (
     direction,
     sortBy,
@@ -34,7 +36,8 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
       }
     } 
 
-    const sorted = await getAllTasks(
+    const sorted = await getAllTasks3(
+      route.params.boardID,
       sortDirection.value,
       currentSortBy.value,
       filterStatusArray.value
