@@ -11,11 +11,11 @@ import MoreIcon from "@/components/icons/MoreIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import EditTaskIcon from "@/components/icons/EditTaskIcon.vue"
 import DeleteConfirmationTask from "@/components/DeleteConfirmationTask.vue"
+import UserSetting from "@/components/UserSetting.vue"
 import FilterCollapse from "@/components/FilterCollapse.vue"
 import DropdownSortStatus from "@/components/DropdownSortStatus.vue"
 import DropdownSortAssignees from "@/components/DropdownSortAssignee.vue"
 import DropdownSortTitle from "@/components/DropdownSortTitle.vue"
-import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import { toast } from "vue3-toastify"
 import { useRoute } from "vue-router"
 import "vue3-toastify/dist/index.css"
@@ -98,8 +98,6 @@ onBeforeMount(async () => {
       </div>
 
       <div class="flex items-center gap-x-3">
-        <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
-
         <router-link :to="`/board/${route.params.boardID}/status`">
           <div
             class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer">
@@ -117,15 +115,7 @@ onBeforeMount(async () => {
             </button>
           </div>
         </router-link>
-        <div
-          class="bg-[#1D1D1F] px-4 py-2 rounded-2xl flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
-          <button class="itbkk-fullname text-normal font-Inter">
-            {{ userStore.userIdentity.name }}
-          </button>
-          <span>
-            <DropdownIcon />
-          </span>
-        </div>
+        <UserSetting />
       </div>
     </div>
 

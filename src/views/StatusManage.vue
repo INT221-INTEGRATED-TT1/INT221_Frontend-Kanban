@@ -26,6 +26,7 @@ import AstronautStopSignBlack from "@/components/icons/AstronautStopSignBlack.vu
 import DeleteConfirmationStatus from "@/components/DeleteConfirmationStatus.vue";
 import {useRoute} from "vue-router"
 import SettingIcon from "@/components/icons/SettingIcon.vue";
+import UserSetting from "@/components/UserSetting.vue"
 
 const route = useRoute()
 const utilityStore = useUtilityStore();
@@ -152,6 +153,11 @@ watch(newStatus, () => {
     : (utilityStore.transactionDisable = true);
 });
 
+const logout = () => {
+  localStorage.removeItem("JWT_TOKEN")
+  router.push('/login')
+}
+
 onBeforeMount(async () => {
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
   if (JWT_TOKEN) {
@@ -214,15 +220,7 @@ onBeforeMount(async () => {
           </div>
         </router-link>
 
-        <div
-          class="bg-[#1D1D1F] px-4 py-2 rounded-2xl flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
-          <button class="text-normal font-Inter">
-            {{ userStore.userIdentity.name}}
-          </button>
-          <span>
-              <DropdownIcon />
-            </span>
-        </div>
+        <UserSetting />
 
         <button
           class="itbkk-status-setting hover:bg-[#1f1f1f] px-1 tracking-wider rounded-xl border border-[#E3E3E3] border-opacity-50"
