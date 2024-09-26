@@ -3,58 +3,14 @@ import {ref, onMounted, onBeforeMount, watch, reactive} from "vue"
 import {getAllBoards} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import GroupCode from "@/components/icons/GroupCode.vue"
-import FilterCollapse from "@/components/FilterCollapse.vue"
 import AboutBoardIcon from "@/components/icons/AboutBoard.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import {useUserStore} from "@/stores/useUserStore"
+import UserSetting from "@/components/UserSetting.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 
-// const testData = reactive([{
-//     boardName: "Todo Planning to travelll27",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo Planning to travelsssssssssssssss40",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo Planning to travelssssssssssssssssssss",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// {
-//     boardName: "Todo asdasd to dasda",
-//     createdBy: "Natsaran",
-//     createdOn: "16 Jan 2024",
-// },
-// ])
 const userStore = useUserStore()
 const utilityStore = useUtilityStore()
-// const testEmptyData = reactive('')
-
-// console.log(Object.keys(testData).length)
 
 const formatDateTime = (baseFormatDate) => {
   const date = new Date(baseFormatDate)
@@ -74,6 +30,12 @@ const formatDateTime = (baseFormatDate) => {
   return formattedDate
 }
 
+const selectBoard = (selectBoardId) => {
+  const filterBoard = utilityStore.boardManager.getBoards().filter(board => board.id === selectBoardId)[0]
+  utilityStore.selectedBoard = {...filterBoard}
+  router.push(`/board/${selectBoardId}/task`)
+}
+
 onBeforeMount(async () => {
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN")
   if (JWT_TOKEN) {
@@ -83,8 +45,8 @@ onBeforeMount(async () => {
   try {
     const fetchBoards = await getAllBoards()
     utilityStore.boardManager.addBoards(fetchBoards)
-
     console.log(fetchBoards)
+    console.log(utilityStore.boardManager.getBoards());
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
         ? (task.assignees = "Unassigned")
@@ -115,6 +77,7 @@ onBeforeMount(async () => {
         </div>
       </div>
     </div>
+    <div class="flex justify-end mb-5"><UserSetting /></div>
     <!-- Boad List Header & Add New board Button -->
     <div class="flex justify-center items-center mt-2">
       <h1
@@ -137,15 +100,16 @@ onBeforeMount(async () => {
     >
       <div
         v-for="(board, index) in utilityStore.boardManager.getBoards()"
-        :key="board.boardID"
+        :key="board.id"
         class="space-y-7 p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
-        @click="router.push(`/board/${board.boardID}/task`)"
+        @click="selectBoard(board.id)"
       >
+      
         <!-- <div class="flex gap-4"> -->
         <div
           class="flex items-center min-h-16"
-          :data-tip="board.boardName.length > 10 ? board.boardName : ''"
-          :class="board.boardName.length > 10 ? 'tooltip' : ''"
+          :data-tip="board.name.length > 10 ? board.name : ''"
+          :class="board.name.length > 10 ? 'tooltip' : ''"
         >
           <div class="self-center pr-2">
             <AboutBoardIcon width="40" height="48" />
@@ -153,12 +117,12 @@ onBeforeMount(async () => {
           <p
             class="text-xl font-bold text-start"
             :class="
-              board.boardName.length > 24
+              board.name.length > 24
                 ? 'text-nowrap max-h-16 truncate'
                 : 'text-balance'
             "
           >
-            {{ board.boardName }}
+            {{ board.name }}
           </p>
         </div>
         <!-- <div class="flex items-center justify-between font-Geist tracking-wider text-white space-y-1"> -->
@@ -173,7 +137,7 @@ onBeforeMount(async () => {
               By {{ userStore.userIdentity.name }}
             </p>
             <p class="text-xs font-light opacity-55">
-              Created At {{ formatDateTime(board.createOn) }}
+              Created At {{ formatDateTime(board.createdOn) }}
             </p>
           </div>
           <button class="tooltip tooltip-error text-normal" data-tip="Delete">

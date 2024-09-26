@@ -8,14 +8,8 @@ class BoardManagement {
   }
 
   addBoard(newBoard) {
-    const pushNewBoard = {
-      boardID: newBoard.boardID,
-      boardName: newBoard.boardName,
-      ownerID: newBoard.owner.oid,
-      createOn: "2024-09-16T06:06:48Z",
-      updateOn: "2024-09-16T06:06:48Z"
-    }
-    this.boards.push(pushNewBoard)
+    
+    this.boards.push(newBoard)
   }
 
   // deleteBoard(deleteId) {

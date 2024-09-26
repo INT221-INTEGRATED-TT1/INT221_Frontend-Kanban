@@ -11,13 +11,13 @@ import MoreIcon from "@/components/icons/MoreIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import EditTaskIcon from "@/components/icons/EditTaskIcon.vue"
 import DeleteConfirmationTask from "@/components/DeleteConfirmationTask.vue"
+import UserSetting from "@/components/UserSetting.vue"
 import FilterCollapse from "@/components/FilterCollapse.vue"
 import DropdownSortStatus from "@/components/DropdownSortStatus.vue"
 import DropdownSortAssignees from "@/components/DropdownSortAssignee.vue"
 import DropdownSortTitle from "@/components/DropdownSortTitle.vue"
-import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import { toast } from "vue3-toastify"
-import {useRoute} from "vue-router"
+import { useRoute } from "vue-router"
 import "vue3-toastify/dist/index.css"
 
 const route = useRoute()
@@ -28,9 +28,9 @@ const userStore = useUserStore()
 const deleteTask = async (deleteId) => {
   try {
     // console.log(deleteId)
-    const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.taskID === deleteId)[0].statuses3.statusID
+    const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.id === deleteId)[0].statuses3.id
     console.log(findStatusIdFromTask)
-    const response = await deleteTask3(route.params.boardID,deleteId)
+    const response = await deleteTask3(route.params.boardID, deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
       // console.log
@@ -98,8 +98,6 @@ onBeforeMount(async () => {
       </div>
 
       <div class="flex items-center gap-x-3">
-        <!-- <span class="cursor-pointer"><FilterIcon /></span> -->
-
         <router-link :to="`/board/${route.params.boardID}/status`">
           <div
             class="itbkk-manage-status bg-[#D9D9D9] text-base border-[#4C4C4C] border-[3px] px-3 py-[0.38rem] rounded-2xl tracking-wider hover:bg-transparent hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#B136FD] hover:from-[28%] hover:via-[#E95689] hover:via-[59%] hover:to-[#ED9E2F] hover:to-[88%] duration-500 ease-in-out cursor-pointer">
@@ -117,19 +115,16 @@ onBeforeMount(async () => {
             </button>
           </div>
         </router-link>
-        <div
-          class="bg-[#1D1D1F] px-4 py-2 rounded-2xl flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
-          <button class="itbkk-fullname text-normal font-Inter">
-            {{ userStore.userIdentity.name }}
-          </button>
-          <span>
-            <DropdownIcon />
-          </span>
-        </div>
+        <UserSetting />
       </div>
     </div>
 
-    <div class="pt-12">
+    <div class="pt-10">
+      <div class="flex justify-end">
+        <router-link :to="{ name: 'share-task' }">
+          <button class="bg-[#338EF7] text-white text-center font-Geist text-sm px-4 py-1 rounded-sm self-end">Share</button>
+        </router-link>
+      </div>
       <FilterCollapse />
 
       <table class="table border-collapse bg-[#141414] text-center">
@@ -150,29 +145,29 @@ onBeforeMount(async () => {
         </thead>
         <tbody>
           <tr class="itbkk-item border-none text-secondary"
-            v-for="(task, index) in utilityStore.tasksManager.getTasks()" :key="task.taskID"
+            v-for="(task, index) in utilityStore.tasksManager.getTasks()" :key="task.id"
             v-if="utilityStore.tasksManager.getTasks().length > 0">
             <td>{{ ++index }}</td>
             <td
               class="itbkk-title cursor-pointer hover:text-[#dcc6c6] hover:bg-normal hover:bg-opacity-5 hover:rounded-2xl duration-[350ms]"
-              @click="router.push(`/board/${route.params.boardID}/task/${task.taskID}`)">
+              @click="router.push(`/board/${route.params.boardID}/task/${task.id}`)">
               <div class="w-[20rem] mx-auto truncate tracking-wider">
-                {{ task.taskTitle }}
+                {{ task.title }}
               </div>
             </td>
             <td class="itbkk-assignees text-opacity-90 text-center italic">
               <div class="bg-[#1A1B1D] rounded-md px-1 py-2 text-wrap tracking-wide" :class="task.assignees === 'Unassigned'
-          ? 'italic text-gray-500'
-          : 'text-[#F99B1D]'
-          ">
+                ? 'italic text-gray-500'
+                : 'text-[#F99B1D]'
+                ">
                 {{ task.assignees }}
               </div>
             </td>
-            <td class="itbkk-status tooltip mt-1.5 before:max-w-none" :data-tip="task.statuses3.statusName">
+            <td class="itbkk-status tooltip mt-1.5 before:max-w-none" :data-tip="task.statuses3.name">
               <div
                 class="rounded-2xl p-2 font-semibold text-[16px] w-[8rem] truncate text-center tracking-normal font-Inter"
-                :class="statusStyleStore.statusCustomStyle(task.statuses3.statusColor)">
-                {{ task.statuses3.statusName }}
+                :class="statusStyleStore.statusCustomStyle(task.statuses3.color)">
+                {{ task.statuses3.name }}
               </div>
             </td>
             <td>
@@ -184,14 +179,14 @@ onBeforeMount(async () => {
                 <ul tabindex="0"
                   class="dropdown-content z-[1] menu shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-box w-32">
                   <li class="itbkk-button-edit cursor-pointer p-1 hover:rounded-md"
-                    @click="router.push(`task/${task.taskID}/edit`)">
+                    @click="router.push(`task/${task.id}/edit`)">
                     <span class="font-Inter tracking-wider font-semibold">
                       <EditTaskIcon />Edit
                     </span>
                   </li>
                   <div class="divider m-0 h-0"></div>
                   <li class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
-                    @click="utilityStore.confirmDeleteTask(task.taskID, task.taskTitle)">
+                    @click="utilityStore.confirmDeleteTask(task.id, task.title)">
                     <span class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold">
                       <DeleteIcon />Delete
                     </span>
