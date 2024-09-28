@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeMount, watch } from "vue"
-import { getAllTasks3, deleteTask3, getAllStatuses } from "@/libs/FetchAPI.js"
+import { getAllTasks, deleteTask, getAllStatuses } from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
@@ -25,12 +25,12 @@ const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const userStore = useUserStore()
 // const filteredStatus = ref([])
-const deleteTask = async (deleteId) => {
+const deleteATask = async (deleteId) => {
   try {
     // console.log(deleteId)
     const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.id === deleteId)[0].statuses3.id
     console.log(findStatusIdFromTask)
-    const response = await deleteTask3(route.params.boardID, deleteId)
+    const response = await deleteTask(route.params.boardID, deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
       // console.log
@@ -66,7 +66,7 @@ onBeforeMount(async () => {
   }
   try {
     // console.log(route.params.boardID)
-    const fetchTasks = await getAllTasks3(route.params.boardID)
+    const fetchTasks = await getAllTasks(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
     utilityStore.selectedBoardId = route.params.boardID
     console.log(utilityStore.selectedBoardId)
@@ -207,7 +207,7 @@ onBeforeMount(async () => {
     <router-view />
 
     <!-- delete confirmation -->
-    <DeleteConfirmationTask @delete-task="deleteTask(utilityStore.selectedId)" />
+    <DeleteConfirmationTask @delete-task="deleteATask(utilityStore.selectedId)" />
     <!-- delete confirmation -->
   </main>
 </template>

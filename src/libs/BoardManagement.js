@@ -3,13 +3,19 @@ class BoardManagement {
     this.boards = boards
   }
 
-  addBoards(newBoard) {
-    this.boards = newBoard
+  addBoards(newBoards) {
+    this.boards = newBoards
   }
 
   addBoard(newBoard) {
-    
-    this.boards.push(newBoard)
+    const refactorBoardFeilds = {
+      id : newBoard.boardId,
+      name : newBoard.name,
+      ownerId : newBoard.owner.id,
+      createdOn : "",
+      updatedOn : ""
+    }
+    this.boards.push(refactorBoardFeilds)
   }
 
   // deleteBoard(deleteId) {

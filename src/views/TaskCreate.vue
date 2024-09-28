@@ -1,6 +1,6 @@
 <script setup>
 import {ref, reactive, computed, onBeforeMount, watch} from "vue"
-import {createTask3} from "@/libs/FetchAPI"
+import {createTask} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -82,9 +82,9 @@ const createNewTask = async () => {
   }
 
   try {
-    const response = await createTask3(route.params.boardID, newTask)
-    // console.log(newTask)
-
+    newTask.assignees.trim().length === 0 ? (newTask.assignees = null) : ""
+    newTask.description.trim().length === 0 ? (newTask.description = null) : ""
+    const response = await createTask(route.params.boardID, newTask)
     if (response.status === 201) {
       utilityStore.transactionDisable = false
       // newStatus.id = 1

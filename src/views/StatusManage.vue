@@ -6,9 +6,9 @@ import { useStatusStyleStore } from "@/stores/useStatusStyleStore.js";
 import {useSortAndFilterStore} from "@/stores/useSortAndFilterStore.js"
 import {useUserStore} from "@/stores/useUserStore"
 import {
-  deleteStatuses3,
-  getAllStatuses3,
-  deleteStatusTransfer3,
+  deleteStatuses,
+  getAllStatuses,
+  deleteStatusTransfer,
 } from "@/libs/FetchAPI";
 import StatusSetting from "@/components/StatusSetting.vue";
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue";
@@ -52,7 +52,7 @@ const deleteModal = (statuses) => {
 const deleteStatus = async (deleteId) => {
   // console.log(statuses.value)
   try {
-    const response = await deleteStatuses3(route.params.boardID, deleteId);
+    const response = await deleteStatuses(route.params.boardID, deleteId);
     if (response.status === 200) {
       utilityStore.statusManager.deleteStatus(deleteId);
       utilityStore.showDeleteConfirmation = false;
@@ -102,7 +102,7 @@ const deleteTransfer = async (oldDeleteId, newDeleteId) => {
     );
     return;
   }
-  const response = await deleteStatusTransfer3(route.params.boardID, oldDeleteId, newDeleteId);
+  const response = await deleteStatusTransfer(route.params.boardID, oldDeleteId, newDeleteId);
   if (response.status === 200) {
     utilityStore.statusManager.deleteTransferStatus(oldDeleteId, newDeleteId);
     utilityStore.disableTransfer = false;
@@ -165,7 +165,7 @@ onBeforeMount(async () => {
     userStore.userIdentity = { ...JSON.parse(decodedData) }
   }
   try {
-    const fetchData = await getAllStatuses3(route.params.boardID);
+    const fetchData = await getAllStatuses(route.params.boardID);
     utilityStore.statusManager.addStatuses(fetchData);
     
     sortAndFilterStore.filterStatusArray = []

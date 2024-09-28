@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, reactive} from "vue"
-import {getTask3, getAllStatuses} from "@/libs/FetchAPI.js"
+import {getTask, getAllStatuses} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
@@ -12,30 +12,10 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 
-// const text = ref('')
-// let textArea = ref('')
-// onMounted(() => {
-//   console.log(textArea);
-//   console.log(textArea.value.style.height);
-//   // textArea = document.querySelector('textarea');
-
-// });
-// const resizeTextarea = () => {
-//   console.log("Resize function execute");
-//   textArea.value.style.height = "auto";
-//   textArea.value.style.height = textArea.value.scrollHeight + "px";
-// };
-
 const task = ref([])
 const route = useRoute()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
-
-// const isOpen = ref(false)
-
-// const toggleDropdown = () => {
-//   isOpen.value = !isOpen.value
-// }
 
 const formatTimezone = () => {
   const options = {
@@ -46,24 +26,6 @@ const formatTimezone = () => {
   return timeZone
 }
 
-const formatDateTime = (baseFormatDate) => {
-  const date = new Date(baseFormatDate)
-  const options = {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }
-  const formattedDate = date
-    .toLocaleString("en-GB", options)
-    .replace(/\//g, "/")
-    .replace(",", "")
-
-  return formattedDate
-}
-
 const statusAtt = reactive({
   name: "",
   color: "",
@@ -71,7 +33,7 @@ const statusAtt = reactive({
 
 onBeforeMount(async () => {
   try {
-    const fetchTask = await getTask3(route.params.boardID,route.params.taskID)
+    const fetchTask = await getTask(route.params.boardID,route.params.taskID)
     task.value = fetchTask
 
     statusAtt.name = task.value.statuses3.name
@@ -90,8 +52,8 @@ onBeforeMount(async () => {
       task.value.assignees = "Unassigned"
     }
 
-    task.value.createOn = formatDateTime(task.value.createdOn)
-    task.value.updateOn = formatDateTime(task.value.updated)
+    task.value.createOn = utilityStore.formatDateTime(task.value.createdOn)
+    task.value.updateOn = utilityStore.formatDateTime(task.value.updated)
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }

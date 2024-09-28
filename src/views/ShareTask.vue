@@ -1,6 +1,5 @@
 <script setup>
 import { ref, reactive, computed, onBeforeMount, watch } from "vue"
-import { createTask3 } from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
@@ -16,7 +15,7 @@ const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 
 // console.log(utilityStore.selectedBoard)
-const testBoardname = ref('ITBKK SIAM personal board')
+// const testBoardname = ref('ITBKK SIAM personal board')
 const testOtherpeopleData = reactive([
     {
         name: "Natsaran Sae-oung",
@@ -38,7 +37,7 @@ const testOtherpeopleData = reactive([
         <div class="bg-[#18181B] rounded-lg w-[50rem] h-auto flex flex-col">
             <div class="flex flex-row justify-between">
                 <p class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6 pb-3 tracking-wider">
-                    Share<span class="text-white">&nbsp{{ testBoardname }}&nbsp</span>board
+                    Share<span class="text-white">&nbsp{{ utilityStore.selectedBoard.name }}&nbsp</span>board
                 </p>
                 <button class="flex text-[#005BC4] text-lg self-end mb-3 items-center gap-2"><span>
                         <LinkIcon />

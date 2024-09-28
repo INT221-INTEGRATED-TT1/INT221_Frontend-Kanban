@@ -3,7 +3,6 @@ import {useUtilityStore} from "@/stores/useUtilityStore.js"
 
 const utilityStore = useUtilityStore()
 
-
 defineEmits(['deleteTask'])
 </script>
 

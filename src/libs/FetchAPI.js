@@ -3,9 +3,11 @@ import { toast } from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
 // แก้ด้วย
-const getAllTasks = async (direction, sortBy, filterStatuses) => {
-  let url = `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`
-  // console.log(filterStatuses)
+const accessToken = localStorage.getItem("JWT_TOKEN");
+
+const getAllTasks = async (boardID, sortBy = "createdOn", filterStatuses = "", direction = "ASC") => {
+  let url = `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardID}/tasks`
+
   if (direction || sortBy || filterStatuses) {
     const params = new URLSearchParams()
 
@@ -30,65 +32,68 @@ const getAllTasks = async (direction, sortBy, filterStatuses) => {
     }
 
     url += `?${params.toString()}`
+
   }
-  // console.log(url)
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    throw {
-      status: response.status,
-      router: router.push("/task"),
-    }
-  }
-
-  return response.json()
-}
-
-const getTask = async (id) => {
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`
-  )
-  {
+  console.log(url)
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+      },
+    })
     if (!response.ok) {
       throw {
         status: response.status,
-        router: router.push("/task"),
-        timeout: setTimeout(() => {
-          toast(`The requested Task : ${id} does not exist`, {
-            type: "error",
-            timeout: 2000,
-            theme: "dark",
-            transition: "flip",
-            position: "bottom-right",
-          })
-        }),
+        router: router.push(`/board/${boardID}/task`),
       }
     }
+    return response.json()
   }
+  catch (error) {
+    throw error
+  }
+}
+
+const getTask = async (boardId, taskId) => {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+    },
+  })
+  if (!response.ok) {
+    throw {
+      status: response.status,
+      router: router.push(`/board/${boardId}/task`),
+      timeout: setTimeout(() => {
+        toast(`The requested Task : ${id} does not exist`, {
+          type: "error",
+          timeout: 2000,
+          theme: "dark",
+          transition: "flip",
+          position: "bottom-right",
+        })
+      }),
+    }
+  }
+
   return response.json()
 }
 
-const createTask = async (newTask) => {
-  let createTask = { ...newTask }
-
-  createTask.assignees.trim().length === 0 ? (createTask.assignees = null) : ""
-  createTask.description.trim().length === 0
-    ? (createTask.description = null)
-    : ""
-
+const createTask = async (boardId, newTask) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/tasks`,
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ ...createTask }),
+        body: JSON.stringify({ ...newTask }),
       }
     )
-    // console.log(createTask)
-
     return {
       status: response.status,
       message: "Task created successfully",
@@ -99,12 +104,15 @@ const createTask = async (newTask) => {
   }
 }
 
-const deleteTasks = async (id) => {
+const deleteTask = async (boardId, taskId) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}`,
       {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+        },
       }
     )
     return {
@@ -117,26 +125,21 @@ const deleteTasks = async (id) => {
   }
 }
 
-const editTask = async (id, newTask) => {
-  newTask.assignees === null || newTask.assignees.trim().length === 0
-    ? (newTask.assignees = null)
-    : ""
-  newTask.description === null || newTask.description.trim().length === 0
-    ? (newTask.description = null)
-    : ""
-
+const editTask = async (boardId, taskId, newTask) => {
+  newTask.assignees === null || newTask.assignees.trim().length === 0 ? (newTask.assignees = null) : ""
+  newTask.description === null || newTask.description.trim().length === 0 ? (newTask.description = null) : ""
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/tasks/${id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
         },
         body: JSON.stringify(newTask),
       }
     )
-
     return {
       status: response.status,
       message: "Task updated successfully",
@@ -147,30 +150,40 @@ const editTask = async (id, newTask) => {
   }
 }
 
-const getAllStatuses = async () => {
+const getAllStatuses = async (boardId) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses`
+    `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses`, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+    },
+  }
   )
   {
     if (!response.ok) {
       throw {
         status: response.status,
-        router: router.push("/status/manage"),
+        router: router.push(`/board/${boardId}/status`),
       }
     }
     return response.json()
   }
 }
 
-const getStatus = async (statusId) => {
+const getStatus = async (boardId, statusId) => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`
+    `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses/${statusId}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+      },
+    }
   )
   {
     if (!response.ok) {
       throw {
         status: response.status,
-        router: router.push("/status/manage"),
+        router: router.push(`/board/${boardId}/status`),
         toast: setTimeout(() => {
           toast("An error has occurred, the status does not exist", {
             type: "error",
@@ -186,20 +199,17 @@ const getStatus = async (statusId) => {
   }
 }
 
-const createStatus = async (newStatus) => {
-  let createStatus = { ...newStatus }
-  createStatus.description.trim().length === 0
-    ? (createStatus.description = null)
-    : ""
+const createStatus = async (boardId, newStatus) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses`,
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
         },
-        body: JSON.stringify(createStatus),
+        body: JSON.stringify(newStatus),
       }
     )
     return {
@@ -212,15 +222,15 @@ const createStatus = async (newStatus) => {
   }
 }
 
-const editStatus = async (statusId, newStatus) => {
-  newStatus.description === null ? (newStatus.description = null) : ""
+const editStatus = async (boardId, statusId, newStatus) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`,
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses/${statusId}`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
         },
         body: JSON.stringify(newStatus),
       }
@@ -236,12 +246,15 @@ const editStatus = async (statusId, newStatus) => {
   }
 }
 
-const deleteStatuses = async (statusId) => {
+const deleteStatuses = async (boardId, statusId) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${statusId}`,
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses/${statusId}`,
       {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+        },
       }
     )
     return {
@@ -254,12 +267,15 @@ const deleteStatuses = async (statusId) => {
   }
 }
 
-const deleteStatusTransfer = async (oldId, newId) => {
+const deleteStatusTransfer = async (boardId, oldId, newId) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/${oldId}/${newId}`,
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses/${oldId}/${newId}`,
       {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+        },
       }
     )
     return {
@@ -378,332 +394,9 @@ const createBoard = async (newBoard) => {
         body: JSON.stringify({ ...createBoard }),
       }
     )
-    // console.log(createTask)
-
     return {
       status: response.status,
       message: "Board created successfully",
-      data: await response.json(),
-    }
-  } catch (error) {
-    throw error
-  }
-}
-
-const getAllTasks3 = async (boardID, direction, sortBy, filterStatuses) => {
-  console.log(boardID)
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  let url = `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardID}/tasks`
-  // console.log(filterStatuses)
-  if (direction || sortBy || filterStatuses) {
-    const params = new URLSearchParams()
-
-    if (direction) {
-      params.append("direction", direction)
-    }
-    if (sortBy) {
-      if (sortBy.trim().length === 0) {
-        params.delete("sortBy")
-      } else {
-        params.append("sortBy", sortBy)
-      }
-    }
-    if (filterStatuses.length) {
-      for (let index = 0; index < filterStatuses.length; index++) {
-        if (filterStatuses[index] === "") {
-
-        } else if (filterStatuses) {
-          params.append("filterStatuses", filterStatuses[index])
-        }
-      }
-    }
-
-    url += `?${params.toString()}`
-
-  }
-  console.log(url)
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-      },
-    })
-    if (!response.ok) {
-      throw {
-        status: response.status,
-        router: router.push(`/board/${boardID}/task`),
-      }
-    }
-    return response.json()
-  }
-  catch (error) {
-    throw error
-  }
-
-}
-
-const getTask3 = async (boardId, taskId) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}`, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`,
-    },
-  }
-
-  )
-  {
-    if (!response.ok) {
-      throw {
-        status: response.status,
-        router: router.push(`/board/${boardId}/task`),
-        timeout: setTimeout(() => {
-          toast(`The requested Task : ${id} does not exist`, {
-            type: "error",
-            timeout: 2000,
-            theme: "dark",
-            transition: "flip",
-            position: "bottom-right",
-          })
-        }),
-      }
-    }
-  }
-  return response.json()
-}
-
-const createTask3 = async (boardId, newTask) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  let createTask = { ...newTask }
-
-  createTask.assignees.trim().length === 0 ? (createTask.assignees = null) : ""
-  createTask.description.trim().length === 0
-    ? (createTask.description = null)
-    : ""
-
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({ ...createTask }),
-      }
-    )
-    // console.log(createTask)
-
-    return {
-      status: response.status,
-      message: "Task created successfully",
-      data: await response.json(),
-      
-    }
-  } catch (error) {
-    throw error
-  }
-}
-
-const editTask3 = async (boardId, taskId, newTask) => {
-  newTask.assignees === null || newTask.assignees.trim().length === 0
-    ? (newTask.assignees = null)
-    : ""
-  newTask.description === null || newTask.description.trim().length === 0
-    ? (newTask.description = null)
-    : ""
-
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(newTask),
-      }
-    )
-
-    return {
-      status: response.status,
-      message: "Task updated successfully",
-      data: await response.json(),
-    }
-  } catch (error) {
-    throw error
-  }
-}
-
-const deleteTask3 = async (boardId, taskId) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-        },
-      }
-    )
-    return {
-      status: response.status,
-      message: "Task deleted successfully",
-      data: await response.json(),
-    }
-  } catch (error) {
-    throw error
-  }
-}
-
-const getAllStatuses3 = async (boardId) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses`, {
-    method: "GET",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`,
-    },
-  }
-  )
-  {
-    if (!response.ok) {
-      throw {
-        status: response.status,
-        router: router.push(`/board/${boardId}/status`),
-      }
-    }
-    return response.json()
-  }
-}
-
-const getStatus3 = async (boardId, statusId) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses/${statusId}`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-      },
-    }
-  )
-  {
-    if (!response.ok) {
-      throw {
-        status: response.status,
-        router: router.push(`/board/${boardId}/status`),
-        toast: setTimeout(() => {
-          toast("An error has occurred, the status does not exist", {
-            type: "error",
-            timeout: 2000,
-            theme: "dark",
-            transition: "flip",
-            position: "bottom-right",
-          })
-        }),
-      }
-    }
-    return response.json()
-  }
-}
-
-const createStatus3 = async (boardId, newStatus) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  let createStatus = { ...newStatus }
-  createStatus.description.trim().length === 0
-    ? (createStatus.description = null)
-    : ""
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(createStatus),
-      }
-    )
-    return {
-      status: response.status,
-      message: "Status created successfully",
-      data: await response.json(),
-    }
-  } catch (error) {
-    throw error
-  }
-}
-
-const editStatus3 = async (boardId, statusId, newStatus) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  newStatus.description === null ? (newStatus.description = null) : ""
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses/${statusId}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(newStatus),
-      }
-    )
-
-    return {
-      status: response.status,
-      message: "Task updated successfully",
-      data: await response.json(),
-    }
-  } catch (error) {
-    throw error
-  }
-}
-
-const deleteStatuses3 = async (boardId, statusId) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses/${statusId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-        },
-      }
-    )
-    return {
-      status: response.status,
-      message: "Status deleted successfully",
-      data: await response.json(),
-    }
-  } catch (error) {
-    throw error
-  }
-}
-
-const deleteStatusTransfer3 = async (boardId, oldId, newId) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses/${oldId}/${newId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-        },
-      }
-    )
-    return {
-      status: response.status,
-      message: "Status deleted successfully",
       data: await response.json(),
     }
   } catch (error) {
@@ -715,7 +408,7 @@ export {
   getAllTasks,
   getTask,
   createTask,
-  deleteTasks,
+  deleteTask,
   editTask,
   getAllStatuses,
   getStatus,
@@ -728,15 +421,4 @@ export {
   authorizedUser,
   getAllBoards,
   createBoard,
-  getAllTasks3,
-  getTask3,
-  createTask3,
-  editTask3,
-  deleteTask3,
-  getAllStatuses3,
-  getStatus3,
-  createStatus3,
-  editStatus3,
-  deleteStatuses3,
-  deleteStatusTransfer3,
 }
