@@ -94,7 +94,7 @@ router.beforeEach(async (to, from, next) => {
   if (accessToken) {
     // console.log(to);
     try {
-      const response = await authorizedUser(accessToken);
+      const response = await authorizedUser();
       if (response.status === 200) {
         // console.log('Authentication Pass');
         if (to.name === 'login') {
@@ -104,13 +104,14 @@ router.beforeEach(async (to, from, next) => {
           // Proceed to the intended route
           next();
         }
-      } else {
+      }
+      else {
         // Handle unexpected status codes by redirecting to /board
         localStorage.removeItem("JWT_TOKEN")
         next('/login');
       }
     } catch (error) {
-      // console.error("Authentication check failed:", error);
+      console.error("Authentication check failed:", error);
       // Redirect to login page on authentication failure
       next('/login');
     }

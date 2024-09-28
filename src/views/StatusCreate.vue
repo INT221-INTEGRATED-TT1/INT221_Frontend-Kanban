@@ -14,8 +14,8 @@ const statusStyleStore = useStatusStyleStore()
 const route = useRoute()
 
 const newStatus = reactive({
-  name: "",
-  description: "",
+  name: " ",
+  description: " ",
   color: statusStyleStore.presetColors[5],
   limitMaximumTask: 0,
 })
@@ -33,6 +33,7 @@ const isButtonDisabled = computed(() => {
 const createNewStatus = async () => {
   utilityStore.transactionDisable = true
   try {
+    // newStatus.description.trim().length === 0 ? newStatus.description = null : newStatus.description = newStatus.description
     const response = await createStatus(route.params.boardID, newStatus)
     // console.log(response.data)
     if (response.status === 201) {

@@ -3,11 +3,11 @@ import { toast } from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 
 // แก้ด้วย
-const accessToken = localStorage.getItem("JWT_TOKEN");
+const getAccessToken = () => localStorage.getItem("JWT_TOKEN");
 
 const getAllTasks = async (boardID, sortBy = "createdOn", filterStatuses = "", direction = "ASC") => {
   let url = `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardID}/tasks`
-
+  // console.log(getAccessToken())
   if (direction || sortBy || filterStatuses) {
     const params = new URLSearchParams()
 
@@ -38,15 +38,10 @@ const getAllTasks = async (boardID, sortBy = "createdOn", filterStatuses = "", d
   try {
     const response = await fetch(url, {
       method: "GET",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-      },
+      headers: { "Authorization": `Bearer ${getAccessToken()}`,},
     })
     if (!response.ok) {
-      throw {
-        status: response.status,
-        router: router.push(`/board/${boardID}/task`),
-      }
+      throw await response.json()
     }
     return response.json()
   }
@@ -59,7 +54,7 @@ const getTask = async (boardId, taskId) => {
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}`, {
     method: "GET",
     headers: {
-      "Authorization": `Bearer ${accessToken}`,
+      "Authorization": `Bearer ${getAccessToken()}`,
     },
   })
   if (!response.ok) {
@@ -82,6 +77,8 @@ const getTask = async (boardId, taskId) => {
 }
 
 const createTask = async (boardId, newTask) => {
+  // newTask.assignees.trim().length === 0 ? (newTask.assignees = null) : ""
+  // newTask.description.trim().length === 0 ? (newTask.description = null) : ""
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks`,
@@ -89,7 +86,7 @@ const createTask = async (boardId, newTask) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${getAccessToken()}`,
         },
         body: JSON.stringify({ ...newTask }),
       }
@@ -111,7 +108,7 @@ const deleteTask = async (boardId, taskId) => {
       {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${getAccessToken()}`,
         },
       }
     )
@@ -135,7 +132,7 @@ const editTask = async (boardId, taskId, newTask) => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${getAccessToken()}`,
         },
         body: JSON.stringify(newTask),
       }
@@ -151,22 +148,19 @@ const editTask = async (boardId, taskId, newTask) => {
 }
 
 const getAllStatuses = async (boardId) => {
+  try {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses`, {
     method: "GET",
-    headers: {
-      "Authorization": `Bearer ${accessToken}`,
-    },
-  }
-  )
-  {
+    headers: { "Authorization": `Bearer ${getAccessToken()}`,},
+    })
     if (!response.ok) {
-      throw {
-        status: response.status,
-        router: router.push(`/board/${boardId}/status`),
-      }
+      throw await response.json()
     }
     return response.json()
+  }
+  catch (error) {
+    throw error
   }
 }
 
@@ -175,7 +169,7 @@ const getStatus = async (boardId, statusId) => {
     `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses/${statusId}`, {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
+        "Authorization": `Bearer ${getAccessToken()}`,
       },
     }
   )
@@ -200,6 +194,7 @@ const getStatus = async (boardId, statusId) => {
 }
 
 const createStatus = async (boardId, newStatus) => {
+  // newStatus.description.trim().length === 0 ? newStatus.description = null : ""
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/statuses`,
@@ -207,7 +202,7 @@ const createStatus = async (boardId, newStatus) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${getAccessToken()}`,
         },
         body: JSON.stringify(newStatus),
       }
@@ -230,7 +225,7 @@ const editStatus = async (boardId, statusId, newStatus) => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${getAccessToken()}`,
         },
         body: JSON.stringify(newStatus),
       }
@@ -253,7 +248,7 @@ const deleteStatuses = async (boardId, statusId) => {
       {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${getAccessToken()}`,
         },
       }
     )
@@ -274,7 +269,7 @@ const deleteStatusTransfer = async (boardId, oldId, newId) => {
       {
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${getAccessToken()}`,
         },
       }
     )
@@ -334,14 +329,14 @@ const authenticateUser = async (userCredentials) => {
   }
 }
 
-const authorizedUser = async (accessToken) => {
+const authorizedUser = async () => {
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/login/validate-token`,
       {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${getAccessToken()}`,
         },
       }
     )
@@ -357,12 +352,11 @@ const authorizedUser = async (accessToken) => {
 }
 
 const getAllBoards = async () => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
   const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v3/boards`,
     {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
+        "Authorization": `Bearer ${getAccessToken()}`,
       },
     }
   )
@@ -378,10 +372,8 @@ const getAllBoards = async () => {
 }
 
 const createBoard = async (newBoard) => {
-  const accessToken = localStorage.getItem("JWT_TOKEN");
-  const createBoard = { ...newBoard }
-  console.log(newBoard);
-  
+  // const createBoard = { ...newBoard }
+  // console.log(newBoard);
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v3/boards`,
@@ -389,9 +381,9 @@ const createBoard = async (newBoard) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`,
+          "Authorization": `Bearer ${getAccessToken()}`,
         },
-        body: JSON.stringify({ ...createBoard }),
+        body: JSON.stringify({ ...newBoard }),
       }
     )
     return {

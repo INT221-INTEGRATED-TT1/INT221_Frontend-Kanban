@@ -76,8 +76,11 @@ onBeforeMount(async () => {
         ? (task.assignees = "Unassigned")
         : ""
     }
-  } catch (error) {
-    console.log("Error fetching tasks : ", error)
+  } 
+  catch (error) {
+    localStorage.removeItem("JWT_TOKEN")
+    console.log("Error fetching tasks : ", error.message)
+    router.push('/login')
   }
 })
 </script>

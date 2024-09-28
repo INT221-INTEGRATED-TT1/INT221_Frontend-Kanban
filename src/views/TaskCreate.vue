@@ -82,8 +82,8 @@ const createNewTask = async () => {
   }
 
   try {
-    newTask.assignees.trim().length === 0 ? (newTask.assignees = null) : ""
-    newTask.description.trim().length === 0 ? (newTask.description = null) : ""
+    // newTask.assignees.trim().length === 0 ? (newTask.assignees = null) : ""
+    // newTask.description.trim().length === 0 ? (newTask.description = null) : ""
     const response = await createTask(route.params.boardID, newTask)
     if (response.status === 201) {
       utilityStore.transactionDisable = false
