@@ -8,14 +8,18 @@ class BoardManagement {
   }
 
   addBoard(newBoard) {
-    // const refactorBoardFeilds = {
-    //   id : newBoard.boardId,
-    //   name : newBoard.name,
-    //   ownerId : newBoard.owner.id,
-    //   createdOn : "",
-    //   updatedOn : ""
-    // }
     this.boards.push(newBoard)
+  }
+
+  // findBoardVisibility(boardId){
+  //   this.boards.filter(board => board.id = boardId)[0]
+  //   // console.log("findboard : ",this.boards.filter(board => board.id = boardId)[0],this.boards.filter(board => board.id = boardId)[0].visibility)
+  // }
+
+  changeVisibilityBoard(boardId, newVisibility){
+    // console.log(this.boards[this.boards.findIndex(board => board.id === boardId)].visibility)
+    this.boards[this.boards.findIndex(board => board.id === boardId)].visibility = newVisibility
+    // console.log(this.boards[this.boards.findIndex(board => board.id === boardId)].visibility)
   }
 
   // deleteBoard(deleteId) {

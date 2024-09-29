@@ -396,6 +396,25 @@ const createBoard = async (newBoard) => {
   }
 }
 
+const updateBoardVisibility = async (boardId, visibilityString) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+        body: JSON.stringify({ visibility : visibilityString }),
+      }
+    )
+    return response.json()
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -413,4 +432,5 @@ export {
   authorizedUser,
   getAllBoards,
   createBoard,
+  updateBoardVisibility,
 }
