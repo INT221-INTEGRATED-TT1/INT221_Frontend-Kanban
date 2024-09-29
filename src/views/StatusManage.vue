@@ -228,7 +228,7 @@ onBeforeMount(async () => {
 
         <UserSetting />
 
-        <button
+        <button v-if="utilityStore.isOwnerBoard"
           class="itbkk-status-setting hover:bg-[#1f1f1f] px-1 tracking-wider rounded-xl border border-[#E3E3E3] border-opacity-50"
           @click="utilityStore.limitStatus"
         >
