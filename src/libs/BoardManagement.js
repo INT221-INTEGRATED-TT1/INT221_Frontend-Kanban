@@ -8,14 +8,14 @@ class BoardManagement {
   }
 
   addBoard(newBoard) {
-    const refactorBoardFeilds = {
-      id : newBoard.boardId,
-      name : newBoard.name,
-      ownerId : newBoard.owner.id,
-      createdOn : "",
-      updatedOn : ""
-    }
-    this.boards.push(refactorBoardFeilds)
+    // const refactorBoardFeilds = {
+    //   id : newBoard.boardId,
+    //   name : newBoard.name,
+    //   ownerId : newBoard.owner.id,
+    //   createdOn : "",
+    //   updatedOn : ""
+    // }
+    this.boards.push(newBoard)
   }
 
   // deleteBoard(deleteId) {
