@@ -30,6 +30,7 @@ const testOtherpeopleData = reactive([
         email: "papangkorn@kmutt.ac.th"
     },
 ])
+
 </script>
 
 <template>
@@ -37,11 +38,13 @@ const testOtherpeopleData = reactive([
         <div class="bg-[#18181B] rounded-lg w-[50rem] h-auto flex flex-col">
             <div class="flex flex-row justify-between">
                 <p class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6 pb-3 tracking-wider">
-                    Share<span class="text-white">&nbsp{{ utilityStore.selectedBoard.name }}&nbsp</span>board
+                    Share<span class="text-white">&nbsp{{ utilityStore.tasksManager.getTasks()[0]?.statuses3.boardId.name }}&nbsp</span>board
                 </p>
-                <button class="flex text-[#005BC4] text-lg self-end mb-3 items-center gap-2"><span>
+                <button class="flex text-[#005BC4] text-lg self-end mb-3 items-center gap-2">
+                    <span>
                         <LinkIcon />
-                    </span>Copy Link</button>
+                    </span>Copy Link
+                </button>
                 <button class="self-start mr-5 mt-5" @click="router.back">
                     <Xmark />
                 </button>

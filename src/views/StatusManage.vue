@@ -8,6 +8,7 @@ import {useUserStore} from "@/stores/useUserStore"
 import {
   deleteStatuses,
   getAllStatuses,
+  getAllBoards,
   deleteStatusTransfer,
 } from "@/libs/FetchAPI";
 import StatusSetting from "@/components/StatusSetting.vue";
@@ -153,16 +154,19 @@ watch(newStatus, () => {
     : (utilityStore.transactionDisable = true);
 });
 
-const logout = () => {
-  localStorage.removeItem("JWT_TOKEN")
-  router.push('/login')
-}
-
 onBeforeMount(async () => {
+  utilityStore.isOwnerBoard = false
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
   if (JWT_TOKEN) {
     const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
     userStore.userIdentity = { ...JSON.parse(decodedData) }
+
+    const fetchBoards = await getAllBoards()
+    utilityStore.boardManager.addBoards(fetchBoards)
+    utilityStore.selectedBoardId = route.params.boardID
+
+    utilityStore.boardManager.getBoards().forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+    console.log("Owner Board : ",utilityStore.isOwnerBoard)
   }
   try {
     const fetchData = await getAllStatuses(route.params.boardID);
@@ -212,7 +216,7 @@ onBeforeMount(async () => {
         </router-link>
 
         <router-link to="status/add">
-          <div
+          <div v-if="utilityStore.isOwnerBoard"
             class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
           >
             <span><CreateTaskIcon /></span>
@@ -252,11 +256,11 @@ onBeforeMount(async () => {
                 Description
               </div>
             </th>
-            <th class="rounded-tr-xl">Actions</th>
+            <th v-if="utilityStore.isOwnerBoard" class="rounded-tr-xl">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr
+          <tr 
             v-for="(statuses, index) in utilityStore.statusManager.getStatus()"
             class="border-none"
           >
@@ -283,7 +287,7 @@ onBeforeMount(async () => {
                 {{ statuses.description }}
               </div>
             </td>
-            <td class="flex gap-x-3 justify-center items-center">
+            <td v-if="utilityStore.isOwnerBoard" class="flex gap-x-3 justify-center items-center">
               <!-- <div class="flex gap-x-2"> -->
               <div
                 class="tooltip tooltip-edit"

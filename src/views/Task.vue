@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeMount, watch } from "vue"
-import { getAllTasks, deleteTask, getAllStatuses } from "@/libs/FetchAPI.js"
+import { getAllTasks, deleteTask, getAllBoards } from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
@@ -59,18 +59,28 @@ const deleteATask = async (deleteId) => {
 }
 
 onBeforeMount(async () => {
+  utilityStore.isOwnerBoard = false
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
   if (JWT_TOKEN) {
     const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
     userStore.userIdentity = { ...JSON.parse(decodedData) }
+
+    const fetchBoards = await getAllBoards()
+    utilityStore.boardManager.addBoards(fetchBoards)
+    utilityStore.selectedBoardId = route.params.boardID
+
+    utilityStore.boardManager.getBoards().forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+    console.log("Owner Board : ",utilityStore.isOwnerBoard)
   }
   try {
     // console.log(route.params.boardID)
     const fetchTasks = await getAllTasks(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
-    utilityStore.selectedBoardId = route.params.boardID
+    
     console.log(utilityStore.selectedBoardId)
-    console.log(fetchTasks)
+    console.log("Owner Board : ",utilityStore.isOwnerBoard)
+    // console.log(fetchTasks)
+
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
         ? (task.assignees = "Unassigned")
@@ -108,7 +118,7 @@ onBeforeMount(async () => {
           </div>
         </router-link>
         <router-link :to="{ name: 'create-task' }">
-          <div
+          <div v-if="utilityStore.isOwnerBoard"
             class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
             <span>
               <CreateTaskIcon />
@@ -125,7 +135,7 @@ onBeforeMount(async () => {
     <div class="pt-10">
       <div class="flex justify-end">
         <router-link :to="{ name: 'share-task' }">
-          <button class="bg-[#338EF7] text-white text-center font-Geist text-sm px-4 py-1 rounded-sm self-end">Share</button>
+          <button v-if="utilityStore.isOwnerBoard" class="bg-[#338EF7] text-white text-center font-Geist text-sm px-4 py-1 rounded-sm self-end">Share</button>
         </router-link>
       </div>
       <FilterCollapse />
@@ -175,7 +185,7 @@ onBeforeMount(async () => {
             </td>
             <td>
               <div class="dropdown dropdown-bottom itbkk-button-action">
-                <div tabindex="0" role="button"
+                <div tabindex="0" role="button" v-if="utilityStore.isOwnerBoard"
                   class="btn bg-transparent outline-none border-none hover:bg-white hover:bg-opacity-[0.07]">
                   <MoreIcon />
                 </div>

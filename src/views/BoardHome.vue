@@ -13,6 +13,7 @@ const userStore = useUserStore()
 const utilityStore = useUtilityStore()
 
 const selectBoard = (selectBoardId) => {
+  utilityStore.selectedBoardId = selectBoardId
   const filterBoard = utilityStore.boardManager.getBoards().filter(board => board.id === selectBoardId)[0]
   utilityStore.selectedBoard = {...filterBoard}
   router.push(`/board/${selectBoardId}/task`)
