@@ -1,6 +1,5 @@
 <script setup>
 import router from "@/router/index.js"
-// import AstronautNotFound from "@/components/icons/AstronautNotFound.vue"
 </script>
 
 <template>
@@ -8,8 +7,8 @@ import router from "@/router/index.js"
     <div
       class="relative  h-full w-full flex flex-col justify-center items-center text-2xl gap-y-20"
     >
-      <h1 class="text-5xl font-extrabold text-headline italic">
-        Access Denied
+      <h1 class="text-3xl font-extrabold text-headline italic">
+        Access denied, you do not have permission to view this page.
       </h1>
       <button
         @click="router.push('/')"
@@ -17,9 +16,6 @@ import router from "@/router/index.js"
       >
         GO BACK HOME
       </button>
-      <!-- <div class="absolute  right-80">
-        <AstronautNotFound  />
-      </div> -->
     </div>
   </div>
 </template>

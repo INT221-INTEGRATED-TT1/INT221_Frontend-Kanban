@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router"
 import Task from "@/views/Task.vue"
 import TaskModalDetail from "@/views/TaskModalDetail.vue"
 import NotFound from "@/components/NotFound.vue"
+import Forbidden from "@/components/Forbidden.vue"
 import TaskCreate from "@/views/TaskCreate.vue"
 import TaskEdit from "@/views/TaskEdit.vue"
 import TestLen from "@/components/TestLen.vue"
@@ -51,7 +52,7 @@ const router = createRouter({
     },
     {
       path: "/error",
-      component: AccessDeniedPage,
+      component: Forbidden,
       name: "access-denied"
     },
     {
