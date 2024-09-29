@@ -9,6 +9,7 @@ import StatusCreate from "@/views/StatusCreate.vue"
 import StatusManage from "@/views/StatusManage.vue"
 import StatusEdit from "@/views/StatusEdit.vue"
 import TeamPage from "@/views/TeamPage.vue"
+import AccessDeniedPage from "@/views/AccessDeniedPage.vue"
 import LoginPage from "@/views/LoginPage.vue"
 import BoardHome from "@/views/BoardHome.vue"
 import BoardCreate from "@/views/BoardCreate.vue"
@@ -47,6 +48,11 @@ const router = createRouter({
       path: "/team",
       component: TeamPage,
       name: "team"
+    },
+    {
+      path: "/error",
+      component: AccessDeniedPage,
+      name: "access-denied"
     },
     {
       path: "/login",
@@ -90,7 +96,7 @@ const router = createRouter({
 // Global navigation guard
 router.beforeEach(async (to, from, next) => {
   const accessToken = localStorage.getItem("JWT_TOKEN");
-  // console.log(accessToken);
+  console.log(accessToken);
   if (accessToken) {
     // console.log(to);
     try {
@@ -116,12 +122,14 @@ router.beforeEach(async (to, from, next) => {
       next('/login');
     }
   } else {
-    if (to.name !== 'login') {
-      // If not authenticated, redirect to login
-      next('/login');
-    } else {
+    if (to.name === 'error') next('/error');
+    else {
+       // If not authenticated, redirect to login
+      if (to.name === 'board-home' ) {
+        next('/login');
+      }
       // If already on the login page, proceed
-      next();
+      else next();
     }
   }
 });

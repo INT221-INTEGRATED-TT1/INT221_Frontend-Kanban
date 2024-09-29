@@ -3,7 +3,7 @@
 </script>
  
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="flex items-center justify-center min-h-screen">
     <div class="text-center bg-white p-8 rounded-lg shadow-lg">
       <h1 class="text-4xl font-bold text-red-500 mb-4">Access Denied</h1>
       <p class="text-lg text-gray-700 mb-6">

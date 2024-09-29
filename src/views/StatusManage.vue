@@ -178,7 +178,7 @@ onBeforeMount(async () => {
   } catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
     console.log("Error fetching tasks : ", error.message)
-    router.back()
+    router.push('/error')
   }
 });
 
