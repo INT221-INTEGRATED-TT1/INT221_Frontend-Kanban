@@ -20,9 +20,9 @@ onBeforeMount(async () => {
     utilityStore.statusManager.addFilteredField()
     
   } catch (error) {
-    localStorage.removeItem("JWT_TOKEN")
+    // localStorage.removeItem("JWT_TOKEN")
     console.log("Error fetching tasks : ", error.message)
-    router.push('/login')
+    router.back()
   }
 })
 </script>
