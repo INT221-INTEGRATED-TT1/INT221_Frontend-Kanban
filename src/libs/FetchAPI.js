@@ -4,6 +4,7 @@ import "vue3-toastify/dist/index.css"
 
 // แก้ด้วย
 const getAccessToken = () => localStorage.getItem("JWT_TOKEN");
+const getRefreshToken = () => localStorage.getItem("JWT_REFRESH_TOKEN");
 
 const getAllTasks = async (boardID, sortBy = "createdOn", filterStatuses = "", direction = "ASC") => {
   let url = `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardID}/tasks`
@@ -415,6 +416,28 @@ const updateBoardVisibility = async (boardId, visibilityString) => {
   }
 }
 
+const getNewAccessToken = async () => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/token`,
+      {
+        method: "POST",
+        headers: {
+          "x-refresh-token": `${getRefreshToken()}`,
+        },
+      }
+    )
+
+    return {
+      status: response.status,
+      message: "Authorized user successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -433,4 +456,5 @@ export {
   getAllBoards,
   createBoard,
   updateBoardVisibility,
+  getNewAccessToken
 }

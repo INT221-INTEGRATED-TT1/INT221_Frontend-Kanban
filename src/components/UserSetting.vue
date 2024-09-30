@@ -7,6 +7,7 @@ const userStore = useUserStore()
 
 const logout = () => {
   localStorage.removeItem("JWT_TOKEN")
+  localStorage.removeItem("JWT_REFRESH_TOKEN")
   router.push('/login')
 }
 
