@@ -29,14 +29,15 @@ const testOtherpeopleData = reactive([
         email: "papangkorn@kmutt.ac.th"
     },
 ])
-const changeVisibilityBoard  = async (visibility) => {
+const changeVisibilityBoard = async (visibility) => {
     await updateBoardVisibility(route.params.boardID, visibility)
     utilityStore.boardManager.changeVisibilityBoard(route.params.boardID, visibility)
     currentVisibility.value = visibility
 }
 
 const copyToClipboard = async () => {
-    await navigator.clipboard.writeText((window.location.origin + route.fullPath).slice(0, -6))
+    window.location.origin.includes('localhost') ? await navigator.clipboard.writeText((window.location.origin + route.fullPath).slice(0, -6)) : 
+    await navigator.clipboard.writeText(`${import.meta.env.production.VITE_BASE_URL}/` + (window.location.origin + route.fullPath).slice(0, -6))
     copyLinkClicked.value = true
 }
 
@@ -55,7 +56,8 @@ onBeforeMount(async () => {
         <div class="bg-[#18181B] rounded-lg w-[50rem] h-auto flex flex-col">
             <div class="flex flex-row justify-between">
                 <p class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6 pb-3 tracking-wider">
-                    Share<span class="text-white">&nbsp{{ utilityStore.tasksManager.getTasks()[0]?.statuses3.boardId.name }}&nbsp</span>board
+                    Share<span class="text-white">&nbsp{{
+                        utilityStore.tasksManager.getTasks()[0]?.statuses3.boardId.name }}&nbsp</span>board
                 </p>
                 <button class="flex text-[#005BC4] text-lg self-end mb-3 items-center gap-2" @click="copyToClipboard">
                     <LinkIcon />
@@ -73,11 +75,13 @@ onBeforeMount(async () => {
                         <UserIcon />Anyone with the link
                     </span>
                     <div class="flex items-center gap-2 tracking-wider">
-                        <input type="radio" name="radio-2" :checked="currentVisibility === 'PRIVATE'" class="radio radio-primary"  @click="changeVisibilityBoard('PRIVATE')"/>
+                        <input type="radio" name="radio-2" :checked="currentVisibility === 'PRIVATE'"
+                            class="radio radio-primary" @click="changeVisibilityBoard('PRIVATE')" />
                         <p>No Access</p>
                     </div>
                     <div class="flex items-center gap-2 tracking-wider">
-                        <input type="radio" name="radio-2" :checked="currentVisibility === 'PUBLIC'" class="radio radio-primary" @click="changeVisibilityBoard('PUBLIC')"/>
+                        <input type="radio" name="radio-2" :checked="currentVisibility === 'PUBLIC'"
+                            class="radio radio-primary" @click="changeVisibilityBoard('PUBLIC')" />
                         <p>Viewer</p>
                     </div>
                 </div>
@@ -89,7 +93,8 @@ onBeforeMount(async () => {
                 </div>
 
                 <!-- other people with acces -->
-                <p class="text-[#F5F5F5] text-opacity-80 font-medium text-lg flex tracking-wider"> Other People with Access </p>
+                <p class="text-[#F5F5F5] text-opacity-80 font-medium text-lg flex tracking-wider"> Other People with
+                    Access </p>
                 <div v-for="(people, index) in testOtherpeopleData" :key="index">
                     <div class="flex text-white text-opacity-85 break-keep  gap-9">
                         <div class=" items-center tracking-wider justify-start">
@@ -97,11 +102,11 @@ onBeforeMount(async () => {
                             <p class="text-[#F5F5F5] text-opacity-50">{{ people.email }}</p>
                         </div>
                         <div class="flex items-center gap-2 tracking-wider">
-                            <input type="radio" :name="`radio-${index+3}`" class="radio radio-primary" />
+                            <input type="radio" :name="`radio-${index + 3}`" class="radio radio-primary" />
                             <p>Viewer</p>
                         </div>
                         <div class="flex items-center gap-2 tracking-wider">
-                            <input type="radio" :name="`radio-${index+3}`" class="radio radio-primary" />
+                            <input type="radio" :name="`radio-${index + 3}`" class="radio radio-primary" />
                             <p>Editor</p>
                         </div>
                     </div>
