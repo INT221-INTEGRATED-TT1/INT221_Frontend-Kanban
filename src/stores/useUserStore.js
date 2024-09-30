@@ -13,7 +13,16 @@ export const useUserStore = defineStore("userStore", () => {
         "iss": ""
     })
 
+    const getUserIdentity = () => {
+        const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+        if (JWT_TOKEN) {
+            const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
+            userIdentity = { ...JSON.parse(decodedData) }
+        }
+    }
+
     return {
         userIdentity,
+        getUserIdentity,
     }
 })

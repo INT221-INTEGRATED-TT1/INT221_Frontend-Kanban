@@ -1,10 +1,11 @@
 <script setup>
 import {ref, onBeforeMount} from "vue"
-import {getAllStatuses3} from "@/libs/FetchAPI.js"
+import {getAllStatuses} from "@/libs/FetchAPI.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useSortAndFilterStore} from "@/stores/useSortAndFilterStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import {useRoute} from "vue-router"
+import router from "@/router/index.js"
 import FilterIcon from "@/components/icons/FilterIcon.vue"
 
 const route = useRoute()
@@ -14,12 +15,14 @@ const statusStyleStore = useStatusStyleStore()
 
 onBeforeMount(async () => {
   try {
-    const fetchStatuses = await getAllStatuses3(route.params.boardID)
+    const fetchStatuses = await getAllStatuses(route.params.boardID)
     utilityStore.statusManager.addStatuses(fetchStatuses)
     utilityStore.statusManager.addFilteredField()
     
   } catch (error) {
-    console.log(error)
+    // localStorage.removeItem("JWT_TOKEN")
+    console.log("Error fetching tasks : ", error.message)
+    router.push('/error')
   }
 })
 </script>

@@ -26,6 +26,7 @@ export const useUtilityStore = defineStore("utility", () => {
     updatedOn : "",
     ownerId : ""
   })
+  const isOwnerBoard = ref(false)
 
   const confirmDeleteStatus = (statuses) => {
     selectedId.value = statuses.id
@@ -47,6 +48,24 @@ export const useUtilityStore = defineStore("utility", () => {
     showStatusSettingMenu.value = true
   }
 
+  const formatDateTime = (baseFormatDate) => {
+    const date = new Date(baseFormatDate)
+    const options = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    }
+    const formattedDate = date
+      .toLocaleString("en-GB", options)
+      .replace(/\//g, "/")
+      .replace(",", "")
+  
+    return formattedDate
+  }
+
   return {
     tasksManager,
     selectedId,
@@ -66,5 +85,7 @@ export const useUtilityStore = defineStore("utility", () => {
     boardManager,
     selectedBoard,
     selectedBoardId,
+    formatDateTime,
+    isOwnerBoard
   }
 })

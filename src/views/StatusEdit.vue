@@ -4,7 +4,7 @@ import router from "@/router"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import {getStatus3, editStatus3} from "@/libs/FetchAPI"
+import {getStatus, editStatus} from "@/libs/FetchAPI"
 import Xmark from "@/components/icons/Xmark.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
@@ -28,7 +28,8 @@ const updateColor = (index) => {
 
 const editStatusData = async (newStatus) => {
   try {
-    const response = await editStatus3(route.params.boardID, route.params.statusID, newStatus)
+    newStatus.description === null ? (newStatus.description = null) : ""
+    const response = await editStatus(route.params.boardID, route.params.statusID, newStatus)
     if (response.status === 200) {
       utilityStore.statusManager.editStatus(route.params.statusID, newStatus)
       router.push(`/board/${route.params.boardID}/status`)
@@ -69,7 +70,7 @@ const isButtonDisabled = computed(() => {
 
 onBeforeMount(async () => {
   try {
-    const fetchData = await getStatus3(route.params.boardID, route.params.statusID)
+    const fetchData = await getStatus(route.params.boardID, route.params.statusID)
     status.value = fetchData
     // console.log(status.value);
     // console.log(fetchData);

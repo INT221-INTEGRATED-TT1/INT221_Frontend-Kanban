@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, computed, onBeforeMount, watch } from "vue"
-import { createTask3 } from "@/libs/FetchAPI"
+import { updateBoardVisibility } from "@/libs/FetchAPI.js"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
@@ -13,10 +13,8 @@ import { useRoute } from "vue-router"
 
 const route = useRoute()
 const utilityStore = useUtilityStore()
-const statusStyleStore = useStatusStyleStore()
-
-// console.log(utilityStore.selectedBoard)
-const testBoardname = ref('ITBKK SIAM personal board')
+const currentVisibility = ref('')
+const copyLinkClicked = ref(false)
 const testOtherpeopleData = reactive([
     {
         name: "Natsaran Sae-oung",
@@ -31,6 +29,25 @@ const testOtherpeopleData = reactive([
         email: "papangkorn@kmutt.ac.th"
     },
 ])
+const changeVisibilityBoard  = async (visibility) => {
+    await updateBoardVisibility(route.params.boardID, visibility)
+    utilityStore.boardManager.changeVisibilityBoard(route.params.boardID, visibility)
+    currentVisibility.value = visibility
+}
+
+const copyToClipboard = async () => {
+    await navigator.clipboard.writeText((window.location.origin + route.fullPath).slice(0, -6))
+    copyLinkClicked.value = true
+}
+
+onBeforeMount(async () => {
+    copyLinkClicked.value = false
+    currentVisibility.value = utilityStore.boardManager.getBoards().filter(board => board.id === route.params.boardID)[0].visibility
+    console.log(currentVisibility.value)
+    console.log(window.location.origin + route.fullPath)
+    // await navigator.clipboard.writeText((window.location.origin + route.fullPath).slice(0, -6))
+})
+
 </script>
 
 <template>
@@ -38,11 +55,13 @@ const testOtherpeopleData = reactive([
         <div class="bg-[#18181B] rounded-lg w-[50rem] h-auto flex flex-col">
             <div class="flex flex-row justify-between">
                 <p class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6 pb-3 tracking-wider">
-                    Share<span class="text-white">&nbsp{{ testBoardname }}&nbsp</span>board
+                    Share<span class="text-white">&nbsp{{ utilityStore.tasksManager.getTasks()[0]?.statuses3.boardId.name }}&nbsp</span>board
                 </p>
-                <button class="flex text-[#005BC4] text-lg self-end mb-3 items-center gap-2"><span>
-                        <LinkIcon />
-                    </span>Copy Link</button>
+                <button class="flex text-[#005BC4] text-lg self-end mb-3 items-center gap-2" @click="copyToClipboard">
+                    <LinkIcon />
+                    <span v-if="copyLinkClicked"> Link copied to clipboard! </span>
+                    <span v-else> Copy Link </span>
+                </button>
                 <button class="self-start mr-5 mt-5" @click="router.back">
                     <Xmark />
                 </button>
@@ -54,11 +73,11 @@ const testOtherpeopleData = reactive([
                         <UserIcon />Anyone with the link
                     </span>
                     <div class="flex items-center gap-2 tracking-wider">
-                        <input type="radio" name="radio-2" class="radio radio-primary" checked="checked" />
+                        <input type="radio" name="radio-2" :checked="currentVisibility === 'PRIVATE'" class="radio radio-primary"  @click="changeVisibilityBoard('PRIVATE')"/>
                         <p>No Access</p>
                     </div>
                     <div class="flex items-center gap-2 tracking-wider">
-                        <input type="radio" name="radio-2" class="radio radio-primary" />
+                        <input type="radio" name="radio-2" :checked="currentVisibility === 'PUBLIC'" class="radio radio-primary" @click="changeVisibilityBoard('PUBLIC')"/>
                         <p>Viewer</p>
                     </div>
                 </div>
@@ -78,7 +97,7 @@ const testOtherpeopleData = reactive([
                             <p class="text-[#F5F5F5] text-opacity-50">{{ people.email }}</p>
                         </div>
                         <div class="flex items-center gap-2 tracking-wider">
-                            <input type="radio" :name="`radio-${index+3}`" class="radio radio-primary" checked="checked" />
+                            <input type="radio" :name="`radio-${index+3}`" class="radio radio-primary" />
                             <p>Viewer</p>
                         </div>
                         <div class="flex items-center gap-2 tracking-wider">

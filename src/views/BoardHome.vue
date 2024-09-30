@@ -12,25 +12,8 @@ import {useUtilityStore} from "@/stores/useUtilityStore.js"
 const userStore = useUserStore()
 const utilityStore = useUtilityStore()
 
-const formatDateTime = (baseFormatDate) => {
-  const date = new Date(baseFormatDate)
-  const options = {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }
-  const formattedDate = date
-    .toLocaleString("en-GB", options)
-    .replace(/\//g, "/")
-    .replace(",", "")
-
-  return formattedDate
-}
-
 const selectBoard = (selectBoardId) => {
+  utilityStore.selectedBoardId = selectBoardId
   const filterBoard = utilityStore.boardManager.getBoards().filter(board => board.id === selectBoardId)[0]
   utilityStore.selectedBoard = {...filterBoard}
   router.push(`/board/${selectBoardId}/task`)
@@ -47,11 +30,6 @@ onBeforeMount(async () => {
     utilityStore.boardManager.addBoards(fetchBoards)
     console.log(fetchBoards)
     console.log(utilityStore.boardManager.getBoards());
-    for (const task of utilityStore.tasksManager.getTasks()) {
-      task.assignees === null || task.assignees.trim().length === 0
-        ? (task.assignees = "Unassigned")
-        : ""
-    }
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }
@@ -125,19 +103,14 @@ onBeforeMount(async () => {
             {{ board.name }}
           </p>
         </div>
-        <!-- <div class="flex items-center justify-between font-Geist tracking-wider text-white space-y-1"> -->
-        <!-- <p class="text-2xl font-semibold">Todo Planning to travel</p> -->
-        <!-- <p class="text-xs font-light opacity-55">Created At 16 Jan 2024</p> -->
-        <!-- <p class="text-sm font-medium ">By Natsaran</p> -->
-        <!-- </div> -->
-        <!-- </div> -->
+
         <div class="flex items-end justify-between">
           <div>
             <p class="text-sm font-medium">
               By {{ userStore.userIdentity.name }}
             </p>
             <p class="text-xs font-light opacity-55">
-              Created At {{ formatDateTime(board.createdOn) }}
+              Created At {{ utilityStore.formatDateTime(board.createdOn) }}
             </p>
           </div>
           <button class="tooltip tooltip-error text-normal" data-tip="Delete">

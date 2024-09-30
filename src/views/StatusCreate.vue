@@ -2,7 +2,7 @@
 import {ref, reactive, watch, computed} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import {createStatus3} from "@/libs/FetchAPI"
+import {createStatus} from "@/libs/FetchAPI"
 import router from "@/router"
 import {useRoute} from "vue-router"
 import Xmark from "@/components/icons/Xmark.vue"
@@ -14,8 +14,8 @@ const statusStyleStore = useStatusStyleStore()
 const route = useRoute()
 
 const newStatus = reactive({
-  name: "",
-  description: "",
+  name: " ",
+  description: " ",
   color: statusStyleStore.presetColors[5],
   limitMaximumTask: 0,
 })
@@ -33,7 +33,8 @@ const isButtonDisabled = computed(() => {
 const createNewStatus = async () => {
   utilityStore.transactionDisable = true
   try {
-    const response = await createStatus3(route.params.boardID, newStatus)
+    // newStatus.description.trim().length === 0 ? newStatus.description = null : newStatus.description = newStatus.description
+    const response = await createStatus(route.params.boardID, newStatus)
     // console.log(response.data)
     if (response.status === 201) {
       // console.log(newStatus)

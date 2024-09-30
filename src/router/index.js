@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router"
 import Task from "@/views/Task.vue"
 import TaskModalDetail from "@/views/TaskModalDetail.vue"
 import NotFound from "@/components/NotFound.vue"
+import Forbidden from "@/components/Forbidden.vue"
 import TaskCreate from "@/views/TaskCreate.vue"
 import TaskEdit from "@/views/TaskEdit.vue"
 import TestLen from "@/components/TestLen.vue"
@@ -13,7 +14,7 @@ import LoginPage from "@/views/LoginPage.vue"
 import BoardHome from "@/views/BoardHome.vue"
 import BoardCreate from "@/views/BoardCreate.vue"
 import ShareTask from "@/views/ShareTask.vue"
-import { authorizedUser } from "@/libs/FetchAPI"
+import { authorizedUser, getNewAccessToken } from "@/libs/FetchAPI"
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL), // base url
@@ -25,28 +26,15 @@ const router = createRouter({
       component: NotFound,
       name: "not-found",
     },
-    // {
-    //   path: "/task",
-    //   component: Task,
-    //   name: "task",
-    //   children: [
-    //     { path: ":id", component: TaskModalDetail,},
-    //     { path: ":id/edit", component: TaskEdit,},
-    //     { path: "add", component: TaskCreate, name: "create-task" },
-    //   ],
-    // },
-    // {
-    //   path: "/status/manage",
-    //   component: StatusManage,
-    //   children: [
-    //     { path: "/status/add", component: StatusCreate, name: "create-task-status" },
-    //     { path: "/status/:id/edit", component: StatusEdit, name: "edit-task-status" },
-    //   ],
-    // },
     {
       path: "/team",
       component: TeamPage,
       name: "team"
+    },
+    {
+      path: "/error",
+      component: Forbidden,
+      name: "access-denied"
     },
     {
       path: "/login",
@@ -94,8 +82,8 @@ router.beforeEach(async (to, from, next) => {
   if (accessToken) {
     // console.log(to);
     try {
-      const response = await authorizedUser(accessToken);
-      if (response.status === 200) {
+      const authzUserResponse = await authorizedUser();
+      if (authzUserResponse.status === 200) {
         // console.log('Authentication Pass');
         if (to.name === 'login') {
           // If authenticated user tries to access login page, redirect to /board
@@ -104,23 +92,34 @@ router.beforeEach(async (to, from, next) => {
           // Proceed to the intended route
           next();
         }
-      } else {
+      }
+      else {
         // Handle unexpected status codes by redirecting to /board
-        localStorage.removeItem("JWT_TOKEN")
-        next('/login');
+        const authzRefreshTokenResponse = await getNewAccessToken();
+        if (authzRefreshTokenResponse.status === 200) {
+          localStorage.setItem("JWT_TOKEN", authzRefreshTokenResponse.data.access_token)
+          next();
+        }
+        else {
+          localStorage.removeItem("JWT_TOKEN")
+          localStorage.removeItem("JWT_REFRESH_TOKEN")
+          next('/login');
+        }
       }
     } catch (error) {
-      // console.error("Authentication check failed:", error);
+      console.error("Authentication check failed:", error);
       // Redirect to login page on authentication failure
       next('/login');
     }
   } else {
-    if (to.name !== 'login') {
-      // If not authenticated, redirect to login
-      next('/login');
-    } else {
+    if (to.name === 'error') next('/error');
+    else {
+       // If not authenticated, redirect to login
+      if (to.name === 'board-home' ) {
+        next('/login');
+      }
       // If already on the login page, proceed
-      next();
+      else next();
     }
   }
 });

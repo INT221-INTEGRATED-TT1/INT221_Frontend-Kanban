@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, computed, reactive} from "vue"
-import {getTask3, editTask3} from "@/libs/FetchAPI.js"
+import {getTask, editTask} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
@@ -15,20 +15,6 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
-
-// const text = ref('')
-// let textArea = ref('')
-// onMounted(() => {
-//   console.log(textArea);
-//   console.log(textArea.value.style.height);
-//   // textArea = document.querySelector('textarea');
-
-// });
-// const resizeTextarea = () => {
-//   console.log("Resize function execute");
-//   textArea.value.style.height = "auto";
-//   textArea.value.style.height = textArea.value.scrollHeight + "px";
-// };
 
 const task = ref({})
 const route = useRoute()
@@ -55,15 +41,6 @@ const selectStatus = (name, color, id) => {
   newStatus.id = id
   updateTask.status3 = id
 }
-
-// const isOpen = ref(false)
-
-// const isOpen = ref(false)
-
-// const toggleDropdown = () => {
-//   // selectStatus(status)
-//   isOpen.value = !isOpen.value
-// }
 
 const formatTimezone = () => {
   const options = {
@@ -126,7 +103,7 @@ const editTaskData = async (newTask) => {
   }
 
   try {
-    const response = await editTask3(
+    const response = await editTask(
       route.params.boardID,
       route.params.taskID,
       newTask
@@ -192,7 +169,7 @@ const isButtonDisable = computed(() => {
 
 onBeforeMount(async () => {
   try {
-    const fetchTask = await getTask3(route.params.boardID, route.params.taskID)
+    const fetchTask = await getTask(route.params.boardID, route.params.taskID)
     task.value = fetchTask
     // console.log(task.value)
 

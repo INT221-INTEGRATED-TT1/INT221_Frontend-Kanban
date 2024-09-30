@@ -41,7 +41,7 @@ class TaskManagement {
   }
 
   getTasks() {
-    console.log(this.tasks);
+    // console.log(this.tasks);
     
     return this.tasks
   }
