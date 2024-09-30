@@ -50,3 +50,5 @@ console.log(test.toString());
 
 const st = ""
 console.log(st.length);
+const baseUrl = process.env.VITE_BASE_URL;
+console.log(baseUrl)

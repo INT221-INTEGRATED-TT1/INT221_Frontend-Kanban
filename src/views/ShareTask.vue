@@ -37,7 +37,7 @@ const changeVisibilityBoard = async (visibility) => {
 
 const copyToClipboard = async () => {
     window.location.origin.includes('localhost') ? await navigator.clipboard.writeText((window.location.origin + route.fullPath).slice(0, -6)) : 
-    await navigator.clipboard.writeText(`${import.meta.env.production.VITE_BASE_URL}/` + (window.location.origin + route.fullPath).slice(0, -6))
+    await navigator.clipboard.writeText(window.location.origin + `${import.meta.env.VITE_PROD_BASE_URL}/` + route.fullPath.slice(0, -6))
     copyLinkClicked.value = true
 }
 
