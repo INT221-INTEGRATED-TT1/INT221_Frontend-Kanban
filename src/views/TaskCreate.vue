@@ -1,6 +1,6 @@
 <script setup>
-import {ref, reactive, computed, onBeforeMount, watch} from "vue"
-import {createTask} from "@/libs/FetchAPI"
+import {ref, reactive, computed, onBeforeMount, watch, nextTick} from "vue"
+import {createTask, getAllBoards} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -120,13 +120,59 @@ const createNewTask = async () => {
     console.log(error)
   }
 }
-onBeforeMount(() => {
-  const firstStatus = utilityStore.statusManager.getStatus()[0]
-  console.log(firstStatus)
-  newTask.status3 = newStatus.id = firstStatus.id
-  newStatus.name = firstStatus.name
-  newStatus.description = firstStatus.description
-  newStatus.color = firstStatus.color
+
+onBeforeMount(async () => {
+  utilityStore.isOwnerBoard = false
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  if (JWT_TOKEN) {
+    try {
+      const fetchBoards = await getAllBoards()
+      utilityStore.boardManager.addBoards(fetchBoards)
+      utilityStore.selectedBoardId = route.params.boardID
+
+      utilityStore.boardManager.getBoards().forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+      console.log("Owner Board : ",utilityStore.isOwnerBoard)
+
+      utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+      if (!utilityStore.isOwnerBoard) {
+        router.push(`/board/${route.params.boardID}/task`).then(() => {
+          toast(
+            `You don't have permission to edit this board`,
+            {
+              type: "error",
+              timeout: 2000,
+              theme: "dark",
+              transition: "flip",
+              position: "bottom-right",
+            })
+        })
+        return
+      }
+      const firstStatus = utilityStore.statusManager.getStatus()[0]
+      console.log(firstStatus)
+      newTask.status3 = newStatus.id = firstStatus.id
+      newStatus.name = firstStatus.name
+      newStatus.description = firstStatus.description
+      newStatus.color = firstStatus.color
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  if (!utilityStore.isOwnerBoard) {
+        router.push(`/board/${route.params.boardID}/task`).then(() => {
+          toast(
+            `You don't have permission to edit this board`,
+            {
+              type: "error",
+              timeout: 2000,
+              theme: "dark",
+              transition: "flip",
+              position: "bottom-right",
+            })
+        })
+        return
+      }
 })
 </script>
 
@@ -265,7 +311,7 @@ onBeforeMount(() => {
             <div class="flex gap-x-3">
               <button
                 @click="
-                  router.push(`/board/${utilityStore.selectedBoardId}/task`)
+                  router.push(`/board/${route.params.boardID}/task`)
                 "
                 class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none hover:bg-opacity-30 bg-transparent"
               >

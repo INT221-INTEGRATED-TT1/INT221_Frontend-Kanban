@@ -179,6 +179,7 @@ onBeforeMount(async () => {
       }
     }
     // console.log(utilityStore.statusManager.getStatus())
+    utilityStore.isStatusesMounted = true
   } catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
     console.log("Error fetching tasks : ", error.message)

@@ -79,6 +79,8 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const accessToken = localStorage.getItem("JWT_TOKEN");
   // console.log(accessToken);
+  // console.log(to.fullPath)
+  if(/\/board\/.{10}$/.test(to.fullPath)) {next(`${to.fullPath}/task`)}
   if (accessToken) {
     // console.log(to);
     try {
