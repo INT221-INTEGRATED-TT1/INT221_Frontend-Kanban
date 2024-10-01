@@ -1,5 +1,5 @@
 <script setup>
-import {ref, reactive, computed, onBeforeMount, watch} from "vue"
+import {ref, reactive, computed, onBeforeMount, watch, nextTick} from "vue"
 import {createTask} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
@@ -120,13 +120,18 @@ const createNewTask = async () => {
     console.log(error)
   }
 }
-onBeforeMount(() => {
-  const firstStatus = utilityStore.statusManager.getStatus()[0]
-  console.log(firstStatus)
-  newTask.status3 = newStatus.id = firstStatus.id
-  newStatus.name = firstStatus.name
-  newStatus.description = firstStatus.description
-  newStatus.color = firstStatus.color
+onBeforeMount(async () => {
+  nextTick(() => {
+    console.log("test")
+    if(utilityStore.isOwnerBoard) {
+    const firstStatus = utilityStore.statusManager.getStatus()[0]
+    console.log(firstStatus)
+    newTask.status3 = newStatus.id = firstStatus.id
+    newStatus.name = firstStatus.name
+    newStatus.description = firstStatus.description
+    newStatus.color = firstStatus.color
+    }
+  })
 })
 </script>
 
@@ -265,7 +270,7 @@ onBeforeMount(() => {
             <div class="flex gap-x-3">
               <button
                 @click="
-                  router.push(`/board/${utilityStore.selectedBoardId}/task`)
+                  router.push(`/board/${route.params.boardID}/task`)
                 "
                 class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none hover:bg-opacity-30 bg-transparent"
               >

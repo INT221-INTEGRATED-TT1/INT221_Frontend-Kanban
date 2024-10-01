@@ -77,7 +77,7 @@ onBeforeMount(async () => {
     const fetchTasks = await getAllTasks(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
     
-    console.log(utilityStore.selectedBoardId)
+    // console.log(utilityStore.selectedBoardId)
     console.log("Owner Board : ",utilityStore.isOwnerBoard)
     // console.log(fetchTasks)
 

@@ -71,6 +71,21 @@ const isButtonDisabled = computed(() => {
 onBeforeMount(async () => {
   try {
     const fetchData = await getStatus(route.params.boardID, route.params.statusID)
+    utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+    if (!utilityStore.isOwnerBoard) {
+      router.push(`/board/${route.params.boardID}/status`).then(() => {
+        toast(
+          `You don't have permission to edit this board`,
+          {
+            type: "error",
+            timeout: 2000,
+            theme: "dark",
+            transition: "flip",
+            position: "bottom-right",
+          })
+      })
+      return
+    }
     status.value = fetchData
     // console.log(status.value);
     // console.log(fetchData);

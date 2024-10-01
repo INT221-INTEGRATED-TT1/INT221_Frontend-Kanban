@@ -51,23 +51,6 @@ const formatTimezone = () => {
   return timeZone
 }
 
-const formatDateTime = (baseFormatDate) => {
-  const date = new Date(baseFormatDate)
-  const options = {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }
-  const formattedDate = date
-    .toLocaleString("en-GB", options)
-    .replace(/\//g, "/")
-    .replace(",", "")
-
-  return formattedDate
-}
 const filterStatus = ref({})
 
 const editTaskData = async (newTask) => {
@@ -148,7 +131,7 @@ const editTaskData = async (newTask) => {
     console.log("Error updating task: ", error)
   }
 }
-console.log(filterStatus.value);
+// console.log(filterStatus.value);
 
 const isButtonDisable = computed(() => {
   if (newStatus.id !== filterStatus.value.id) {
@@ -170,11 +153,26 @@ const isButtonDisable = computed(() => {
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.boardID, route.params.taskID)
+    utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+    if (!utilityStore.isOwnerBoard) {
+      router.push(`/board/${route.params.boardID}/task`).then(() => {
+        toast(
+          `You don't have permission to edit this board`,
+          {
+            type: "error",
+            timeout: 2000,
+            theme: "dark",
+            transition: "flip",
+            position: "bottom-right",
+          })
+      })
+      return
+    }
     task.value = fetchTask
     // console.log(task.value)
 
-    task.value.createOn = formatDateTime(task.value.createOn)
-    task.value.updateOn = formatDateTime(task.value.updateOn)
+    task.value.createOn = utilityStore.formatDateTime(task.value.createOn)
+    task.value.updateOn = utilityStore.formatDateTime(task.value.updateOn)
 
     updateTask.title = task.value.title
     updateTask.description = task.value.description
