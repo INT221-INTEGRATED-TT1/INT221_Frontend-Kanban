@@ -101,7 +101,7 @@ onBeforeMount(async () => {
     }
   }
   if (!utilityStore.isOwnerBoard) {
-        router.push(`/board/${route.params.boardID}/stasus`).then(() => {
+        router.push(`/board/${route.params.boardID}/status`).then(() => {
           toast(
             `You don't have permission to edit this board`,
             {
