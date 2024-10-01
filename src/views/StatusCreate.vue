@@ -1,8 +1,8 @@
 <script setup>
-import {ref, reactive, watch, computed} from "vue"
+import {ref, reactive, onBeforeMount, computed} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import {createStatus} from "@/libs/FetchAPI"
+import {createStatus, getAllBoards} from "@/libs/FetchAPI"
 import router from "@/router"
 import {useRoute} from "vue-router"
 import Xmark from "@/components/icons/Xmark.vue"
@@ -67,6 +67,55 @@ const createNewStatus = async () => {
     console.log(error)
   }
 }
+
+onBeforeMount(async () => {
+  utilityStore.isOwnerBoard = false
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  if (JWT_TOKEN) {
+    try {
+      const fetchBoards = await getAllBoards()
+      utilityStore.boardManager.addBoards(fetchBoards)
+      utilityStore.selectedBoardId = route.params.boardID
+
+      utilityStore.boardManager.getBoards().forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+      console.log("Owner Board : ",utilityStore.isOwnerBoard)
+
+      utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+      if (!utilityStore.isOwnerBoard) {
+        router.push(`/board/${route.params.boardID}/status`).then(() => {
+          toast(
+            `You don't have permission to edit this board`,
+            {
+              type: "error",
+              timeout: 2000,
+              theme: "dark",
+              transition: "flip",
+              position: "bottom-right",
+            })
+        })
+        return
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  if (!utilityStore.isOwnerBoard) {
+        router.push(`/board/${route.params.boardID}/stasus`).then(() => {
+          toast(
+            `You don't have permission to edit this board`,
+            {
+              type: "error",
+              timeout: 2000,
+              theme: "dark",
+              transition: "flip",
+              position: "bottom-right",
+            })
+        })
+        return
+      }
+})
+
 </script>
 
 <template>

@@ -86,6 +86,8 @@ onBeforeMount(async () => {
         ? (task.assignees = "Unassigned")
         : ""
     }
+
+    utilityStore.isTaskMounted = true
   } 
   catch (error) {
     // localStorage.removeItem("JWT_TOKEN")

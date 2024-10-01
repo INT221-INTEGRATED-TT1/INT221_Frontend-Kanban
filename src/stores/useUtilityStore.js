@@ -27,6 +27,8 @@ export const useUtilityStore = defineStore("utility", () => {
     ownerId : ""
   })
   const isOwnerBoard = ref(false)
+  const isTaskMounted = ref(false)
+  const isStatusesMounted = ref(false)
 
   const confirmDeleteStatus = (statuses) => {
     selectedId.value = statuses.id
@@ -86,6 +88,8 @@ export const useUtilityStore = defineStore("utility", () => {
     selectedBoard,
     selectedBoardId,
     formatDateTime,
-    isOwnerBoard
+    isOwnerBoard,
+    isTaskMounted,
+    isStatusesMounted
   }
 })
