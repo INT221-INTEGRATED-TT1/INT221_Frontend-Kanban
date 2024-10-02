@@ -70,15 +70,15 @@ onBeforeMount(async () => {
     utilityStore.selectedBoardId = route.params.boardID
 
     utilityStore.boardManager.getBoards().forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-    console.log("Owner Board : ",utilityStore.isOwnerBoard)
+    console.log("Owner Board : ", utilityStore.isOwnerBoard)
   }
   try {
     // console.log(route.params.boardID)
     const fetchTasks = await getAllTasks(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
-    
+
     // console.log(utilityStore.selectedBoardId)
-    console.log("Owner Board : ",utilityStore.isOwnerBoard)
+    console.log("Owner Board : ", utilityStore.isOwnerBoard)
     // console.log(fetchTasks)
 
     for (const task of utilityStore.tasksManager.getTasks()) {
@@ -88,7 +88,7 @@ onBeforeMount(async () => {
     }
 
     utilityStore.isTaskMounted = true
-  } 
+  }
   catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
     console.log("Error fetching tasks : ", error.message)
@@ -120,15 +120,15 @@ onBeforeMount(async () => {
           </div>
         </router-link>
         <router-link :to="{ name: 'create-task' }">
-          <div v-if="utilityStore.isOwnerBoard"
-            class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer">
-            <span>
+          <button :disabled="!utilityStore.isOwnerBoard"
+            :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 tooltip tooltip-top border-opacity-15 text-normal text-opacity-15 cursor-not-allowed'
+              : 'border-opacity-75 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer text-opacity-75 text-normal'"
+            data-tip="You need to be board owner to perform this action."
+            class="itbkk-button-add border-secondary border-[0.1px] px-3 py-1 rounded-lg flex items-center gap-x-2 ">
+            <span :class="!utilityStore.isOwnerBoard ? 'opacity-15' : ''">
               <CreateTaskIcon />
-            </span>
-            <button class="itbkk-button-add text-normal text-opacity-75">
-              Add Task
-            </button>
-          </div>
+            </span>Add Task
+          </button>
         </router-link>
         <UserSetting />
       </div>
@@ -137,7 +137,10 @@ onBeforeMount(async () => {
     <div class="pt-10">
       <div class="flex justify-end">
         <router-link :to="{ name: 'share-task' }">
-          <button v-if="utilityStore.isOwnerBoard" class="bg-[#338EF7] text-white text-center font-Geist text-sm px-4 py-1 rounded-sm self-end">Share</button>
+          <button :disabled="!utilityStore.isOwnerBoard"
+            :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'bg-[#338EF7]'"
+            data-tip="You need to be board owner to perform this action."
+            class=" text-white text-center font-Geist text-sm px-4 py-1 rounded-sm self-end">Share</button>
         </router-link>
       </div>
       <FilterCollapse />
@@ -187,25 +190,37 @@ onBeforeMount(async () => {
             </td>
             <td>
               <div class="dropdown dropdown-bottom itbkk-button-action">
-                <div tabindex="0" role="button" v-if="utilityStore.isOwnerBoard"
+                <div tabindex="0" role="button"
                   class="btn bg-transparent outline-none border-none hover:bg-white hover:bg-opacity-[0.07]">
                   <MoreIcon />
                 </div>
                 <ul tabindex="0"
                   class="dropdown-content z-[1] menu shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-box w-32">
-                  <li class="itbkk-button-edit cursor-pointer p-1 hover:rounded-md"
-                    @click="router.push(`task/${task.id}/edit`)">
-                    <span class="font-Inter tracking-wider font-semibold">
-                      <EditTaskIcon />Edit
-                    </span>
-                  </li>
+                  <!-- <li> -->
+                    <button :disabled="!utilityStore.isOwnerBoard"
+                      :class="!utilityStore.isOwnerBoard ? 'text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'cursor-pointer hover:rounded-md hover:bg-zinc-700 hover:bg-opacity-30'"
+                      class="itbkk-button-edit flex items-center justify-center p-2 gap-x-2 pr-5 mb-1 font-Inter tracking-wider font-semibold text-normal"
+                      data-tip="You need to be board owner to perform this action."
+                      @click="router.push(`task/${task.id}/edit`)">
+                      <span :class="!utilityStore.isOwnerBoard ? 'opacity-60' : ''">
+                        <EditTaskIcon />
+                      </span>
+                      Edit
+                    </button>
+                  <!-- </li> -->
                   <div class="divider m-0 h-0"></div>
-                  <li class="itbkk-button-delete cursor-pointer p-1 hover:rounded-md"
+                  <!-- <li> -->
+                  <button :disabled="!utilityStore.isOwnerBoard"
+                    :class="!utilityStore.isOwnerBoard ? 'text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'cursor-pointer hover:rounded-md hover:bg-zinc-700 hover:bg-opacity-30'"
+                    class="itbkk-button-delete flex items-center justify-center p-2 gap-x-2 pr-5 mt-1 text-[#DB1058] font-Inter tracking-wider font-semibold"
+                    data-tip="You need to be board owner to perform this action."
                     @click="utilityStore.confirmDeleteTask(task.id, task.title)">
-                    <span class="font-Inter text-[#DB1058] text-opacity-60 tracking-wider font-semibold">
-                      <DeleteIcon />Delete
+                    <span :class="!utilityStore.isOwnerBoard ? 'opacity-60' : ''">
+                      <DeleteIcon />
                     </span>
-                  </li>
+                    Delete
+                  </button>
+                  <!-- </li> -->
                 </ul>
               </div>
             </td>

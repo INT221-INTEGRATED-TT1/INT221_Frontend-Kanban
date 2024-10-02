@@ -139,7 +139,7 @@ onBeforeMount(async () => {
                 <div class="divider m-2"></div>
                 <div class="p-8 flex flex-col gap-y-6">
                     <p class="itbkk-button-message text-[#D69C27] text-opacity-75 mb-7">
-                        Only the board owner can access and manage this board when it's set to private. Do you want to change the visibility to <span class="text-red-400 font-bold underline underline-offset-2">{{currentVisibility === 'PUBLIC'? 'Public': 'Private'}}</span> ?
+                        Only the board owner can access and manage this board when it's set to private. Do you want to change the visibility to <span class="text-blue-500 font-bold underline underline-offset-2">{{currentVisibility === 'PUBLIC'? 'Public': 'Private'}}</span> ?
                     </p>
                     <div class="flex justify-end gap-x-[1rem]">
                         <button
