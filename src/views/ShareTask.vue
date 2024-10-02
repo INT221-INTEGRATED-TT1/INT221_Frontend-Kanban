@@ -10,6 +10,7 @@ import LinkIcon from "@/components/icons/LinkIcon.vue"
 import { toast } from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import { useRoute } from "vue-router"
+import BoardVisibilityChange from "@/components/BoardVisibilityChange.vue"
 
 const route = useRoute()
 const utilityStore = useUtilityStore()
@@ -29,9 +30,8 @@ const testOtherpeopleData = reactive([
         email: "papangkorn@kmutt.ac.th"
     },
 ])
-const changeVisibilityBoard = async (visibility) => {
-    await updateBoardVisibility(route.params.boardID, visibility)
-    utilityStore.boardManager.changeVisibilityBoard(route.params.boardID, visibility)
+const changeVisibilityBoardRadioClick = async (visibility) => {
+    currentVisibility.value === visibility ? utilityStore.showChangeBoardVisibilityConfirmation = false : utilityStore.showChangeBoardVisibilityConfirmation = true
     currentVisibility.value = visibility
 }
 
@@ -39,6 +39,21 @@ const copyToClipboard = async () => {
     window.location.origin.includes('localhost') ? await navigator.clipboard.writeText((window.location.origin + route.fullPath).slice(0, -6)) : 
     await navigator.clipboard.writeText(window.location.origin + `${import.meta.env.VITE_PROD_BASE_URL}` + route.fullPath.slice(0, -6))
     copyLinkClicked.value = true
+}
+
+const CancelChangeVisibilityBoard = () => {
+    utilityStore.showChangeBoardVisibilityConfirmation = false
+    currentVisibility.value === 'PRIVATE' ? currentVisibility.value = 'PUBLIC' : currentVisibility.value = 'PRIVATE'
+}
+
+const isRadioChecked = computed(() => {
+    return currentVisibility.value
+})
+
+const changeVisibilityBoard = async () => {
+    await updateBoardVisibility(route.params.boardID, currentVisibility.value)
+    utilityStore.boardManager.changeVisibilityBoard(route.params.boardID, currentVisibility.value)
+    utilityStore.showChangeBoardVisibilityConfirmation = false
 }
 
 onBeforeMount(async () => {
@@ -75,13 +90,13 @@ onBeforeMount(async () => {
                         <UserIcon />Anyone with the link
                     </span>
                     <div class="flex items-center gap-2 tracking-wider">
-                        <input type="radio" name="radio-2" :checked="currentVisibility === 'PRIVATE'"
-                            class="radio radio-primary" @click="changeVisibilityBoard('PRIVATE')" />
+                        <input type="radio" name="radio-2" :checked="isRadioChecked === 'PRIVATE'"
+                            class="radio radio-primary" @click="changeVisibilityBoardRadioClick('PRIVATE')" />
                         <p>No Access</p>
                     </div>
                     <div class="flex items-center gap-2 tracking-wider">
-                        <input type="radio" name="radio-2" :checked="currentVisibility === 'PUBLIC'"
-                            class="radio radio-primary" @click="changeVisibilityBoard('PUBLIC')" />
+                        <input type="radio" name="radio-2" :checked="isRadioChecked === 'PUBLIC'"
+                            class="radio radio-primary" @click="changeVisibilityBoardRadioClick('PUBLIC')" />
                         <p>Viewer</p>
                     </div>
                 </div>
@@ -109,6 +124,34 @@ onBeforeMount(async () => {
                             <input type="radio" :name="`radio-${index + 3}`" class="radio radio-primary" />
                             <p>Editor</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <BoardVisibilityChange v-if="utilityStore.showChangeBoardVisibilityConfirmation"/> -->
+    <div v-if="utilityStore.showChangeBoardVisibilityConfirmation">
+        <div class="fixed inset-0 backdrop-blur-md flex justify-center items-center z-30">
+            <div class="itbkk-message bg-[#18181B] rounded-lg w-[34rem] h-auto flex flex-col">
+                <h1 class="text-[#F5F5F5] font-bold text-2xl text-opacity-80 flex px-10 pt-9">
+                    Board Visibility Change !
+                </h1>
+                <div class="divider m-2"></div>
+                <div class="p-8 flex flex-col gap-y-6">
+                    <p class="itbkk-button-message text-[#D69C27] text-opacity-75 mb-7">
+                        Only the board owner can access and manage this board when it's set to private. Do you want to change the visibility to <span class="text-red-400 font-bold underline underline-offset-2">{{currentVisibility === 'PUBLIC'? 'Public': 'Private'}}</span> ?
+                    </p>
+                    <div class="flex justify-end gap-x-[1rem]">
+                        <button
+                            class="itbkk-button-cancel btn text-xs font-semibold text-[#FFFFFF] bg-transparent text-opacity-70 border-none hover:bg-transparent"
+                            @click="CancelChangeVisibilityBoard">
+                            Cancel
+                        </button>
+                        <button
+                            class="btn px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
+                            @click="changeVisibilityBoard">
+                            Confirm
+                        </button>
                     </div>
                 </div>
             </div>
