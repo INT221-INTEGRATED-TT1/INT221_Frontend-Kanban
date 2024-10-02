@@ -91,8 +91,8 @@ onBeforeMount(async () => {
   }
   catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
-    console.log("Error fetching tasks : ", error.message)
-    router.push('/error')
+    console.log("Error fetching tasks : ", error.status === 404)
+    error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
   }
 })
 </script>
@@ -197,16 +197,16 @@ onBeforeMount(async () => {
                 <ul tabindex="0"
                   class="dropdown-content z-[1] menu shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-box w-32">
                   <!-- <li> -->
-                    <button :disabled="!utilityStore.isOwnerBoard"
-                      :class="!utilityStore.isOwnerBoard ? 'text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'cursor-pointer hover:rounded-md hover:bg-zinc-700 hover:bg-opacity-30'"
-                      class="itbkk-button-edit flex items-center justify-center p-2 gap-x-2 pr-5 mb-1 font-Inter tracking-wider font-semibold text-normal"
-                      data-tip="You need to be board owner to perform this action."
-                      @click="router.push(`task/${task.id}/edit`)">
-                      <span :class="!utilityStore.isOwnerBoard ? 'opacity-60' : ''">
-                        <EditTaskIcon />
-                      </span>
-                      Edit
-                    </button>
+                  <button :disabled="!utilityStore.isOwnerBoard"
+                    :class="!utilityStore.isOwnerBoard ? 'text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'cursor-pointer hover:rounded-md hover:bg-zinc-700 hover:bg-opacity-30'"
+                    class="itbkk-button-edit flex items-center justify-center p-2 gap-x-2 pr-5 mb-1 font-Inter tracking-wider font-semibold text-normal"
+                    data-tip="You need to be board owner to perform this action."
+                    @click="router.push(`task/${task.id}/edit`)">
+                    <span :class="!utilityStore.isOwnerBoard ? 'opacity-60' : ''">
+                      <EditTaskIcon />
+                    </span>
+                    Edit
+                  </button>
                   <!-- </li> -->
                   <div class="divider m-0 h-0"></div>
                   <!-- <li> -->
