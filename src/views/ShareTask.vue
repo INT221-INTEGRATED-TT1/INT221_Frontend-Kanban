@@ -10,7 +10,6 @@ import LinkIcon from "@/components/icons/LinkIcon.vue"
 import { toast } from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import { useRoute } from "vue-router"
-import BoardVisibilityChange from "@/components/BoardVisibilityChange.vue"
 
 const route = useRoute()
 const utilityStore = useUtilityStore()
