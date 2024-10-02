@@ -182,8 +182,8 @@ onBeforeMount(async () => {
     utilityStore.isStatusesMounted = true
   } catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
-    console.log("Error fetching tasks : ", error.message)
-    router.push('/error')
+    console.log("Error fetching tasks : ", error)
+    error.status === 404 ? router.push({name: 'not-found'}) : router.push('/error')
   }
 });
 
@@ -217,14 +217,16 @@ onBeforeMount(async () => {
         </router-link>
 
         <router-link to="status/add">
-          <div v-if="utilityStore.isOwnerBoard"
-            class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
-          >
-            <span><CreateTaskIcon /></span>
-            <button class="itbkk-button-add text-normal text-opacity-75">
+          <button :disabled="!utilityStore.isOwnerBoard"
+            :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 tooltip tooltip-top border-opacity-15 text-opacity-15 cursor-not-allowed'
+            : 'border-opacity-75 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer text-opacity-75'"
+            data-tip="You need to be board owner to perform this action."
+            class="itbkk-button-add border-secondary border-[0.1px] px-3 py-1 rounded-lg flex items-center gap-x-2 text-normal">
+            <span :class="!utilityStore.isOwnerBoard ? 'opacity-15' : ''"><CreateTaskIcon /></span>
+            <!-- <button class="itbkk-button-add text-normal text-opacity-75"> -->
               Add Status
-            </button>
-          </div>
+            <!-- </button> -->
+          </button>
         </router-link>
 
         <UserSetting />
@@ -257,7 +259,7 @@ onBeforeMount(async () => {
                 Description
               </div>
             </th>
-            <th v-if="utilityStore.isOwnerBoard" class="rounded-tr-xl">Actions</th>
+            <th class="rounded-tr-xl">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -291,54 +293,37 @@ onBeforeMount(async () => {
             <td v-if="utilityStore.isOwnerBoard" class="flex gap-x-3 justify-center items-center">
               <!-- <div class="flex gap-x-2"> -->
               <div
-                class="tooltip tooltip-edit"
-                :data-tip="
-                  statuses.name === 'No Status' || statuses.name === 'Done'
-                    ? 'Cannot Edit'
-                    : 'Edit'
-                "
-              >
+                class="tooltip tooltip-edit" :data-tip=" statuses.name === 'No Status' || statuses.name === 'Done' ? 'Cannot Edit' : 'Edit' ">
                 <button
                   @click="router.push(`status/${statuses.id}/edit`)"
                   class="itbkk-button-edit"
-                  :disabled="
-                    statuses.name === 'No Status' || statuses.name === 'Done'
-                      ? disabledActionButton
-                      : false
-                  "
-                  :class="{
-                    'opacity-50 cursor-not-allowed':
-                      statuses.name === 'No Status' || statuses.name === 'Done',
-                  }"
-                >
+                  :disabled="statuses.name === 'No Status' || statuses.name === 'Done' ? disabledActionButton : false"
+                  :class="{'opacity-50 cursor-not-allowed': statuses.name === 'No Status' || statuses.name === 'Done',}">
                   <EditTaskStatus />
                 </button>
               </div>
               <div
-                class="tooltip text-normal tooltip-error"
-                :data-tip="
-                  statuses.name === 'No Status' || statuses.name === 'Done'
-                    ? 'Cannot Delete'
-                    : 'Delete'
-                "
-              >
+                class="tooltip text-normal tooltip-error":data-tip="statuses.name === 'No Status' || statuses.name === 'Done' ? 'Cannot Delete' : 'Delete'">
                 <button
                   class="itbkk-button-delete"
-                  @click="deleteModal(statuses)"
-                  :disabled="
-                    statuses.name === 'No Status' || statuses.name === 'Done'
-                      ? disabledActionButton
-                      : false
-                  "
-                  :class="{
-                    'opacity-50 cursor-not-allowed ':
-                      statuses.name === 'No Status' || statuses.name === 'Done',
-                  }"
-                >
+                  @click="deleteModal(statuses)":disabled="statuses.name === 'No Status' || statuses.name === 'Done' ? disabledActionButton: false"
+                  :class="{'opacity-50 cursor-not-allowed ': statuses.name === 'No Status' || statuses.name === 'Done',}" >
                   <DeleteIcon width="22" height="31" />
                 </button>
               </div>
               <!-- </div> -->
+            </td>
+            <td v-else class="flex gap-x-3 justify-center items-center">
+              <div class="tooltip tooltip-edit" data-tip="Cannot Edit" >
+                <button class="itbkk-button-edit opacity-50 cursor-not-allowed " disabled="true" >
+                  <EditTaskStatus />
+                </button>
+              </div>
+              <div class="tooltip text-normal tooltip-error" data-tip="Cannot Delete" >
+                <button class="itbkk-button-delete opacity-50 cursor-not-allowed " disabled="true" >
+                  <DeleteIcon width="22" height="31"/>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

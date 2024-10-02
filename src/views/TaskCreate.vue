@@ -135,17 +135,18 @@ onBeforeMount(async () => {
 
       utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
       if (!utilityStore.isOwnerBoard) {
-        router.push(`/board/${route.params.boardID}/task`).then(() => {
-          toast(
-            `You don't have permission to edit this board`,
-            {
-              type: "error",
-              timeout: 2000,
-              theme: "dark",
-              transition: "flip",
-              position: "bottom-right",
-            })
-        })
+        // router.push(`/board/${route.params.boardID}/task`).then(() => {
+        //   toast(
+        //     `You don't have permission to edit this board`,
+        //     {
+        //       type: "error",
+        //       timeout: 2000,
+        //       theme: "dark",
+        //       transition: "flip",
+        //       position: "bottom-right",
+        //     })
+        // })
+        router.push('/error')
         return
       }
       const firstStatus = utilityStore.statusManager.getStatus()[0]
@@ -160,17 +161,18 @@ onBeforeMount(async () => {
     }
   }
   if (!utilityStore.isOwnerBoard) {
-        router.push(`/board/${route.params.boardID}/task`).then(() => {
-          toast(
-            `You don't have permission to edit this board`,
-            {
-              type: "error",
-              timeout: 2000,
-              theme: "dark",
-              transition: "flip",
-              position: "bottom-right",
-            })
-        })
+        // router.push(`/board/${route.params.boardID}/task`).then(() => {
+        //   toast(
+        //     `You don't have permission to edit this board`,
+        //     {
+        //       type: "error",
+        //       timeout: 2000,
+        //       theme: "dark",
+        //       transition: "flip",
+        //       position: "bottom-right",
+        //     })
+        // })
+        router.push('/error')
         return
       }
 })

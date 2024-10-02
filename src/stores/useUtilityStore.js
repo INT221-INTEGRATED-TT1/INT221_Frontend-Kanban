@@ -12,6 +12,7 @@ export const useUtilityStore = defineStore("utility", () => {
   const taskTitleConfirm = ref("")
   const statusTitle = ref("")
   const showDeleteConfirmation = ref(false)
+  const showChangeBoardVisibilityConfirmation = ref(false)
   const showStatusSettingMenu = ref(false)
   const selectedColor = ref(null)
   const disableTransfer = ref(false)
@@ -90,6 +91,7 @@ export const useUtilityStore = defineStore("utility", () => {
     formatDateTime,
     isOwnerBoard,
     isTaskMounted,
-    isStatusesMounted
+    isStatusesMounted,
+    showChangeBoardVisibilityConfirmation
   }
 })

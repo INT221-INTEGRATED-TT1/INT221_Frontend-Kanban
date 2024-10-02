@@ -22,7 +22,7 @@ onBeforeMount(async () => {
   } catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
     console.log("Error fetching tasks : ", error.message)
-    router.push('/error')
+    error.status === 404 ? router.push({name: 'not-found'}) : router.push('/error')
   }
 })
 </script>
