@@ -23,6 +23,7 @@ export const useUtilityStore = defineStore("utility", () => {
   const selectedBoard = ref({
     id : "",
     name : "",
+    visibility : "",
     createdOn : "",
     updatedOn : "",
     ownerId : ""
