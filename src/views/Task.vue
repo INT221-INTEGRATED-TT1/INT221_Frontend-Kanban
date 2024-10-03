@@ -60,6 +60,7 @@ const deleteATask = async (deleteId) => {
 
 onBeforeMount(async () => {
   utilityStore.isOwnerBoard = false
+  utilityStore.selectedBoardId = route.params.boardID
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
   if (JWT_TOKEN) {
     const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
@@ -67,16 +68,17 @@ onBeforeMount(async () => {
 
     const fetchBoards = await getAllBoards()
     utilityStore.boardManager.addBoards(fetchBoards)
-    utilityStore.selectedBoardId = route.params.boardID
 
     utilityStore.boardManager.getBoards().forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards().filter(board => board.id === route.params.boardID)[0]} : ""
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
   }
   try {
     // console.log(route.params.boardID)
     const fetchTasks = await getAllTasks(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
-
+    // utilityStore.selectedBoard.name.length > 0 ? console.log('board has board name') : utilityStore.selectedBoard = {...fetchTasks[0]?.board}
+    !utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...fetchTasks[0]?.board} : ""
     // console.log(utilityStore.selectedBoardId)
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
     // console.log(fetchTasks)
@@ -87,7 +89,7 @@ onBeforeMount(async () => {
         : ""
     }
 
-    utilityStore.isTaskMounted = true
+    // utilityStore.isTaskMounted = true
   }
   catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
@@ -135,7 +137,8 @@ onBeforeMount(async () => {
     </div>
 
     <div class="pt-10">
-      <div class="flex justify-end">
+      <div class="flex justify-center items-center">
+        <div class="text-headline font-extrabold text-2xl tracking-wider mx-auto pl-44 pr-36">{{ utilityStore.selectedBoard.name }}</div>
         <router-link :to="{ name: 'share-task' }">
           <button :disabled="!utilityStore.isOwnerBoard"
             :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'bg-[#338EF7]'"
