@@ -71,6 +71,11 @@ const router = createRouter({
         { path: ":statusID/edit", component: StatusEdit, name: "edit-task-status" },
       ],
     },
+    {
+      path: "/board/:boardID/collab",
+      component: StatusManage,
+      name: "board-collab",
+    },
   ]
 
 })
