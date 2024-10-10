@@ -174,7 +174,7 @@ onBeforeMount(async () => {
             <p v-else class="ml-1">Link copied <br/> to clipboard!</p>
           </button>
         </div>
-        <router-link :to="{ name: 'share-task' }">
+        <router-link :to="`/board/${route.params.boardID}/collab`">
           <button :disabled="!utilityStore.isOwnerBoard"
             :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'bg-[#338EF7]'"
             data-tip="You need to be board owner to perform this action."

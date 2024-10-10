@@ -9,6 +9,7 @@ import TestLen from "@/components/TestLen.vue"
 import StatusCreate from "@/views/StatusCreate.vue"
 import StatusManage from "@/views/StatusManage.vue"
 import StatusEdit from "@/views/StatusEdit.vue"
+import BoardCollab from "@/views/BoardCollab.vue"
 import TeamPage from "@/views/TeamPage.vue"
 import LoginPage from "@/views/LoginPage.vue"
 import BoardHome from "@/views/BoardHome.vue"
@@ -73,7 +74,7 @@ const router = createRouter({
     },
     {
       path: "/board/:boardID/collab",
-      component: StatusManage,
+      component: BoardCollab,
       name: "board-collab",
     },
   ]

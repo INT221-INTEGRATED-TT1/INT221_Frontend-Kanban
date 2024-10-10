@@ -49,14 +49,14 @@ const addNewBoard = async (newBoard) => {
             120</span>
         </div>
         <!-- button -->
-        <div class="flex justify-end gap-x-[1rem]">
+        <div class="flex justify-end items-center gap-x-[1rem]">
           <button
             class="btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
             @click="router.push('/board')">
             Cancel
           </button>
           <button
-            class="btn px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
+            class="btn btn-sm px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
             @click="addNewBoard(newBoard)">
             Create
           </button>
