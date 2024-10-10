@@ -56,7 +56,7 @@ const addNewBoard = async (newBoard) => {
             Cancel
           </button>
           <button
-            class="btn btn-sm px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
+            class="btn px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
             @click="addNewBoard(newBoard)">
             Create
           </button>
