@@ -75,28 +75,27 @@ onBeforeMount(async () => {
       </router-link>
     </div>
     <!-- Lists of the boards -->
-    <div v-if="utilityStore.boardManager.getBoards().length > 0"
+    <div v-if="utilityStore.boardManager.getBoards().length > 0 && personalORcollab === 'PERSONAL'"
       class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem]">
       <div v-for="(board, index) in utilityStore.boardManager.getBoards()" :key="board.id"
-        class="space-y-7 p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
+        class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
         @click="selectBoard(board.id)">
 
         <!-- <div class="flex gap-4"> -->
-        <div class="flex items-center min-h-16" :data-tip="board.name.length > 10 ? board.name : ''"
+        <p class="font-Inter text-end" :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
+        <div class="flex items-center min-h-16" 
+          :data-tip="board.name.length > 10 ? board.name : ''"
           :class="board.name.length > 10 ? 'tooltip' : ''">
           <div class="self-center pr-2">
             <AboutBoardIcon width="40" height="48" />
           </div>
-          <p class="text-xl font-bold text-start" :class="
-              board.name.length > 24
-                ? 'text-nowrap max-h-16 truncate'
-                : 'text-balance'
-            ">
+          <p class="text-xl font-bold text-start" 
+          :class=" board.name.length > 24 ? 'text-nowrap max-h-16 truncate' : 'text-balance'">
             {{ board.name }}
           </p>
         </div>
 
-        <div class="flex items-end justify-between">
+        <div class="flex items-end justify-between mt-7">
           <div>
             <p class="text-sm font-medium">
               By {{ userStore.userIdentity.name }}
