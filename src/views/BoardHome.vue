@@ -11,6 +11,7 @@ import {useUtilityStore} from "@/stores/useUtilityStore.js"
 
 const userStore = useUserStore()
 const utilityStore = useUtilityStore()
+const personalORcollab = ref('PERSONAL')
 
 const selectBoard = (selectBoardId) => {
   utilityStore.selectedBoardId = selectBoardId
@@ -37,16 +38,12 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <main
-    class="w-screen h-screen overflow-y-auto bg-animation p-[8rem] pt-[4rem]"
-  >
+  <main class="w-screen h-screen overflow-y-auto bg-animation p-[8rem] pt-[4rem]">
     <!-- Team Logo -->
     <div class="flex justify-between">
       <div>
         <router-link to="/board">
-          <h1
-            class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand"
-          >
+          <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
             IT-BangMod Kradan Kanban
           </h1>
         </router-link>
@@ -55,56 +52,50 @@ onBeforeMount(async () => {
         </div>
       </div>
     </div>
-    <div class="flex justify-end mb-5"><UserSetting /></div>
+    <div class="flex justify-end mb-5">
+      <UserSetting />
+    </div>
     <!-- Boad List Header & Add New board Button -->
     <div class="flex justify-center items-center mt-2">
-      <h1
-        class="text-headline font-extrabold text-3xl tracking-wider mx-auto pl-44"
-      >
-        Board List
-      </h1>
+      <div class="flex mx-auto pl-44 gap-10 items-center">
+        <button @click="personalORcollab = 'PERSONAL'"
+          class="text-headline text-xl tracking-wider w-36 py-1 rounded-xl hover:bg-[#272727] hover:duration-[350ms]" :class="personalORcollab === 'PERSONAL' ? 'bg-[#414141] bg-opacity-90': ''">
+          Personal
+        </button>
+        <button @click="personalORcollab = 'COLLAB'"
+          class="text-headline text-xl tracking-wider py-1 w-36 rounded-xl hover:bg-[#272727] hover:duration-[350ms]" :class="personalORcollab === 'COLLAB' ? 'bg-[#414141] bg-opacity-90': ''">
+          Collab
+        </button>
+      </div>
       <router-link :to="{name: 'create-board'}">
         <div
-          class="flex items-center bg-[#E3E3E3] py-1 px-5 rounded text-black text-sm font-semibold tracking-wid hover:bg-opacity-90"
-        >
+          class="flex items-center bg-[#E3E3E3] py-1 px-5 rounded text-black text-sm font-semibold tracking-wid hover:bg-opacity-90">
           <div class="text-center">Create personal board</div>
         </div>
       </router-link>
     </div>
     <!-- Lists of the boards -->
-    <div
-      v-if="utilityStore.boardManager.getBoards().length > 0"
-      class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem]"
-    >
-      <div
-        v-for="(board, index) in utilityStore.boardManager.getBoards()"
-        :key="board.id"
-        class="space-y-7 p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
-        @click="selectBoard(board.id)"
-      >
-      
+    <div v-if="utilityStore.boardManager.getBoards().length > 0 && personalORcollab === 'PERSONAL'"
+      class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem]">
+      <div v-for="(board, index) in utilityStore.boardManager.getBoards()" :key="board.id"
+        class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
+        @click="selectBoard(board.id)">
+
         <!-- <div class="flex gap-4"> -->
-        <div
-          class="flex items-center min-h-16"
+        <p class="font-Inter text-end" :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
+        <div class="flex items-center min-h-16" 
           :data-tip="board.name.length > 10 ? board.name : ''"
-          :class="board.name.length > 10 ? 'tooltip' : ''"
-        >
+          :class="board.name.length > 10 ? 'tooltip' : ''">
           <div class="self-center pr-2">
             <AboutBoardIcon width="40" height="48" />
           </div>
-          <p
-            class="text-xl font-bold text-start"
-            :class="
-              board.name.length > 24
-                ? 'text-nowrap max-h-16 truncate'
-                : 'text-balance'
-            "
-          >
+          <p class="text-xl font-bold text-start" 
+          :class=" board.name.length > 24 ? 'text-nowrap max-h-16 truncate' : 'text-balance'">
             {{ board.name }}
           </p>
         </div>
 
-        <div class="flex items-end justify-between">
+        <div class="flex items-end justify-between mt-7">
           <div>
             <p class="text-sm font-medium">
               By {{ userStore.userIdentity.name }}
@@ -120,9 +111,7 @@ onBeforeMount(async () => {
       </div>
     </div>
     <div v-else>
-      <h1
-        class="text-center p-44 text-white text-opacity-40 font-Inter text-[24px] tracking-wider"
-      >
+      <h1 class="text-center p-44 text-white text-opacity-40 font-Inter text-[24px] tracking-wider">
         No personal board
       </h1>
     </div>

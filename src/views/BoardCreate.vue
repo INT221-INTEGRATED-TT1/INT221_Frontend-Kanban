@@ -49,7 +49,7 @@ const addNewBoard = async (newBoard) => {
             120</span>
         </div>
         <!-- button -->
-        <div class="flex justify-end gap-x-[1rem]">
+        <div class="flex justify-end items-center gap-x-[1rem]">
           <button
             class="btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
             @click="router.push('/board')">

@@ -6,6 +6,8 @@ import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
 import { useUserStore } from "@/stores/useUserStore"
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue"
+import LinkIcon from "@/components/icons/LinkIcon.vue"
+import UserIcon from "@/components/icons/UserIcon.vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import MoreIcon from "@/components/icons/MoreIcon.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
@@ -24,6 +26,9 @@ const route = useRoute()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const userStore = useUserStore()
+const currentVisibility = ref('')
+const copyLinkClicked = ref(false)
+const isToggled = ref(false)
 // const filteredStatus = ref([])
 const deleteATask = async (deleteId) => {
   try {
@@ -58,6 +63,16 @@ const deleteATask = async (deleteId) => {
   }
 }
 
+const copyToClipboard = async () => {
+    window.location.origin.includes('localhost') ? await navigator.clipboard.writeText((window.location.origin + route.fullPath).slice(0, -5)) : 
+    await navigator.clipboard.writeText(window.location.origin + `${import.meta.env.VITE_PROD_BASE_URL}` + route.fullPath.slice(0, -5))
+    copyLinkClicked.value = true
+    setTimeout(() => {
+        copyLinkClicked.value = false
+      }, 2000); // Delay for 2 seconds
+      // copyLinkClicked.value = true
+}
+
 onBeforeMount(async () => {
   utilityStore.isOwnerBoard = false
   utilityStore.selectedBoardId = route.params.boardID
@@ -72,6 +87,12 @@ onBeforeMount(async () => {
     utilityStore.boardManager.getBoards().forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
     utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards().filter(board => board.id === route.params.boardID)[0]} : ""
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
+    if(utilityStore.isOwnerBoard) {
+      currentVisibility.value = utilityStore.boardManager.getBoards().filter(board => board.id === route.params.boardID)[0].visibility
+      currentVisibility.value === 'PUBLIC' ? isToggled.value = true : isToggled.value = false
+    } else { 
+      currentVisibility.value = ''
+    }
   }
   try {
     // console.log(route.params.boardID)
@@ -137,13 +158,30 @@ onBeforeMount(async () => {
     </div>
 
     <div class="pt-10">
-      <div class="flex justify-center items-center">
-        <div class="text-headline font-extrabold text-2xl tracking-wider mx-auto pl-44 pr-36">{{ utilityStore.selectedBoard.name }}</div>
-        <router-link :to="{ name: 'share-task' }">
+      <div class="flex justify-end items-center mb-6">
+        <div class="text-headline font-extrabold text-2xl tracking-wider mr-auto" >{{ utilityStore.selectedBoard.name }}</div>
+        <div class="flex items-center gap-4 mr-10">
+          <p>Publish</p>
+          <input type="checkbox" 
+          :class="currentVisibility === 'PUBLIC' ? 'border-[#565656] bg-white [--tglbg:#11FF70]' : ''"
+          class="toggle hover:bg-gray-200" 
+          v-model="isToggled"
+          @click="!isToggled"
+          :checked="currentVisibility === 'PUBLIC'" />
+          <button class="flex items-center gap-1 text-[#005BC4] text-sm" :class="isToggled ? 'opacity-100' : 'opacity-0 '" @click="copyToClipboard" :disabled="copyLinkClicked || !isToggled">
+            <LinkIcon />
+            <p v-if="!copyLinkClicked"> Copy Link</p>
+            <p v-else class="ml-1">Link copied <br/> to clipboard!</p>
+          </button>
+        </div>
+        <router-link :to="`/board/${route.params.boardID}/collab`">
           <button :disabled="!utilityStore.isOwnerBoard"
             :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'bg-[#338EF7]'"
             data-tip="You need to be board owner to perform this action."
-            class=" text-white text-center font-Geist text-sm px-4 py-1 rounded-sm self-end">Share</button>
+            class="flex items-center gap-2 text-white text-center font-Geist text-sm px-4 py-2 rounded-md self-end">
+            <UserIcon />
+            Manage Contributor
+          </button>
         </router-link>
       </div>
       <FilterCollapse />

@@ -28,11 +28,9 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-
+  
   <div class="mb-5 collapse">
-    <h1
-      class="itbkk-status-filter flex items-center text-normal gap-x-3 collapse-title tracking-wider"
-    >
+    <h1 class="itbkk-status-filter flex items-center text-normal gap-x-3 collapse-title tracking-wider">
       <FilterIcon /> Filters
     </h1>
     <input type="checkbox" />
