@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeMount, watch } from "vue"
-import { getAllTasks, deleteTask, getAllBoards } from "@/libs/FetchAPI.js"
+import { getAllTasks, deleteTask, getAllBoards, updateBoardVisibility } from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
@@ -73,6 +73,29 @@ const copyToClipboard = async () => {
       // copyLinkClicked.value = true
 }
 
+const changeVisibilityBoardRadioClick = () => {
+    console.log('first',isToggled.value)
+    isToggled.value = !isToggled.value
+    console.log('second',isToggled.value)
+
+    let fsVisibility = ''
+    isToggled.value ? fsVisibility = 'PUBLIC' : fsVisibility = 'PRIVATE'
+    currentVisibility.value === fsVisibility ? utilityStore.showChangeBoardVisibilityConfirmation = false : utilityStore.showChangeBoardVisibilityConfirmation = true
+    currentVisibility.value = fsVisibility
+}
+
+const CancelChangeVisibilityBoard = () => {
+    utilityStore.showChangeBoardVisibilityConfirmation = false
+    currentVisibility.value === 'PRIVATE' ? currentVisibility.value = 'PUBLIC' : currentVisibility.value = 'PRIVATE'
+    isToggled.value = !isToggled.value
+}
+
+const changeVisibilityBoard = async () => {
+    await updateBoardVisibility(route.params.boardID, currentVisibility.value)
+    utilityStore.boardManager.changeVisibilityBoard(route.params.boardID, currentVisibility.value)
+    utilityStore.showChangeBoardVisibilityConfirmation = false
+}
+
 onBeforeMount(async () => {
   utilityStore.isOwnerBoard = false
   utilityStore.selectedBoardId = route.params.boardID
@@ -90,6 +113,9 @@ onBeforeMount(async () => {
     if(utilityStore.isOwnerBoard) {
       currentVisibility.value = utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0].visibility
       currentVisibility.value === 'PUBLIC' ? isToggled.value = true : isToggled.value = false
+
+      console.log(isToggled.value)
+
     } else { 
       currentVisibility.value = ''
     }
@@ -118,6 +144,7 @@ onBeforeMount(async () => {
     error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
   }
 })
+
 </script>
 
 <template>
@@ -159,19 +186,18 @@ onBeforeMount(async () => {
 
     <div class="pt-10">
       <div class="flex justify-end items-center mb-6">
-        <div class="text-headline font-extrabold text-2xl tracking-wider mr-auto" >{{ utilityStore.selectedBoard.name }}</div>
+        <div class="text-headline font-extrabold text-2xl tracking-wider mr-auto">{{ utilityStore.selectedBoard.name }}
+        </div>
         <div class="flex items-center gap-4 mr-10">
           <p>Publish</p>
-          <input type="checkbox" 
-          :class="currentVisibility === 'PUBLIC' ? 'border-[#565656] bg-white [--tglbg:#11FF70]' : ''"
-          class="toggle hover:bg-gray-200" 
-          v-model="isToggled"
-          @click="!isToggled"
-          :checked="currentVisibility === 'PUBLIC'" />
-          <button class="flex items-center gap-1 text-[#005BC4] text-sm" :class="isToggled ? 'opacity-100' : 'opacity-0 '" @click="copyToClipboard" :disabled="copyLinkClicked || !isToggled">
+          <!-- :class="currentVisibility === 'PUBLIC' ? 'border-[#565656] bg-white [--tglbg:#11FF70]' : ''" -->
+          <input type="checkbox" class="toggle hover:bg-gray-200" v-model="isToggled" @click="changeVisibilityBoardRadioClick" :checked="currentVisibility === 'PUBLIC' " />
+          <button class="flex items-center gap-1 text-[#005BC4] text-sm"
+            :class="isToggled ? 'opacity-100' : 'opacity-0 '" @click="copyToClipboard"
+            :disabled="copyLinkClicked || !isToggled">
             <LinkIcon />
             <p v-if="!copyLinkClicked"> Copy Link</p>
-            <p v-else class="ml-1">Link copied <br/> to clipboard!</p>
+            <p v-else class="ml-1">Link copied <br /> to clipboard!</p>
           </button>
         </div>
         <router-link :to="`/board/${route.params.boardID}/collab`">
@@ -184,6 +210,38 @@ onBeforeMount(async () => {
           </button>
         </router-link>
       </div>
+
+      <div v-if="utilityStore.showChangeBoardVisibilityConfirmation">
+        <div class="fixed inset-0 backdrop-blur-md flex justify-center items-center z-30">
+          <div class="itbkk-message bg-[#18181B] rounded-lg w-[34rem] h-auto flex flex-col">
+            <h1 class="text-[#F5F5F5] font-bold text-2xl text-opacity-80 flex px-10 pt-9">
+              Board Visibility Change !
+            </h1>
+            <div class="divider m-2"></div>
+            <div class="p-8 flex flex-col gap-y-6">
+              <p class="itbkk-button-message text-[#D69C27] text-opacity-75 mb-7">
+                Only the board owner can access and manage this board when it's set to private. Do you want to change
+                the visibility to <span class="text-blue-500 font-bold underline underline-offset-2">{{ currentVisibility
+                  === 'PUBLIC' ? 'Public': 'Private'}}</span> ?
+              </p>
+              <div class="flex justify-end gap-x-[1rem]">
+                <button
+                  class="itbkk-button-cancel btn text-xs font-semibold text-[#FFFFFF] bg-transparent text-opacity-70 border-none hover:bg-transparent"
+                  @click="CancelChangeVisibilityBoard">
+                  Cancel
+                </button>
+                <button
+                  class="btn px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
+                  @click="changeVisibilityBoard">
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       <FilterCollapse />
 
       <table class="table border-collapse bg-[#141414] text-center">
