@@ -3,9 +3,46 @@ import { ref, onMounted, onBeforeMount, watch, reactive } from "vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import UserSetting from "@/components/UserSetting.vue"
 import Xmark from "@/components/icons/Xmark.vue"
+import router from "@/router/index.js"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
+import { getCollaborators, getAllBoards } from "@/libs/FetchAPI.js"
+import { useUtilityStore } from "@/stores/useUtilityStore.js"
+import { useRoute } from "vue-router"
+import { useUserStore } from "@/stores/useUserStore"
+
+const userStore = useUserStore()
+const route = useRoute()
+const utilityStore = useUtilityStore()
 const addCollaboratorModal = ref(false)
-const numberofCollaborators = ref(6)
+// const numberofCollaborators = ref(6) getCollaborators
+
+
+onBeforeMount(async () => {
+  utilityStore.isOwnerBoard = false
+  utilityStore.selectedBoardId = route.params.boardID
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  if (JWT_TOKEN) {
+    const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
+    userStore.userIdentity = { ...JSON.parse(decodedData) }
+
+    const fetchBoards = await getAllBoards()
+    utilityStore.boardManager.addBoards(fetchBoards)
+
+    utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : ""
+    console.log("Owner Board : ", utilityStore.isOwnerBoard)
+    
+  }
+
+  try {
+    const fetchCollaborators = await getCollaborators(route.params.boardID)
+    userStore.collaboratorManager.addCollaborators(fetchCollaborators)
+  }
+  catch (error) {
+    console.log("Error fetching Collaborators : ", error.status === 404)
+    error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
+  }
+})
 
 </script>
 
@@ -60,7 +97,7 @@ const numberofCollaborators = ref(6)
             </button>
           </div>
           <!-- Collaborators -->
-          <div v-for="i in numberofCollaborators"></div>
+          <div v-for="i in 7"></div>
           <!-- button -->
           <div class="flex justify-end items-center gap-x-[1rem] ">
             <button
@@ -101,15 +138,15 @@ const numberofCollaborators = ref(6)
           </tr>
         </thead>
         <tbody>
-          <tr v-for="i in numberofCollaborators" class="text-white border-none mt-1">
+          <tr v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()" class="text-white border-none mt-1">
             <td></td>
-            <td>{{ i }}</td>
-            <td>Chob Dou</td>
-            <td>Chobtitle@sit.kmutt.ac.th</td>
+            <td>{{ ++index }}</td>
+            <td>{{collaborator.name}}</td>
+            <td>{{collaborator.email}}</td>
             <td class="flex justify-center">
               <button
                 class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-4 py-2 rounded-3xl text-white text-sm tracking-wider hover:bg-opacity-90">
-                Reader
+                {{collaborator.accessRight}}
                 <DropdownIcon />
               </button>
             </td>

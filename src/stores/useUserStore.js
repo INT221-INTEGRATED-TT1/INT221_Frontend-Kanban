@@ -1,7 +1,9 @@
 import { reactive, ref } from "vue"
+import {CollaboratorManagement} from "@/libs/CollaboratorManagement"
 import { defineStore } from "pinia"
 
 export const useUserStore = defineStore("userStore", () => {
+    const collaboratorManager = ref(new CollaboratorManagement())
     const userIdentity = reactive({
         "role": "",
         "name": "",
@@ -22,6 +24,7 @@ export const useUserStore = defineStore("userStore", () => {
     }
 
     return {
+        collaboratorManager,
         userIdentity,
         getUserIdentity,
     }

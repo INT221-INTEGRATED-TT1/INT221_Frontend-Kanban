@@ -188,10 +188,10 @@ onBeforeMount(async () => {
       <div class="flex justify-end items-center mb-6">
         <div class="text-headline font-extrabold text-2xl tracking-wider mr-auto">{{ utilityStore.selectedBoard.name }}
         </div>
-        <div class="flex items-center gap-4 mr-10">
-          <p>Publish</p>
+        <div class="flex items-center gap-4 mr-10" >
+          <p :class="utilityStore.isOwnerBoard ? 'text-opacity-100': 'text-white text-opacity-35'">{{ utilityStore.isOwnerBoard ? 'Publish' : 'Cannot Publish'}}</p>
           <!-- :class="currentVisibility === 'PUBLIC' ? 'border-[#565656] bg-white [--tglbg:#11FF70]' : ''" -->
-          <input type="checkbox" class="toggle hover:bg-gray-200" v-model="isToggled" @click="changeVisibilityBoardRadioClick" :checked="currentVisibility === 'PUBLIC' " />
+          <input type="checkbox" class="toggle hover:bg-gray-200" v-model="isToggled" @click="changeVisibilityBoardRadioClick" :checked="currentVisibility === 'PUBLIC' " :disabled="!utilityStore.isOwnerBoard" />
           <button class="flex items-center gap-1 text-[#005BC4] text-sm"
             :class="isToggled ? 'opacity-100' : 'opacity-0 '" @click="copyToClipboard"
             :disabled="copyLinkClicked || !isToggled">
@@ -205,7 +205,7 @@ onBeforeMount(async () => {
             :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'bg-[#338EF7]'"
             data-tip="You need to be board owner to perform this action."
             class="flex items-center gap-2 text-white text-center font-Geist text-sm px-4 py-2 rounded-md self-end">
-            <UserIcon />
+            <div :class="!utilityStore.isOwnerBoard ? 'opacity-20' : 'opacity-100'"><UserIcon /></div>
             Manage Contributor
           </button>
         </router-link>
@@ -221,8 +221,7 @@ onBeforeMount(async () => {
             <div class="p-8 flex flex-col gap-y-6">
               <p class="itbkk-button-message text-[#D69C27] text-opacity-75 mb-7">
                 Only the board owner can access and manage this board when it's set to private. Do you want to change
-                the visibility to <span class="text-blue-500 font-bold underline underline-offset-2">{{ currentVisibility
-                  === 'PUBLIC' ? 'Public': 'Private'}}</span> ?
+                the visibility to <span class="text-blue-500 font-bold underline underline-offset-2">{{ currentVisibility === 'PUBLIC' ? 'Public': 'Private'}}</span> ?
               </p>
               <div class="flex justify-end gap-x-[1rem]">
                 <button

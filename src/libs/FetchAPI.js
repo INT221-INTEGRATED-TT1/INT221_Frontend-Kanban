@@ -437,6 +437,33 @@ const getNewAccessToken = async () => {
     throw error
   }
 }
+const getCollaborators = async (boardId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+      } 
+    )
+    
+    if (!response.ok) {
+      throw response
+    }
+    return {
+      status: response.status,
+      message: "getCollaborators successfully",
+      data: await response.json(),
+    }
+  } 
+  catch (error) {
+    throw error
+  }
+}
+
+
 
 export {
   getAllTasks,
@@ -456,5 +483,6 @@ export {
   getAllBoards,
   createBoard,
   updateBoardVisibility,
-  getNewAccessToken
+  getNewAccessToken,
+  getCollaborators
 }
