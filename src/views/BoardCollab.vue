@@ -52,7 +52,7 @@ const numberofCollaborators = ref(6)
           <!-- board name input -->
           <div class="flex flex-row gap-3">
             <input class="py-1 text-start rounded-lg border border-[#71717A] indent-4 text-white w-full"
-              placeholder="Email" />
+              placeholder="Email" maxlength="50"/>
             <button
               class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-3 rounded text-white text-sm tracking-wider hover:bg-opacity-90">
               Reader

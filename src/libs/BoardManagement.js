@@ -22,12 +22,9 @@ class BoardManagement {
     // console.log(this.boards[this.boards.findIndex(board => board.id === boardId)].visibility)
   }
 
-  // deleteBoard(deleteId) {
-  //   this.boards.splice(
-  //     this.boards.findIndex((Board) => Board.id === deleteId),
-  //     1
-  //   )
-  // }
+  deleteBoard(deleteId) {
+    this.boards.splice(this.boards.findIndex((Board) => Board.id === deleteId),1)
+  }
 
   // editBoard(boardId, newBoard) {
   //   // console.log("Board id is", BoardId)
