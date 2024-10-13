@@ -8,7 +8,7 @@ class BoardManagement {
   }
 
   addBoard(newBoard) {
-    this.boards.push(newBoard)
+    this.boards.personalBoards.push(newBoard)
   }
 
   // findBoardVisibility(boardId){

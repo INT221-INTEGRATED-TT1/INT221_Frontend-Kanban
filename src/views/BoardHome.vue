@@ -4,6 +4,7 @@ import {getAllBoards} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import AboutBoardIcon from "@/components/icons/AboutBoard.vue"
+import NoBoardBG from "@/components/icons/NoBoardBG.vue"
 import DeleteIcon from "@/components/icons/DeleteIcon.vue"
 import {useUserStore} from "@/stores/useUserStore"
 import UserSetting from "@/components/UserSetting.vue"
@@ -15,7 +16,7 @@ const personalORcollab = ref('PERSONAL')
 
 const selectBoard = (selectBoardId) => {
   utilityStore.selectedBoardId = selectBoardId
-  const filterBoard = utilityStore.boardManager.getBoards().filter(board => board.id === selectBoardId)[0]
+  const filterBoard = utilityStore.boardManager.getBoards().personalBoards.filter(board => board.id === selectBoardId)[0]
   utilityStore.selectedBoard = {...filterBoard}
   router.push(`/board/${selectBoardId}/task`)
 }
@@ -75,10 +76,10 @@ onBeforeMount(async () => {
       </router-link>
     </div>
     <!-- Lists of the boards -->
-    <div v-if="utilityStore.boardManager.getBoards().length > 0 && personalORcollab === 'PERSONAL'"
+    <div v-if="utilityStore.boardManager.getBoards().personalBoards?.length > 0 && personalORcollab === 'PERSONAL'"
       class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem]">
-      <div v-for="(board, index) in utilityStore.boardManager.getBoards()" :key="board.id"
-        class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between cursor-pointer hover:bg-normal hover:bg-opacity-5"
+      <div v-for="(board, index) in utilityStore.boardManager.getBoards().personalBoards" :key="board.id"
+        class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between hover:bg-normal hover:bg-opacity-10"
         @click="selectBoard(board.id)">
 
         <!-- <div class="flex gap-4"> -->
@@ -110,11 +111,61 @@ onBeforeMount(async () => {
         </div>
       </div>
     </div>
-    <div v-else>
-      <h1 class="text-center p-44 text-white text-opacity-40 font-Inter text-[24px] tracking-wider">
-        No personal board
-      </h1>
+
+    <div v-if="utilityStore.boardManager.getBoards().personalBoards?.length === 0 && personalORcollab === 'PERSONAL'">
+      <div class="flex flex-col justify-center items-center mt-32">
+        <div ><NoBoardBG /></div>
+        <h1 class="text-center text-white text-opacity-40 font-Inter text-[24px] tracking-wider" >
+          It seems you don't have any boards yet. Please create a new board to get started.
+        </h1>
+      </div>
     </div>
+
+    <div v-if="utilityStore.boardManager.getBoards().collaboratorBoards?.length > 0 && personalORcollab === 'COLLAB'"
+      class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem]">
+      <div v-for="(board, index) in utilityStore.boardManager.getBoards().collaboratorBoards" :key="board.id"
+        class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between hover:bg-normal hover:bg-opacity-10"
+        @click="selectBoard(board.id)">
+
+        <!-- <div class="flex gap-4"> -->
+        <p class="font-Inter text-end" :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
+        <div class="flex items-center min-h-16" 
+          :data-tip="board.name.length > 10 ? board.name : ''"
+          :class="board.name.length > 10 ? 'tooltip' : ''">
+          <div class="self-center pr-2">
+            <AboutBoardIcon width="40" height="48" />
+          </div>
+          <p class="text-xl font-bold text-start" 
+          :class=" board.name.length > 24 ? 'text-nowrap max-h-16 truncate' : 'text-balance'">
+            {{ board.name }}
+          </p>
+        </div>
+
+        <div class="flex items-end justify-between mt-7">
+          <div>
+            <p class="text-sm font-medium">
+              By {{ userStore.userIdentity.name }}
+            </p>
+            <p class="text-xs font-light opacity-55">
+              Created At {{ utilityStore.formatDateTime(board.createdOn) }}
+            </p>
+          </div>
+          <button class="tooltip tooltip-error text-normal" data-tip="Delete">
+            <DeleteIcon width="28" height="37" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="utilityStore.boardManager.getBoards().collaboratorBoards?.length === 0 && personalORcollab === 'COLLAB'">
+      <div class="flex flex-col justify-center items-center mt-32">
+        <div ><NoBoardBG /></div>
+        <h1 class="text-center text-white text-opacity-40 font-Inter text-[24px] tracking-wider ml-12" >
+          You have not joined any boards yet.
+        </h1>
+      </div>
+    </div>
+
     <router-view />
   </main>
 </template>

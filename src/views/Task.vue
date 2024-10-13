@@ -84,11 +84,11 @@ onBeforeMount(async () => {
     const fetchBoards = await getAllBoards()
     utilityStore.boardManager.addBoards(fetchBoards)
 
-    utilityStore.boardManager.getBoards().forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards().filter(board => board.id === route.params.boardID)[0]} : ""
+    utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : ""
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
     if(utilityStore.isOwnerBoard) {
-      currentVisibility.value = utilityStore.boardManager.getBoards().filter(board => board.id === route.params.boardID)[0].visibility
+      currentVisibility.value = utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0].visibility
       currentVisibility.value === 'PUBLIC' ? isToggled.value = true : isToggled.value = false
     } else { 
       currentVisibility.value = ''
