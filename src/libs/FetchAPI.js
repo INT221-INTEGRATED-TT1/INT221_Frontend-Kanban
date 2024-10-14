@@ -397,6 +397,27 @@ const createBoard = async (newBoard) => {
   }
 }
 
+const deleteBoard = async (boardId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+      }
+    )
+    return {
+      status: response.status,
+      message: "Status deleted successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 const updateBoardVisibility = async (boardId, visibilityString) => {
   try {
     const response = await fetch(
@@ -438,6 +459,95 @@ const getNewAccessToken = async () => {
   }
 }
 
+const getCollaborators = async (boardId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+      } 
+    )
+    
+    if (!response.ok) {
+      throw response
+    }
+    return {
+      status: response.status,
+      message: "getCollaborators successfully",
+      data: await response.json(),
+    }
+  } 
+  catch (error) {
+    throw error
+  }
+}
+
+const addCollaborator = async (boardId, newCollaborator) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+        body: JSON.stringify(newCollaborator),
+      }
+    )
+    return {
+      status: response.status,
+      message: "add a collaborator successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const deleteCollaborator = async (boardId, collaboratorId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs/${collaboratorId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+      }
+    )
+    return {
+      status: response.status,
+      message: "Status deleted successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const changeCollaboratorAccessRisght = async (boardId, collaboratorId, newAccessRight) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs/${collaboratorId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+        body: JSON.stringify({ accessRight : newAccessRight }),
+      }
+    )
+    return response.json()
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -455,6 +565,11 @@ export {
   authorizedUser,
   getAllBoards,
   createBoard,
+  deleteBoard,
   updateBoardVisibility,
-  getNewAccessToken
+  getNewAccessToken,
+  getCollaborators,
+  addCollaborator,
+  deleteCollaborator,
+  changeCollaboratorAccessRisght,
 }

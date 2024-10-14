@@ -8,7 +8,7 @@ class BoardManagement {
   }
 
   addBoard(newBoard) {
-    this.boards.push(newBoard)
+    this.boards.personalBoards.push(newBoard)
   }
 
   // findBoardVisibility(boardId){
@@ -18,16 +18,13 @@ class BoardManagement {
 
   changeVisibilityBoard(boardId, newVisibility){
     // console.log(this.boards[this.boards.findIndex(board => board.id === boardId)].visibility)
-    this.boards[this.boards.findIndex(board => board.id === boardId)].visibility = newVisibility
+    this.boards.personalBoards[this.boards.personalBoards.findIndex(board => board.id === boardId)].visibility = newVisibility
     // console.log(this.boards[this.boards.findIndex(board => board.id === boardId)].visibility)
   }
 
-  // deleteBoard(deleteId) {
-  //   this.boards.splice(
-  //     this.boards.findIndex((Board) => Board.id === deleteId),
-  //     1
-  //   )
-  // }
+  deleteBoard(deleteId) {
+    this.boards.splice(this.boards.findIndex((Board) => Board.id === deleteId),1)
+  }
 
   // editBoard(boardId, newBoard) {
   //   // console.log("Board id is", BoardId)

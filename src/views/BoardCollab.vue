@@ -1,11 +1,123 @@
 <script setup>
-import { ref, onMounted, onBeforeMount, watch, reactive } from "vue"
+import { ref, onMounted, onBeforeMount, computed, reactive } from "vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import UserSetting from "@/components/UserSetting.vue"
 import Xmark from "@/components/icons/Xmark.vue"
+import router from "@/router/index.js"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
+import { getCollaborators, getAllBoards, addCollaborator, deleteCollaborator, changeCollaboratorAccessRisght } from "@/libs/FetchAPI.js"
+import { useUtilityStore } from "@/stores/useUtilityStore.js"
+import { useRoute } from "vue-router"
+import { useUserStore } from "@/stores/useUserStore"
+
+const userStore = useUserStore()
+const route = useRoute()
+const utilityStore = useUtilityStore()
 const addCollaboratorModal = ref(false)
-const numberofCollaborators = ref(6)
+const isEmailValid = ref(true)
+const confirmChangeAccessRight = ref(false)
+let collaboratorSelected = reactive({
+  oid : '',
+  name : '',
+  email : '',
+  accessRight : '',
+  addedOn : '',
+})
+const newAccesRight = ref('')
+// const numberofCollaborators = ref(6) getCollaborators
+const newCollaboratorModel = reactive({
+  email : "",
+  accessRight : "READ"
+})
+
+let oldCollaboratorModel = reactive({
+  email : "",
+  accessRight : "READ"
+})
+
+const addNewCollaborator = async () => {
+    oldCollaboratorModel = {...newCollaboratorModel}
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if(emailPattern.test(newCollaboratorModel.email)){
+      isEmailValid.value = true
+      console.log(newCollaboratorModel)
+      const newCollaborator = await addCollaborator(route.params.boardID, newCollaboratorModel)
+      newCollaborator.status === 201 ? userStore.collaboratorManager.addCollaborator(newCollaborator.data) : ''
+
+      addCollaboratorModal.value = false
+      newCollaboratorModel.email = ""
+      newCollaboratorModel.accessRight = "READ"
+    } else{
+      console.log("can't add new collab")
+      isEmailValid.value = false
+      utilityStore.transactionDisable = true
+
+    }
+    
+    // console.log('old : ' , oldCollaboratorModel)
+    // return emailPattern.test(email);
+}
+
+const removeCollaborator = async (removeCollaboratorId) => {
+      const collaboratorRemoved = await deleteCollaborator(route.params.boardID, removeCollaboratorId)
+      collaboratorRemoved.status === 200 ? userStore.collaboratorManager.deleteCollaborator(removeCollaboratorId) : ''
+}
+
+const cancelAddCollaboratorModal = () => {
+  addCollaboratorModal.value = false
+  newCollaboratorModel.email = ""
+  newCollaboratorModel.accessRight = "READ"
+  isEmailValid.value = true
+  utilityStore.transactionDisable = false
+}
+
+const isButtonDisabled = computed(() => {
+  oldCollaboratorModel.email !== newCollaboratorModel.email ? utilityStore.transactionDisable = false : oldCollaboratorModel.accessRight !== newCollaboratorModel.accessRight ? utilityStore.transactionDisable = false : utilityStore.transactionDisable = true
+  // console.log('new : ' , newCollaboratorModel)
+  // console.log('old : ' , oldCollaboratorModel)
+  return !newCollaboratorModel.email || utilityStore.transactionDisable || (userStore.userIdentity.email === newCollaboratorModel.email)
+})
+
+const changeAccessRightModal = (collaborator, changeAccesright) => {
+  confirmChangeAccessRight.value = true
+  collaboratorSelected = {...collaborator}
+  newAccesRight.value = changeAccesright
+}
+
+const changeAccessRight = async () => {
+  const changeAccessRightResponse =  await changeCollaboratorAccessRisght(route.params.boardID, collaboratorSelected.oid, newAccesRight.value)
+  console.log(changeAccessRightResponse)
+  userStore.collaboratorManager.changeCollaboratorAccessRight(collaboratorSelected.oid, newAccesRight.value)
+  confirmChangeAccessRight.value = false
+}
+
+onBeforeMount(async () => {
+  utilityStore.isOwnerBoard = false
+  utilityStore.selectedBoardId = route.params.boardID
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  if (JWT_TOKEN) {
+    const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
+    userStore.userIdentity = { ...JSON.parse(decodedData) }
+
+    const fetchBoards = await getAllBoards()
+    utilityStore.boardManager.addBoards(fetchBoards)
+
+    utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : ""
+    console.log("Owner Board : ", utilityStore.isOwnerBoard)
+    
+  }
+
+  try {
+    const fetchCollaborators = await getCollaborators(route.params.boardID)
+    userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
+    console.log(userStore.collaboratorManager.getCollaborators())
+  }
+  catch (error) {
+    console.log("Error fetching Collaborators : ", error.status === 404)
+    error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
+  }
+})
 
 </script>
 
@@ -43,34 +155,54 @@ const numberofCollaborators = ref(6)
           <h1 class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6 tracking-wider">
             Add Collaborator
           </h1>
-          <button class="self-start mr-8 mt-6" @click="addCollaboratorModal = false">
+          <button class="self-start mr-8 mt-6" @click="cancelAddCollaboratorModal">
             <Xmark />
           </button>
         </div>
         <div class="divider m-0 "></div>
-        <div class="p-8 pt-3 flex flex-col gap-y-6">
+        <div class="p-8 pt-3 flex flex-col">
           <!-- board name input -->
           <div class="flex flex-row gap-3">
             <input class="py-1 text-start rounded-lg border border-[#71717A] indent-4 text-white w-full"
-              placeholder="Email" />
-            <button
-              class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-3 rounded text-white text-sm tracking-wider hover:bg-opacity-90">
-              Reader
-              <DropdownIcon />
-            </button>
+              :class="!isEmailValid ? 'border-red-500' : ''" v-model.trim="newCollaboratorModel.email"
+              placeholder="Email" maxlength="50" />
+            <div class="flex flex-row gap-3 dropdown dropdown-bottom">
+              <button tabindex="0" role="button"
+                class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-3 rounded text-white text-sm tracking-wider hover:bg-opacity-90">
+                {{newCollaboratorModel.accessRight === 'READ' ? 'Read' : 'Write'}}
+                <DropdownIcon />
+              </button>
+              <ul tabindex="0"
+                class="dropdown-content z-[30] shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-md min-w-32 max-w-fit p-4 mt-1">
+                <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10"
+                  @click="newCollaboratorModel.accessRight = 'READ'">
+                  <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
+                    Read
+                  </p>
+                </li>
+                <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10 mt-1"
+                  @click="newCollaboratorModel.accessRight = 'WRITE'">
+                  <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
+                    Write
+                  </p>
+                </li>
+              </ul>
+            </div>
           </div>
+          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">something went wrong ! try again
+            later.</p>
           <!-- Collaborators -->
-          <div v-for="i in numberofCollaborators"></div>
+          <!-- <div v-for="i in 7"></div> -->
           <!-- button -->
-          <div class="flex justify-end items-center gap-x-[1rem] ">
+          <div class="flex justify-end items-center gap-x-[1rem] mt-44">
             <button
               class="btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
-              @click="addCollaboratorModal = false">
+              @click="cancelAddCollaboratorModal">
               Cancel
             </button>
             <button
               class="btn btn-sm px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
-              @click="addCollaboratorModal = false">
+              :disabled="isButtonDisabled" @click="addNewCollaborator">
               Add
             </button>
           </div>
@@ -101,26 +233,71 @@ const numberofCollaborators = ref(6)
           </tr>
         </thead>
         <tbody>
-          <tr v-for="i in numberofCollaborators" class="text-white border-none mt-1">
+          <tr v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()"
+            class="text-white border-none mt-1">
             <td></td>
-            <td>{{ i }}</td>
-            <td>Chob Dou</td>
-            <td>Chobtitle@sit.kmutt.ac.th</td>
-            <td class="flex justify-center">
-              <button
-                class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-4 py-2 rounded-3xl text-white text-sm tracking-wider hover:bg-opacity-90">
-                Reader
-                <DropdownIcon />
-              </button>
+            <td>{{ ++index }}</td>
+            <td>{{collaborator.name}}</td>
+            <td>{{collaborator.email}}</td>
+            <td class="flex justify-center ">
+              <div class="dropdown dropdown-bottom">
+                <button tabindex="0" role="button"
+                  class="flex items-center gap-x-2 bg-[#5A5A5A] bg-opacity-30 px-4 py-2 rounded-3xl text-white text-sm tracking-wider hover:bg-opacity-90">
+                  {{ collaborator.accessRight }}
+                  <DropdownIcon />
+                </button>
+                <ul tabindex="0"
+                  class="dropdown-content z-[30] shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-md min-w-28 max-w-fit p-3 mt-1">
+                  <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10" @click="collaborator.accessRight === 'WRITE' ? changeAccessRightModal(collaborator, 'READ') : '' " >
+                    <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
+                      Read
+                    </p>
+                  </li>
+                  <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10 mt-1" @click="collaborator.accessRight === 'READ' ? changeAccessRightModal(collaborator, 'WRITE') : '' ">
+                    <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
+                      Write
+                    </p>
+                  </li>
+                </ul>
+              </div>
             </td>
             <td>
-              <div class="btn btn-sm btn-outline btn-error">
+              <div class="btn btn-sm btn-outline btn-error" @click="removeCollaborator(collaborator.oid)">
                 Remove
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- change accesright modal -->
+    <div v-if="confirmChangeAccessRight">
+      <div class="fixed inset-0 backdrop-blur-md flex justify-center items-center z-30">
+          <div class="itbkk-message bg-[#18181B] rounded-lg w-[45rem] h-auto flex flex-col">
+            <h1 class="text-[#F5F5F5] font-bold text-2xl text-opacity-80 flex px-10 pt-9">
+              Contributor Access Change !
+            </h1>
+            <div class="divider m-2"></div>
+            <div class="p-8 flex flex-col gap-y-6">
+              <p class="itbkk-button-message text-[#D69C27] text-opacity-75 mb-7">
+                Do you want to change access right of "{{ collaboratorSelected.name }}" to "{{ newAccesRight }}" ?
+              </p>
+              <div class="flex justify-end gap-x-[1rem]">
+                <button
+                  class="itbkk-button-cancel btn text-xs font-semibold text-[#FFFFFF] bg-transparent text-opacity-70 border-none hover:bg-transparent"
+                  @click="confirmChangeAccessRight = false">
+                  Cancel
+                </button>
+                <button
+                  class="btn px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
+                  @click="changeAccessRight">
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
   </main>
 </template>

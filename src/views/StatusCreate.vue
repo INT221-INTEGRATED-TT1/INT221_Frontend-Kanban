@@ -77,7 +77,8 @@ onBeforeMount(async () => {
       utilityStore.boardManager.addBoards(fetchBoards)
       utilityStore.selectedBoardId = route.params.boardID
 
-      utilityStore.boardManager.getBoards().forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+      utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+      utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
       console.log("Owner Board : ",utilityStore.isOwnerBoard)
 
       utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")

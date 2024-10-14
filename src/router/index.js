@@ -14,7 +14,7 @@ import TeamPage from "@/views/TeamPage.vue"
 import LoginPage from "@/views/LoginPage.vue"
 import BoardHome from "@/views/BoardHome.vue"
 import BoardCreate from "@/views/BoardCreate.vue"
-import ShareTask from "@/views/ShareTask.vue"
+// import ShareTask from "@/views/ShareTask.vue"
 import { authorizedUser, getNewAccessToken } from "@/libs/FetchAPI"
 
 const router = createRouter({
@@ -60,7 +60,7 @@ const router = createRouter({
         { path: ":taskID", component: TaskModalDetail, },
         { path: ":taskID/edit", component: TaskEdit, },
         { path: "add", component: TaskCreate, name: "create-task" },
-        { path: "share", component: ShareTask, name: "share-task" },
+        // { path: "share", component: ShareTask, name: "share-task" },
       ],
     },
     {
