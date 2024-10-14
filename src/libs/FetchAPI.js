@@ -397,6 +397,27 @@ const createBoard = async (newBoard) => {
   }
 }
 
+const deleteBoard = async (boardId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+      }
+    )
+    return {
+      status: response.status,
+      message: "Status deleted successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 const updateBoardVisibility = async (boardId, visibilityString) => {
   try {
     const response = await fetch(
@@ -465,7 +486,6 @@ const getCollaborators = async (boardId) => {
 }
 
 const addCollaborator = async (boardId, newCollaborator) => {
-  // newStatus.description.trim().length === 0 ? newStatus.description = null : ""
   try {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs`,
@@ -481,6 +501,27 @@ const addCollaborator = async (boardId, newCollaborator) => {
     return {
       status: response.status,
       message: "add a collaborator successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const deleteCollaborator = async (boardId, collaboratorId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs/${collaboratorId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+      }
+    )
+    return {
+      status: response.status,
+      message: "Status deleted successfully",
       data: await response.json(),
     }
   } catch (error) {
@@ -505,8 +546,10 @@ export {
   authorizedUser,
   getAllBoards,
   createBoard,
+  deleteBoard,
   updateBoardVisibility,
   getNewAccessToken,
   getCollaborators,
   addCollaborator,
+  deleteCollaborator,
 }

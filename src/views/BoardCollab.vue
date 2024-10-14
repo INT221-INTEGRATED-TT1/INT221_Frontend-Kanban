@@ -5,7 +5,7 @@ import UserSetting from "@/components/UserSetting.vue"
 import Xmark from "@/components/icons/Xmark.vue"
 import router from "@/router/index.js"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
-import { getCollaborators, getAllBoards, addCollaborator } from "@/libs/FetchAPI.js"
+import { getCollaborators, getAllBoards, addCollaborator, deleteCollaborator } from "@/libs/FetchAPI.js"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useRoute } from "vue-router"
 import { useUserStore } from "@/stores/useUserStore"
@@ -47,6 +47,11 @@ const addNewCollaborator = async () => {
     
     // console.log('old : ' , oldCollaboratorModel)
     // return emailPattern.test(email);
+}
+
+const removeCollaborator = async (removeCollaboratorId) => {
+      const collaboratorRemoved = await deleteCollaborator(route.params.boardID, removeCollaboratorId)
+      collaboratorRemoved.status === 200 ? userStore.collaboratorManager.deleteCollaborator(removeCollaboratorId) : ''
 }
 
 const cancelAddCollaboratorModal = () => {
@@ -136,8 +141,9 @@ onBeforeMount(async () => {
         <div class="p-8 pt-3 flex flex-col">
           <!-- board name input -->
           <div class="flex flex-row gap-3">
-            <input class="py-1 text-start rounded-lg border border-[#71717A] indent-4 text-white w-full" :class="!isEmailValid ? 'border-red-500' : ''"
-                  v-model.trim="newCollaboratorModel.email" placeholder="Email" maxlength="50" />
+            <input class="py-1 text-start rounded-lg border border-[#71717A] indent-4 text-white w-full"
+              :class="!isEmailValid ? 'border-red-500' : ''" v-model.trim="newCollaboratorModel.email"
+              placeholder="Email" maxlength="50" />
             <div class="flex flex-row gap-3 dropdown dropdown-bottom">
               <button tabindex="0" role="button"
                 class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-3 rounded text-white text-sm tracking-wider hover:bg-opacity-90">
@@ -146,12 +152,14 @@ onBeforeMount(async () => {
               </button>
               <ul tabindex="0"
                 class="dropdown-content z-[30] shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-md min-w-32 max-w-fit p-4 mt-1">
-                <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10" @click="newCollaboratorModel.accessRight = 'READ'">
+                <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10"
+                  @click="newCollaboratorModel.accessRight = 'READ'">
                   <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
                     Read
                   </p>
                 </li>
-                <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10 mt-1" @click="newCollaboratorModel.accessRight = 'WRITE'">
+                <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10 mt-1"
+                  @click="newCollaboratorModel.accessRight = 'WRITE'">
                   <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
                     Write
                   </p>
@@ -159,7 +167,8 @@ onBeforeMount(async () => {
               </ul>
             </div>
           </div>
-          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">something went wrong ! try again later.</p>
+          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">something went wrong ! try again
+            later.</p>
           <!-- Collaborators -->
           <!-- <div v-for="i in 7"></div> -->
           <!-- button -->
@@ -208,15 +217,30 @@ onBeforeMount(async () => {
             <td>{{ ++index }}</td>
             <td>{{collaborator.name}}</td>
             <td>{{collaborator.email}}</td>
-            <td class="flex justify-center">
-              <button
-                class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-4 py-2 rounded-3xl text-white text-sm tracking-wider hover:bg-opacity-90">
-                {{collaborator.accessRight}}
-                <DropdownIcon />
-              </button>
+            <td class="flex justify-center ">
+              <div class="dropdown dropdown-bottom">
+                <button tabindex="0" role="button"
+                  class="flex items-center gap-x-2 bg-[#5A5A5A] bg-opacity-30 px-4 py-2 rounded-3xl text-white text-sm tracking-wider hover:bg-opacity-90">
+                  {{ collaborator.accessRight }}
+                  <DropdownIcon />
+                </button>
+                <ul tabindex="0"
+                  class="dropdown-content z-[30] shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-md min-w-28 max-w-fit p-3 mt-1">
+                  <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10" @click="" >
+                    <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
+                      Read
+                    </p>
+                  </li>
+                  <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10 mt-1" @click="">
+                    <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
+                      Write
+                    </p>
+                  </li>
+                </ul>
+              </div>
             </td>
             <td>
-              <div class="btn btn-sm btn-outline btn-error">
+              <div class="btn btn-sm btn-outline btn-error" @click="removeCollaborator(collaborator.oid)">
                 Remove
               </div>
             </td>

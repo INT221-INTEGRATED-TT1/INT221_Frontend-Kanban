@@ -20,7 +20,7 @@ class CollaboratorManagement {
   }
 
   deleteCollaborator(collaboratorId) {
-    this.collaborators.splice(this.collaborators.findIndex((collaborators) => collaborators.id === collaboratorId),1)
+    this.collaborators.splice(this.collaborators.findIndex((collaborators) => collaborators.oid === collaboratorId),1)
   }
 
   getCollaborators() {
