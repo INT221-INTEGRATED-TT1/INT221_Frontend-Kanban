@@ -3,12 +3,20 @@ class CollaboratorManagement {
     this.collaborators = collaborators
   }
 
-  addCollaborators(newcollaborators) {
-    this.collaborators = newcollaborators
+  addCollaborators(newCollaborators) {
+    this.collaborators = newCollaborators
   }
 
-  addCollaborator(newcollaborators) {
-    this.collaborators.push(newcollaborators)
+  addCollaborator(newCollaborator) {
+    let migrateNewCollaborator = {
+      oid : newCollaborator.boardId,
+      name : newCollaborator.collaboratorName,
+      email : newCollaborator.collaboratorEmail,
+      accessRight : newCollaborator.accessRight,
+      addedOn : '2024-10-14T03:11:41Z',
+    }
+
+    this.collaborators.push(migrateNewCollaborator)
   }
 
   deleteCollaborator(collaboratorId) {

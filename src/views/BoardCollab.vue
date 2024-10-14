@@ -32,7 +32,8 @@ const addNewCollaborator = async () => {
     if(emailPattern.test(newCollaboratorModel.email)){
       isEmailValid.value = true
       console.log(newCollaboratorModel)
-      await addCollaborator(route.params.boardID, newCollaboratorModel)
+      const newCollaborator = await addCollaborator(route.params.boardID, newCollaboratorModel)
+      newCollaborator.status === 201 ? userStore.collaboratorManager.addCollaborator(newCollaborator.data) : ''
 
       addCollaboratorModal.value = false
       newCollaboratorModel.email = ""
@@ -53,6 +54,7 @@ const cancelAddCollaboratorModal = () => {
   newCollaboratorModel.email = ""
   newCollaboratorModel.accessRight = "READ"
   isEmailValid.value = true
+  utilityStore.transactionDisable = false
 }
 
 const isButtonDisabled = computed(() => {
@@ -126,16 +128,16 @@ onBeforeMount(async () => {
           <h1 class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6 tracking-wider">
             Add Collaborator
           </h1>
-          <button class="self-start mr-8 mt-6" @click="addCollaboratorModal = false">
+          <button class="self-start mr-8 mt-6" @click="cancelAddCollaboratorModal">
             <Xmark />
           </button>
         </div>
         <div class="divider m-0 "></div>
-        <div class="p-8 pt-3 flex flex-col gap-y-6">
+        <div class="p-8 pt-3 flex flex-col">
           <!-- board name input -->
           <div class="flex flex-row gap-3">
             <input class="py-1 text-start rounded-lg border border-[#71717A] indent-4 text-white w-full" :class="!isEmailValid ? 'border-red-500' : ''"
-                  v-model="newCollaboratorModel.email" placeholder="Email" maxlength="50" />
+                  v-model.trim="newCollaboratorModel.email" placeholder="Email" maxlength="50" />
             <div class="flex flex-row gap-3 dropdown dropdown-bottom">
               <button tabindex="0" role="button"
                 class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-3 rounded text-white text-sm tracking-wider hover:bg-opacity-90">
@@ -156,12 +158,12 @@ onBeforeMount(async () => {
                 </li>
               </ul>
             </div>
-            <div></div>
           </div>
+          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">something went wrong ! try again later.</p>
           <!-- Collaborators -->
-          <div v-for="i in 7"></div>
+          <!-- <div v-for="i in 7"></div> -->
           <!-- button -->
-          <div class="flex justify-end items-center gap-x-[1rem] ">
+          <div class="flex justify-end items-center gap-x-[1rem] mt-44">
             <button
               class="btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
               @click="cancelAddCollaboratorModal">
