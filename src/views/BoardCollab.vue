@@ -1,11 +1,11 @@
 <script setup>
-import { ref, onMounted, onBeforeMount, watch, reactive } from "vue"
+import { ref, onMounted, onBeforeMount, computed, reactive } from "vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import UserSetting from "@/components/UserSetting.vue"
 import Xmark from "@/components/icons/Xmark.vue"
 import router from "@/router/index.js"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
-import { getCollaborators, getAllBoards } from "@/libs/FetchAPI.js"
+import { getCollaborators, getAllBoards, addCollaborator } from "@/libs/FetchAPI.js"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useRoute } from "vue-router"
 import { useUserStore } from "@/stores/useUserStore"
@@ -14,8 +14,53 @@ const userStore = useUserStore()
 const route = useRoute()
 const utilityStore = useUtilityStore()
 const addCollaboratorModal = ref(false)
+const isEmailValid = ref(true)
 // const numberofCollaborators = ref(6) getCollaborators
+const newCollaboratorModel = reactive({
+  email : "",
+  accessRight : "READ"
+})
 
+let oldCollaboratorModel = reactive({
+  email : "",
+  accessRight : "READ"
+})
+
+const addNewCollaborator = async () => {
+    oldCollaboratorModel = {...newCollaboratorModel}
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if(emailPattern.test(newCollaboratorModel.email)){
+      isEmailValid.value = true
+      console.log(newCollaboratorModel)
+      await addCollaborator(route.params.boardID, newCollaboratorModel)
+
+      addCollaboratorModal.value = false
+      newCollaboratorModel.email = ""
+      newCollaboratorModel.accessRight = "READ"
+    } else{
+      console.log("can't add new collab")
+      isEmailValid.value = false
+      utilityStore.transactionDisable = true
+
+    }
+    
+    // console.log('old : ' , oldCollaboratorModel)
+    // return emailPattern.test(email);
+}
+
+const cancelAddCollaboratorModal = () => {
+  addCollaboratorModal.value = false
+  newCollaboratorModel.email = ""
+  newCollaboratorModel.accessRight = "READ"
+  isEmailValid.value = true
+}
+
+const isButtonDisabled = computed(() => {
+  oldCollaboratorModel.email !== newCollaboratorModel.email ? utilityStore.transactionDisable = false : oldCollaboratorModel.accessRight !== newCollaboratorModel.accessRight ? utilityStore.transactionDisable = false : utilityStore.transactionDisable = true
+  // console.log('new : ' , newCollaboratorModel)
+  // console.log('old : ' , oldCollaboratorModel)
+  return !newCollaboratorModel.email || utilityStore.transactionDisable || (userStore.userIdentity.email === newCollaboratorModel.email)
+})
 
 onBeforeMount(async () => {
   utilityStore.isOwnerBoard = false
@@ -36,7 +81,8 @@ onBeforeMount(async () => {
 
   try {
     const fetchCollaborators = await getCollaborators(route.params.boardID)
-    userStore.collaboratorManager.addCollaborators(fetchCollaborators)
+    userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
+    console.log(userStore.collaboratorManager.getCollaborators())
   }
   catch (error) {
     console.log("Error fetching Collaborators : ", error.status === 404)
@@ -88,13 +134,29 @@ onBeforeMount(async () => {
         <div class="p-8 pt-3 flex flex-col gap-y-6">
           <!-- board name input -->
           <div class="flex flex-row gap-3">
-            <input class="py-1 text-start rounded-lg border border-[#71717A] indent-4 text-white w-full"
-              placeholder="Email" maxlength="50"/>
-            <button
-              class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-3 rounded text-white text-sm tracking-wider hover:bg-opacity-90">
-              Reader
-              <DropdownIcon />
-            </button>
+            <input class="py-1 text-start rounded-lg border border-[#71717A] indent-4 text-white w-full" :class="!isEmailValid ? 'border-red-500' : ''"
+                  v-model="newCollaboratorModel.email" placeholder="Email" maxlength="50" />
+            <div class="flex flex-row gap-3 dropdown dropdown-bottom">
+              <button tabindex="0" role="button"
+                class="flex items-center gap-x-5 bg-[#5A5A5A] bg-opacity-30 px-3 rounded text-white text-sm tracking-wider hover:bg-opacity-90">
+                {{newCollaboratorModel.accessRight === 'READ' ? 'Read' : 'Write'}}
+                <DropdownIcon />
+              </button>
+              <ul tabindex="0"
+                class="dropdown-content z-[30] shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-md min-w-32 max-w-fit p-4 mt-1">
+                <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10" @click="newCollaboratorModel.accessRight = 'READ'">
+                  <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
+                    Read
+                  </p>
+                </li>
+                <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10 mt-1" @click="newCollaboratorModel.accessRight = 'WRITE'">
+                  <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
+                    Write
+                  </p>
+                </li>
+              </ul>
+            </div>
+            <div></div>
           </div>
           <!-- Collaborators -->
           <div v-for="i in 7"></div>
@@ -102,12 +164,12 @@ onBeforeMount(async () => {
           <div class="flex justify-end items-center gap-x-[1rem] ">
             <button
               class="btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
-              @click="addCollaboratorModal = false">
+              @click="cancelAddCollaboratorModal">
               Cancel
             </button>
             <button
               class="btn btn-sm px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
-              @click="addCollaboratorModal = false">
+              :disabled="isButtonDisabled" @click="addNewCollaborator">
               Add
             </button>
           </div>
@@ -138,7 +200,8 @@ onBeforeMount(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()" class="text-white border-none mt-1">
+          <tr v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()"
+            class="text-white border-none mt-1">
             <td></td>
             <td>{{ ++index }}</td>
             <td>{{collaborator.name}}</td>

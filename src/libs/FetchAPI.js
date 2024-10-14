@@ -437,6 +437,7 @@ const getNewAccessToken = async () => {
     throw error
   }
 }
+
 const getCollaborators = async (boardId) => {
   try {
     const response = await fetch(
@@ -463,7 +464,29 @@ const getCollaborators = async (boardId) => {
   }
 }
 
-
+const addCollaborator = async (boardId, newCollaborator) => {
+  // newStatus.description.trim().length === 0 ? newStatus.description = null : ""
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+        body: JSON.stringify(newCollaborator),
+      }
+    )
+    return {
+      status: response.status,
+      message: "add a collaborator successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
 
 export {
   getAllTasks,
@@ -484,5 +507,6 @@ export {
   createBoard,
   updateBoardVisibility,
   getNewAccessToken,
-  getCollaborators
+  getCollaborators,
+  addCollaborator,
 }
