@@ -23,6 +23,11 @@ class CollaboratorManagement {
     this.collaborators.splice(this.collaborators.findIndex((collaborators) => collaborators.oid === collaboratorId),1)
   }
 
+  changeCollaboratorAccessRight(collaboratorId, newAccessRight) {
+    const filterCollaboratorIndex = this.collaborators.findIndex((collaborator) => collaborator.oid === collaboratorId)
+    this.collaborators[filterCollaboratorIndex].accessRight = newAccessRight
+  }
+
   getCollaborators() {
     return this.collaborators
   }

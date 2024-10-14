@@ -529,6 +529,25 @@ const deleteCollaborator = async (boardId, collaboratorId) => {
   }
 }
 
+const changeCollaboratorAccessRisght = async (boardId, collaboratorId, newAccessRight) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs/${collaboratorId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+        body: JSON.stringify({ accessRight : newAccessRight }),
+      }
+    )
+    return response.json()
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -552,4 +571,5 @@ export {
   getCollaborators,
   addCollaborator,
   deleteCollaborator,
+  changeCollaboratorAccessRisght,
 }

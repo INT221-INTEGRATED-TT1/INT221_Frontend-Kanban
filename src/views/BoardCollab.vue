@@ -5,7 +5,7 @@ import UserSetting from "@/components/UserSetting.vue"
 import Xmark from "@/components/icons/Xmark.vue"
 import router from "@/router/index.js"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
-import { getCollaborators, getAllBoards, addCollaborator, deleteCollaborator } from "@/libs/FetchAPI.js"
+import { getCollaborators, getAllBoards, addCollaborator, deleteCollaborator, changeCollaboratorAccessRisght } from "@/libs/FetchAPI.js"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useRoute } from "vue-router"
 import { useUserStore } from "@/stores/useUserStore"
@@ -15,6 +15,15 @@ const route = useRoute()
 const utilityStore = useUtilityStore()
 const addCollaboratorModal = ref(false)
 const isEmailValid = ref(true)
+const confirmChangeAccessRight = ref(false)
+let collaboratorSelected = reactive({
+  oid : '',
+  name : '',
+  email : '',
+  accessRight : '',
+  addedOn : '',
+})
+const newAccesRight = ref('')
 // const numberofCollaborators = ref(6) getCollaborators
 const newCollaboratorModel = reactive({
   email : "",
@@ -68,6 +77,19 @@ const isButtonDisabled = computed(() => {
   // console.log('old : ' , oldCollaboratorModel)
   return !newCollaboratorModel.email || utilityStore.transactionDisable || (userStore.userIdentity.email === newCollaboratorModel.email)
 })
+
+const changeAccessRightModal = (collaborator, changeAccesright) => {
+  confirmChangeAccessRight.value = true
+  collaboratorSelected = {...collaborator}
+  newAccesRight.value = changeAccesright
+}
+
+const changeAccessRight = async () => {
+  const changeAccessRightResponse =  await changeCollaboratorAccessRisght(route.params.boardID, collaboratorSelected.oid, newAccesRight.value)
+  console.log(changeAccessRightResponse)
+  userStore.collaboratorManager.changeCollaboratorAccessRight(collaboratorSelected.oid, newAccesRight.value)
+  confirmChangeAccessRight.value = false
+}
 
 onBeforeMount(async () => {
   utilityStore.isOwnerBoard = false
@@ -226,12 +248,12 @@ onBeforeMount(async () => {
                 </button>
                 <ul tabindex="0"
                   class="dropdown-content z-[30] shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-md min-w-28 max-w-fit p-3 mt-1">
-                  <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10" @click="" >
+                  <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10" @click="collaborator.accessRight === 'WRITE' ? changeAccessRightModal(collaborator, 'READ') : '' " >
                     <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
                       Read
                     </p>
                   </li>
-                  <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10 mt-1" @click="">
+                  <li class="cursor-pointer p-1 hover:rounded-md hover:bg-white hover:bg-opacity-10 mt-1" @click="collaborator.accessRight === 'READ' ? changeAccessRightModal(collaborator, 'WRITE') : '' ">
                     <p class="font-Inter text-center text-opacity-80 tracking-wider font-extralight text-white text-sm">
                       Write
                     </p>
@@ -247,6 +269,35 @@ onBeforeMount(async () => {
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- change accesright modal -->
+    <div v-if="confirmChangeAccessRight">
+      <div class="fixed inset-0 backdrop-blur-md flex justify-center items-center z-30">
+          <div class="itbkk-message bg-[#18181B] rounded-lg w-[45rem] h-auto flex flex-col">
+            <h1 class="text-[#F5F5F5] font-bold text-2xl text-opacity-80 flex px-10 pt-9">
+              Contributor Access Change !
+            </h1>
+            <div class="divider m-2"></div>
+            <div class="p-8 flex flex-col gap-y-6">
+              <p class="itbkk-button-message text-[#D69C27] text-opacity-75 mb-7">
+                Do you want to change access right of "{{ collaboratorSelected.name }}" to "{{ newAccesRight }}" ?
+              </p>
+              <div class="flex justify-end gap-x-[1rem]">
+                <button
+                  class="itbkk-button-cancel btn text-xs font-semibold text-[#FFFFFF] bg-transparent text-opacity-70 border-none hover:bg-transparent"
+                  @click="confirmChangeAccessRight = false">
+                  Cancel
+                </button>
+                <button
+                  class="btn px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
+                  @click="changeAccessRight">
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
   </main>
 </template>
