@@ -201,11 +201,14 @@ onBeforeMount(async () => {
     <div class="flex justify-between">
       <div>
         <router-link to="/board">
-          <h1
+          <!-- <h1
             class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand"
           >
             IT-BangMod Kradan Kanban
-          </h1>
+          </h1> -->
+          <div class="flex items-center gap-3 font-semibold text-[#58c1fd] text-3xl "> 
+            <span class="text-headline text-sm text-opacity-50"> < </span>{{ utilityStore.selectedBoard.name }}
+          </div>
         </router-link>
 
         <div class="ml-[22rem] tracking-in-expand-2">

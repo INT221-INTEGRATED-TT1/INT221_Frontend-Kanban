@@ -157,14 +157,17 @@ onBeforeMount(async () => {
     <div class="flex justify-between">
       <div>
         <router-link to="/board">
-          <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
+          <!-- <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
             IT-BangMod Kradan Kanban
-          </h1>
+          </h1> -->
+        <div class="flex items-center gap-3 font-semibold text-[#58c1fd] text-3xl "> 
+          <span class="text-headline text-sm text-opacity-50"> < </span>{{ utilityStore.selectedBoard.name }}
+        </div>
         </router-link>
 
-        <div class="ml-[22rem] tracking-in-expand-2">
+        <!-- <div class="ml-[22rem] tracking-in-expand-2">
           <GroupCode />
-        </div>
+        </div> -->
       </div>
 
       <div class="flex items-center gap-x-3">
@@ -191,8 +194,7 @@ onBeforeMount(async () => {
 
     <div class="pt-10">
       <div class="flex justify-end items-center mb-6">
-        <div class="text-headline font-extrabold text-2xl tracking-wider mr-auto">{{ utilityStore.selectedBoard.name }}
-        </div>
+        <!-- <div class="text-headline font-extrabold text-2xl tracking-wider mr-auto">{{ utilityStore.selectedBoard.name }}</div> -->
         <div class="flex items-center gap-4 mr-10" >
           <p :class="utilityStore.isOwnerBoard && !utilityStore.collabAccessRight ? 'text-opacity-100': 'text-white text-opacity-35'">{{ utilityStore.isOwnerBoard && !utilityStore.collabAccessRight ? 'Publish' : 'Cannot Publish'}}</p>
           <!-- :class="currentVisibility === 'PUBLIC' ? 'border-[#565656] bg-white [--tglbg:#11FF70]' : ''" -->
