@@ -128,7 +128,7 @@ onBeforeMount(async () => {
         @click="selectBoard(board.id)">
 
         <!-- <div class="flex gap-4"> -->
-        <p class="font-Inter text-end" :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
+        <p class="font-Inter text-end " :class="board.accessRight === 'WRITE' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.accessRight === 'READ' ? 'Read' : 'Write'}}</p>
         <div class="flex items-center min-h-16" 
           :data-tip="board.name.length > 10 ? board.name : ''"
           :class="board.name.length > 10 ? 'tooltip' : ''">
@@ -144,7 +144,7 @@ onBeforeMount(async () => {
         <div class="flex items-end justify-between mt-7">
           <div>
             <p class="text-sm font-medium">
-              By {{ userStore.userIdentity.name }}
+              By {{ board.owner.name }}
             </p>
             <p class="text-xs font-light opacity-55">
               Created At {{ utilityStore.formatDateTime(board.createdOn) }}
