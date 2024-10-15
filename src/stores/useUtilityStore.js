@@ -2,7 +2,7 @@ import {TaskManagement} from "@/libs/TaskManagement"
 import {StatusManagement} from "@/libs/statusManagement"
 import {BoardManagement} from "@/libs/BoardManagement"
 import {defineStore} from "pinia"
-import {ref} from "vue"
+import {reactive, ref} from "vue"
 
 export const useUtilityStore = defineStore("utility", () => {
   const tasksManager = ref(new TaskManagement())
@@ -10,6 +10,10 @@ export const useUtilityStore = defineStore("utility", () => {
   const boardManager = ref(new BoardManagement())
   const selectedId = ref("")
   const taskTitleConfirm = ref("")
+  const collabSelected = reactive({
+    oid : '',
+    name : ''
+  })
   const statusTitle = ref("")
   const showDeleteConfirmation = ref(false)
   const showChangeBoardVisibilityConfirmation = ref(false)
@@ -48,6 +52,14 @@ export const useUtilityStore = defineStore("utility", () => {
     taskTitleConfirm.value = taskTitle
   }
 
+  const confirmDeleteCollaborator = (collaborator) => {
+    showDeleteConfirmation.value = true
+    // console.log(collaborator)
+    collabSelected.oid = collaborator.oid
+    collabSelected.name = collaborator.name
+    // console.log(collabSelected)
+  }
+
   const limitStatus = () => {
     showStatusSettingMenu.value = true
   }
@@ -75,6 +87,7 @@ export const useUtilityStore = defineStore("utility", () => {
     selectedId,
     showDeleteConfirmation,
     taskTitleConfirm,
+    collabSelected,
     statusManager,
     selectedColor,
     statusTitle,
@@ -93,6 +106,7 @@ export const useUtilityStore = defineStore("utility", () => {
     isOwnerBoard,
     isTaskMounted,
     isStatusesMounted,
-    showChangeBoardVisibilityConfirmation
+    showChangeBoardVisibilityConfirmation,
+    confirmDeleteCollaborator
   }
 })

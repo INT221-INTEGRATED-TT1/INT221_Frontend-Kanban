@@ -201,12 +201,14 @@ onBeforeMount(async () => {
           </button>
         </div>
         <router-link :to="`/board/${route.params.boardID}/collab`">
-          <button :disabled="!utilityStore.isOwnerBoard"
-            :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'bg-[#338EF7]'"
+          <!-- :disabled = "!utilityStore.isOwnerBoard" -->
+          <!-- :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'bg-[#338EF7]'" -->
+          <button 
             data-tip="You need to be board owner to perform this action."
-            class="flex items-center gap-2 text-white text-center font-Geist text-sm px-4 py-2 rounded-md self-end">
-            <div :class="!utilityStore.isOwnerBoard ? 'opacity-20' : 'opacity-100'"><UserIcon /></div>
-            Manage Contributor
+            class="flex items-center gap-2 text-white text-center font-Geist text-sm px-4 py-2 rounded-md self-end bg-[#338EF7]">
+            <!-- :class="!utilityStore.isOwnerBoard ? 'opacity-20' : 'opacity-100'" -->
+            <div><UserIcon /></div>
+            Manage Collaborator
           </button>
         </router-link>
       </div>

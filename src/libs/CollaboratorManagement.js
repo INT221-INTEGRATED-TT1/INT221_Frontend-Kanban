@@ -7,9 +7,13 @@ class CollaboratorManagement {
     this.collaborators = newCollaborators
   }
 
-  addCollaborator(newCollaborator) {
+  addCollaborator(newCollaborator, newCollaborators) {
+    // console.log('thiss', this.collaborators)
+    // console.log(newCollaborator.collaboratorName)
+    const findCollaboratorId = newCollaborators.find(collaborator => collaborator.name === newCollaborator.collaboratorName).oid
+    console.log(findCollaboratorId)
     let migrateNewCollaborator = {
-      oid : newCollaborator.boardId,
+      oid : newCollaborator.findCollaboratorId,
       name : newCollaborator.collaboratorName,
       email : newCollaborator.collaboratorEmail,
       accessRight : newCollaborator.accessRight,

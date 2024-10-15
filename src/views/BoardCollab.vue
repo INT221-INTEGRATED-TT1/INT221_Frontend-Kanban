@@ -9,6 +9,7 @@ import { getCollaborators, getAllBoards, addCollaborator, deleteCollaborator, ch
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useRoute } from "vue-router"
 import { useUserStore } from "@/stores/useUserStore"
+import DeleteConfirmationCollab from "@/components/DeleteConfirmationCollab.vue"
 
 const userStore = useUserStore()
 const route = useRoute()
@@ -24,6 +25,8 @@ let collaboratorSelected = reactive({
   addedOn : '',
 })
 const newAccesRight = ref('')
+
+const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 // const numberofCollaborators = ref(6) getCollaborators
 const newCollaboratorModel = reactive({
   email : "",
@@ -37,12 +40,16 @@ let oldCollaboratorModel = reactive({
 
 const addNewCollaborator = async () => {
     oldCollaboratorModel = {...newCollaboratorModel}
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if(emailPattern.test(newCollaboratorModel.email)){
       isEmailValid.value = true
       console.log(newCollaboratorModel)
       const newCollaborator = await addCollaborator(route.params.boardID, newCollaboratorModel)
-      newCollaborator.status === 201 ? userStore.collaboratorManager.addCollaborator(newCollaborator.data) : ''
+
+      const newFetchCollaboratorsForCollaboratorId = await getCollaborators(route.params.boardID)
+      // console.log(fetchCollaborators.data)
+      // userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
+
+      newCollaborator.status === 201 ? userStore.collaboratorManager.addCollaborator(newCollaborator.data, newFetchCollaboratorsForCollaboratorId.data) : ''
 
       addCollaboratorModal.value = false
       newCollaboratorModel.email = ""
@@ -59,8 +66,12 @@ const addNewCollaborator = async () => {
 }
 
 const removeCollaborator = async (removeCollaboratorId) => {
+      console.log(removeCollaboratorId)
       const collaboratorRemoved = await deleteCollaborator(route.params.boardID, removeCollaboratorId)
       collaboratorRemoved.status === 200 ? userStore.collaboratorManager.deleteCollaborator(removeCollaboratorId) : ''
+      oldCollaboratorModel.email = ""
+      oldCollaboratorModel.accessRight = "READ"
+      utilityStore.showDeleteConfirmation = false
 }
 
 const cancelAddCollaboratorModal = () => {
@@ -73,6 +84,7 @@ const cancelAddCollaboratorModal = () => {
 
 const isButtonDisabled = computed(() => {
   oldCollaboratorModel.email !== newCollaboratorModel.email ? utilityStore.transactionDisable = false : oldCollaboratorModel.accessRight !== newCollaboratorModel.accessRight ? utilityStore.transactionDisable = false : utilityStore.transactionDisable = true
+  
   // console.log('new : ' , newCollaboratorModel)
   // console.log('old : ' , oldCollaboratorModel)
   return !newCollaboratorModel.email || utilityStore.transactionDisable || (userStore.userIdentity.email === newCollaboratorModel.email)
@@ -233,7 +245,12 @@ onBeforeMount(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()"
+          <tr v-if="userStore.collaboratorManager.getCollaborators().length === 0" class="border-none">
+            <td colspan="6" class="text-center font-bold text-xl text-headline text-opacity-50 p-10 tracking-wide">
+              No Collaborator
+            </td>
+          </tr>
+          <tr v-else v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()"
             class="text-white border-none mt-1">
             <td></td>
             <td>{{ ++index }}</td>
@@ -262,7 +279,8 @@ onBeforeMount(async () => {
               </div>
             </td>
             <td>
-              <div class="btn btn-sm btn-outline btn-error" @click="removeCollaborator(collaborator.oid)">
+              <!-- removeCollaborator(collaborator.oid) -->
+              <div class="btn btn-sm btn-outline btn-error" @click="utilityStore.confirmDeleteCollaborator(collaborator)"> 
                 Remove
               </div>
             </td>
@@ -299,6 +317,10 @@ onBeforeMount(async () => {
           </div>
         </div>
     </div>
+
+    <!-- delete confirmation -->
+    <DeleteConfirmationCollab @remove-collaborator="removeCollaborator(utilityStore.collabSelected.oid)" />
+    <!-- delete confirmation -->
   </main>
 </template>
 
