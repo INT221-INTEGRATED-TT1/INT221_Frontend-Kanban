@@ -2,20 +2,22 @@
 import {ref, reactive, onBeforeMount, computed} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import {createStatus, getAllBoards} from "@/libs/FetchAPI"
+import {createStatus, getAllBoards, findCollabById} from "@/libs/FetchAPI"
 import router from "@/router"
 import {useRoute} from "vue-router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
+import { useUserStore } from "@/stores/useUserStore"
 
+const userStore = useUserStore()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const route = useRoute()
 
 const newStatus = reactive({
-  name: " ",
-  description: " ",
+  name: "",
+  description: "",
   color: statusStyleStore.presetColors[5],
   limitMaximumTask: 0,
 })
@@ -80,6 +82,11 @@ onBeforeMount(async () => {
       utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
       // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
       console.log("Owner Board : ",utilityStore.isOwnerBoard)
+
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
 
       utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
       if (!utilityStore.isOwnerBoard) {

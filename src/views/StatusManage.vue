@@ -10,6 +10,7 @@ import {
   getAllStatuses,
   getAllBoards,
   deleteStatusTransfer,
+  findCollabById,
 } from "@/libs/FetchAPI";
 import StatusSetting from "@/components/StatusSetting.vue";
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue";
@@ -168,6 +169,11 @@ onBeforeMount(async () => {
     utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
     // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
     console.log("Owner Board : ",utilityStore.isOwnerBoard)
+
+    const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+    utilityStore.collabAccessRight = collabIdentity.accessRight
+    console.log(collabIdentity.accessRight)
+    collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
   }
   try {
     const fetchData = await getAllStatuses(route.params.boardID);
