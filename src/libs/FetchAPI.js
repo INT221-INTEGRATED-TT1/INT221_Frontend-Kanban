@@ -548,6 +548,23 @@ const changeCollaboratorAccessRisght = async (boardId, collaboratorId, newAccess
   }
 }
 
+const findCollabById = async (boardId, collaboratorId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs/${collaboratorId}`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+      }
+    )
+    return response.json()
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -572,4 +589,5 @@ export {
   addCollaborator,
   deleteCollaborator,
   changeCollaboratorAccessRisght,
+  findCollabById,
 }

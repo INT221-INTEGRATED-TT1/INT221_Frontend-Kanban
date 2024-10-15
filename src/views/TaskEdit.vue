@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, computed, reactive} from "vue"
-import {getTask, editTask} from "@/libs/FetchAPI.js"
+import {getTask, editTask, findCollabById} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
@@ -15,7 +15,9 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
+import { useUserStore } from "@/stores/useUserStore"
 
+const userStore = useUserStore()
 const task = ref({})
 const route = useRoute()
 const utilityStore = useUtilityStore()
@@ -141,10 +143,10 @@ const isButtonDisable = computed(() => {
   //   utilityStore.transactionDisable = true
   // }
   return (
-    (updateTask.title === task.value.taskTitle &&
+    (updateTask.title === task.value.title &&
       updateTask.description === task.value.description &&
       updateTask.assignees === task.value.assignees &&
-      updateTask.status3 === task.value.statuses3.statusID) ||
+      updateTask.status3 === task.value.statuses3.id) ||
     !updateTask.title ||
     utilityStore.transactionDisable
   )
@@ -153,6 +155,12 @@ const isButtonDisable = computed(() => {
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.boardID, route.params.taskID)
+
+    const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+    utilityStore.collabAccessRight = collabIdentity.accessRight
+    console.log(collabIdentity.accessRight)
+    collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+
     utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
     if (!utilityStore.isOwnerBoard) {
       // router.push(`/board/${route.params.boardID}/task`).then(() => {
@@ -169,8 +177,9 @@ onBeforeMount(async () => {
       router.push('/error')
       return
     }
+
     task.value = fetchTask
-    // console.log(task.value)
+    console.log(task.value)
 
     task.value.createOn = utilityStore.formatDateTime(task.value.createOn)
     task.value.updateOn = utilityStore.formatDateTime(task.value.updateOn)

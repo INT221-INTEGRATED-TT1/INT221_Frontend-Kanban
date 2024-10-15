@@ -83,7 +83,7 @@ onBeforeMount(async () => {
         <div
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5 break-all"
         >
-          {{ task.taskTitle }}
+          {{ task.title }}
         </div>
 
         <div class="grid grid-cols-1 grid-rows-4 gap-y-4">

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeMount, watch } from "vue"
-import { getAllTasks, deleteTask, getAllBoards, updateBoardVisibility } from "@/libs/FetchAPI.js"
+import { getAllTasks, deleteTask, getAllBoards, updateBoardVisibility, findCollabById } from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
@@ -97,6 +97,7 @@ const changeVisibilityBoard = async () => {
 }
 
 onBeforeMount(async () => {
+  utilityStore.collabAccessRight = ''
   utilityStore.isOwnerBoard = false
   utilityStore.selectedBoardId = route.params.boardID
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
@@ -118,6 +119,10 @@ onBeforeMount(async () => {
 
     } else { 
       currentVisibility.value = ''
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
     }
   }
   try {
@@ -189,9 +194,10 @@ onBeforeMount(async () => {
         <div class="text-headline font-extrabold text-2xl tracking-wider mr-auto">{{ utilityStore.selectedBoard.name }}
         </div>
         <div class="flex items-center gap-4 mr-10" >
-          <p :class="utilityStore.isOwnerBoard ? 'text-opacity-100': 'text-white text-opacity-35'">{{ utilityStore.isOwnerBoard ? 'Publish' : 'Cannot Publish'}}</p>
+          <p :class="utilityStore.isOwnerBoard && !utilityStore.collabAccessRight ? 'text-opacity-100': 'text-white text-opacity-35'">{{ utilityStore.isOwnerBoard && !utilityStore.collabAccessRight ? 'Publish' : 'Cannot Publish'}}</p>
           <!-- :class="currentVisibility === 'PUBLIC' ? 'border-[#565656] bg-white [--tglbg:#11FF70]' : ''" -->
-          <input type="checkbox" class="toggle hover:bg-gray-200" v-model="isToggled" @click="changeVisibilityBoardRadioClick" :checked="currentVisibility === 'PUBLIC' " :disabled="!utilityStore.isOwnerBoard" />
+          <input type="checkbox" class="toggle hover:bg-gray-200" :class="utilityStore.isOwnerBoard && !utilityStore.collabAccessRight ? '' : 'tooltip tooltip-top'" v-model="isToggled" data-tip="You need to be board owner to perform this action."
+            @click="changeVisibilityBoardRadioClick" :checked="currentVisibility === 'PUBLIC' " :disabled="!(utilityStore.isOwnerBoard && !utilityStore.collabAccessRight)" />
           <button class="flex items-center gap-1 text-[#005BC4] text-sm"
             :class="isToggled ? 'opacity-100' : 'opacity-0 '" @click="copyToClipboard"
             :disabled="copyLinkClicked || !isToggled">

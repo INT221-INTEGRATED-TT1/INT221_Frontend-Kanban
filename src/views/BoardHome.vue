@@ -22,6 +22,7 @@ const selectBoard = (selectBoardId) => {
 }
 
 onBeforeMount(async () => {
+  utilityStore.collabAccessRight = ''
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN")
   if (JWT_TOKEN) {
     const decodedData = window.atob(JWT_TOKEN.split(".")[1])

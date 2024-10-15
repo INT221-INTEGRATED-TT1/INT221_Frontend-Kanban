@@ -33,6 +33,7 @@ export const useUtilityStore = defineStore("utility", () => {
     ownerId : ""
   })
   const isOwnerBoard = ref(false)
+  const collabAccessRight = ref('')
   const isTaskMounted = ref(false)
   const isStatusesMounted = ref(false)
 
@@ -107,6 +108,7 @@ export const useUtilityStore = defineStore("utility", () => {
     isTaskMounted,
     isStatusesMounted,
     showChangeBoardVisibilityConfirmation,
-    confirmDeleteCollaborator
+    confirmDeleteCollaborator,
+    collabAccessRight
   }
 })
