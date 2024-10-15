@@ -153,8 +153,9 @@ onBeforeMount(async () => {
     </div>
     <!-- Boad List Header & Add New board Button -->
     <div class="flex justify-end items-center mt-2">
-      <button @click="addCollaboratorModal = true"
-        class="flex items-center bg-[#E3E3E3] text-center py-2 px-5 rounded text-black text-sm font-semibold tracking-wid hover:bg-opacity-90">
+      <button @click="addCollaboratorModal = true" :disabled="!utilityStore.isOwnerBoard"
+        :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-white text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'hover:bg-opacity-90'"
+        class="flex items-center bg-[#E3E3E3] text-center py-2 px-5 rounded text-black text-sm font-semibold tracking-wid ">
         Add Collaborator
       </button>
     </div>
@@ -258,10 +259,11 @@ onBeforeMount(async () => {
             <td>{{collaborator.email}}</td>
             <td class="flex justify-center ">
               <div class="dropdown dropdown-bottom">
-                <button tabindex="0" role="button"
+                <button tabindex="0" role="button" :disabled="!utilityStore.isOwnerBoard"
+                  :class="!utilityStore.isOwnerBoard ? 'bg-opacity-15 text-opacity-40 tooltip cursor-not-allowed' : ''"
                   class="flex items-center gap-x-2 bg-[#5A5A5A] bg-opacity-30 px-4 py-2 rounded-3xl text-white text-sm tracking-wider hover:bg-opacity-90">
                   {{ collaborator.accessRight }}
-                  <DropdownIcon />
+                  <div :class="!utilityStore.isOwnerBoard ? 'opacity-45' : ''"><DropdownIcon /></div>
                 </button>
                 <ul tabindex="0"
                   class="dropdown-content z-[30] shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-md min-w-28 max-w-fit p-3 mt-1">
@@ -280,9 +282,12 @@ onBeforeMount(async () => {
             </td>
             <td>
               <!-- removeCollaborator(collaborator.oid) -->
-              <div class="btn btn-sm btn-outline btn-error" @click="utilityStore.confirmDeleteCollaborator(collaborator)"> 
-                Remove
-              </div>
+              <button 
+                :disabled="!utilityStore.isOwnerBoard && collaborator.oid !== userStore.userIdentity.oid"
+                class="btn btn-sm btn-outline btn-error" 
+                @click="utilityStore.confirmDeleteCollaborator(collaborator)"> 
+                {{ collaborator.oid !== userStore.userIdentity.oid ? 'Remove ' : 'Leave'}}
+              </button>
             </td>
           </tr>
         </tbody>
