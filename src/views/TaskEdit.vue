@@ -155,13 +155,8 @@ const isButtonDisable = computed(() => {
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.boardID, route.params.taskID)
-
-    const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
-    utilityStore.collabAccessRight = collabIdentity.accessRight
-    console.log(collabIdentity.accessRight)
-    collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
-
     utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+
     if (!utilityStore.isOwnerBoard) {
       // router.push(`/board/${route.params.boardID}/task`).then(() => {
       //   toast(
@@ -174,8 +169,14 @@ onBeforeMount(async () => {
       //       position: "bottom-right",
       //     })
       // })
-      router.push('/error')
-      return
+
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+
+      // router.push('/error')
+      // return
     }
 
     task.value = fetchTask
@@ -197,6 +198,8 @@ onBeforeMount(async () => {
     // console.log(updateTask.status.length)
   } catch (error) {
     console.log(`Error fetching task ${route.params.boardID}: `, error)
+    router.push('/error')
+    return
   }
 })
 </script>

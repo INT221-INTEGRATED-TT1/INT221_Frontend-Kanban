@@ -109,8 +109,13 @@ onBeforeMount(async () => {
     utilityStore.boardManager.addBoards(fetchBoards)
 
     utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : ""
+
+    utilityStore.isOwnerBoard ? 
+    utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
+    utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.filter(board => board.id === route.params.boardID)[0]}
+
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
+
     if(utilityStore.isOwnerBoard) {
       currentVisibility.value = utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]?.visibility
       currentVisibility.value === 'PUBLIC' ? isToggled.value = true : isToggled.value = false
@@ -160,7 +165,7 @@ onBeforeMount(async () => {
           <!-- <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
             IT-BangMod Kradan Kanban
           </h1> -->
-        <div class="flex items-center gap-3 font-semibold text-[#58c1fd] text-3xl "> 
+        <div class="flex items-center gap-3 font-semibold text-[#ffffff] text-3xl "> 
           <span class="text-headline text-sm text-opacity-50"> < </span>{{ utilityStore.selectedBoard.name }}
         </div>
         </router-link>

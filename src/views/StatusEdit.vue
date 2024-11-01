@@ -74,11 +74,6 @@ onBeforeMount(async () => {
   try {
     const fetchData = await getStatus(route.params.boardID, route.params.statusID)
 
-    const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
-    utilityStore.collabAccessRight = collabIdentity.accessRight
-    console.log(collabIdentity.accessRight)
-    collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
-
     utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
     if (!utilityStore.isOwnerBoard) {
       // router.push(`/board/${route.params.boardID}/status`).then(() => {
@@ -92,8 +87,10 @@ onBeforeMount(async () => {
       //       position: "bottom-right",
       //     })
       // })
-      router.push('/error')
-      return
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
     }
     
     status.value = fetchData
@@ -106,6 +103,8 @@ onBeforeMount(async () => {
     updateStatus.color = status.value.color
   } catch (error) {
     console.log(error)
+    router.push('/error')
+    return
   }
 })
 </script>
