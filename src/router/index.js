@@ -14,7 +14,6 @@ import TeamPage from "@/views/TeamPage.vue"
 import LoginPage from "@/views/LoginPage.vue"
 import BoardHome from "@/views/BoardHome.vue"
 import BoardCreate from "@/views/BoardCreate.vue"
-import bankApp from "@/views/bankApp.vue"
 // import ShareTask from "@/views/ShareTask.vue"
 import { authorizedUser, getNewAccessToken } from "@/libs/FetchAPI"
 
