@@ -83,11 +83,6 @@ onBeforeMount(async () => {
       // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
       console.log("Owner Board : ",utilityStore.isOwnerBoard)
 
-      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
-      utilityStore.collabAccessRight = collabIdentity.accessRight
-      console.log(collabIdentity.accessRight)
-      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
-
       utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
       if (!utilityStore.isOwnerBoard) {
         // router.push(`/board/${route.params.boardID}/status`).then(() => {
@@ -101,6 +96,10 @@ onBeforeMount(async () => {
         //       position: "bottom-right",
         //     })
         // })
+        const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+        utilityStore.collabAccessRight = collabIdentity.accessRight
+        console.log(collabIdentity.accessRight)
+        collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
         router.push('/error')
         return
       }

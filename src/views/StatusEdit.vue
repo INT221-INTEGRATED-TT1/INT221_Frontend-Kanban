@@ -122,7 +122,7 @@ onBeforeMount(async () => {
         Status Editing
       </h1>
       <div class="flex justify-end px-14">
-        <button @click="router.push(`status`)">
+        <button @click="router.push(`/board/${route.params.boardID}/status`)">
           <span><Xmark /></span>
         </button>
       </div>
