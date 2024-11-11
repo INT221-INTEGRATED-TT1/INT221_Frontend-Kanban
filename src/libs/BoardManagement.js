@@ -23,7 +23,7 @@ class BoardManagement {
   }
 
   deleteBoard(deleteId) {
-    this.boards.splice(this.boards.findIndex((Board) => Board.id === deleteId),1)
+    this.boards.personalBoards.splice(this.boards.personalBoards.findIndex((Board) => Board.id === deleteId),1)
   }
 
   // editBoard(boardId, newBoard) {

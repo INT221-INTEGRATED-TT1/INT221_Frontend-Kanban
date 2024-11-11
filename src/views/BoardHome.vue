@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onMounted, onBeforeMount, watch, reactive} from "vue"
-import {getAllBoards} from "@/libs/FetchAPI.js"
+import {getAllBoards, deleteBoard} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import AboutBoardIcon from "@/components/icons/AboutBoard.vue"
@@ -20,6 +20,13 @@ const selectBoard = (selectBoardId) => {
   utilityStore.selectedBoard = {...filterBoard}
   router.push(`/board/${selectBoardId}/task`)
 }
+
+const removeBoard = async (selectBoardId) => {
+  const responseDeleteBoard = await deleteBoard(selectBoardId) 
+  if(responseDeleteBoard.status === 200) {
+    utilityStore.boardManager.deleteBoard(selectBoardId)
+  }
+} 
 
 onBeforeMount(async () => {
   utilityStore.collabAccessRight = ''
@@ -83,23 +90,26 @@ onBeforeMount(async () => {
       class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem]">
       <div v-for="(board, index) in utilityStore.boardManager.getBoards().personalBoards" :key="board.id"
         class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between hover:bg-normal hover:bg-opacity-10"
-        @click="selectBoard(board.id)">
+        >
 
         <!-- <div class="flex gap-4"> -->
-        <p class="font-Inter text-end" :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
-        <div class="flex items-center min-h-16" 
-          :data-tip="board.name.length > 10 ? board.name : ''"
-          :class="board.name.length > 10 ? 'tooltip' : ''">
-          <div class="self-center pr-2">
-            <AboutBoardIcon width="40" height="48" />
+        <div @click="selectBoard(board.id)">
+          <p class="font-Inter text-end" :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
+          <div class="flex items-center min-h-16" 
+            :data-tip="board.name.length > 10 ? board.name : ''"
+            :class="board.name.length > 10 ? 'tooltip' : ''"
+            >
+            <div class="self-center pr-2">
+              <AboutBoardIcon width="40" height="48" />
+            </div>
+            <p class="text-xl font-bold text-start" 
+            :class=" board.name.length > 24 ? 'text-nowrap max-h-16 truncate' : 'text-balance'">
+              {{ board.name }}
+            </p>
           </div>
-          <p class="text-xl font-bold text-start" 
-          :class=" board.name.length > 24 ? 'text-nowrap max-h-16 truncate' : 'text-balance'">
-            {{ board.name }}
-          </p>
         </div>
 
-        <div class="flex items-end justify-between mt-7">
+        <div class="flex items-end justify-between mt-7" >
           <div>
             <p class="text-sm font-medium">
               By {{ userStore.userIdentity.name }}
@@ -108,8 +118,8 @@ onBeforeMount(async () => {
               Created At {{ utilityStore.formatDateTime(board.createdOn) }}
             </p>
           </div>
-          <button class="tooltip tooltip-error text-normal" data-tip="Delete">
-            <DeleteIcon width="28" height="37" />
+          <button class="tooltip tooltip-error text-normal" data-tip="Delete" @click="removeBoard(board.id)">
+            <DeleteIcon width="28" height="37"/>
           </button>
         </div>
       </div>

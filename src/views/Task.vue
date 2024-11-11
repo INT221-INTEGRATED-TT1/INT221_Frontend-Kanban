@@ -135,11 +135,11 @@ onBeforeMount(async () => {
     const fetchTasks = await getAllTasks(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
     // utilityStore.selectedBoard.name.length > 0 ? console.log('board has board name') : utilityStore.selectedBoard = {...fetchTasks[0]?.board}
-    !utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...fetchTasks[0]?.board} : ""
+    !utilityStore.selectedBoard.name ? utilityStore.selectedBoard = {...fetchTasks[0]?.board} : ""
     // console.log(utilityStore.selectedBoardId)
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
     // console.log(fetchTasks)
-
+    // console.log(utilityStore.selectedBoard)
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
         ? (task.assignees = "Unassigned")
