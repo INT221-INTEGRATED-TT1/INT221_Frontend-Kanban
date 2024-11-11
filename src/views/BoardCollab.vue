@@ -111,7 +111,7 @@ onBeforeMount(async () => {
     userStore.userIdentity = { ...JSON.parse(decodedData) }
 
     const fetchBoards = await getAllBoards()
-    utilityStore.boardManager.addBoards(fetchBoards)
+    utilityStore.boardManager.addBoards(fetchBoards[0])
 
     utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
     utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : ""
@@ -201,8 +201,7 @@ onBeforeMount(async () => {
               </ul>
             </div>
           </div>
-          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">something went wrong ! try again
-            later.</p>
+          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">something went wrong ! try againlater.</p>
           <!-- Collaborators -->
           <!-- <div v-for="i in 7"></div> -->
           <!-- button -->
