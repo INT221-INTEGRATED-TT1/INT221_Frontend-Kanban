@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeMount, computed, reactive } from "vue"
+import { ref, onMounted, onBeforeMount, computed, reactive, watch } from "vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import UserSetting from "@/components/UserSetting.vue"
 import Xmark from "@/components/icons/Xmark.vue"
@@ -16,6 +16,8 @@ const route = useRoute()
 const utilityStore = useUtilityStore()
 const addCollaboratorModal = ref(false)
 const isEmailValid = ref(true)
+const emailFieldErrorMassage = ref('something went wrong ! try againlater.')
+const watchButtonDisable = ref(false)
 const confirmChangeAccessRight = ref(false)
 let collaboratorSelected = reactive({
   oid : '',
@@ -49,12 +51,23 @@ const addNewCollaborator = async () => {
       // console.log(fetchCollaborators.data)
       // userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
 
-      newCollaborator.status === 201 ? userStore.collaboratorManager.addCollaborator(newCollaborator.data, newFetchCollaboratorsForCollaboratorId.data) : ''
-      addCollaboratorModal.value = false
-      newCollaboratorModel.email = ""
-      newCollaboratorModel.accessRight = "READ"
+      if(newCollaborator.status === 201) {
+        userStore.collaboratorManager.addCollaborator(newCollaborator.data, newFetchCollaboratorsForCollaboratorId.data)
+        addCollaboratorModal.value = false
+        newCollaboratorModel.email = ""
+        newCollaboratorModel.accessRight = "READ"
+      }
+      else if (newCollaborator.status === 404) {
+        emailFieldErrorMassage.value = 'The user does not exists.'
+        isEmailValid.value = false
+      }
+      else if (newCollaborator.status === 409) {
+        emailFieldErrorMassage.value = 'The user is already the collaborator of this board.'
+        isEmailValid.value = false
+      }
     } else{
       console.log("can't add new collab")
+      emailFieldErrorMassage.value = 'something went wrong ! try againlater.'
       isEmailValid.value = false
       utilityStore.transactionDisable = true
 
@@ -86,7 +99,24 @@ const isButtonDisabled = computed(() => {
   
   // console.log('new : ' , newCollaboratorModel)
   // console.log('old : ' , oldCollaboratorModel)
-  return !newCollaboratorModel.email || utilityStore.transactionDisable || (userStore.userIdentity.email === newCollaboratorModel.email)
+  return !newCollaboratorModel.email || utilityStore.transactionDisable || (userStore.userIdentity.email === newCollaboratorModel.email) || watchButtonDisable.value
+})
+
+
+watch(newCollaboratorModel, (newValue, oldValue) => {
+  // console.log(newValue)
+  if (!emailPattern.test(newValue.email)) {
+    watchButtonDisable.value = true
+  }
+
+  else if(userStore.userIdentity.email === newValue.email) {
+    emailFieldErrorMassage.value = 'Board owner cannot be collaborator of his/her own board'
+    isEmailValid.value = false
+  }
+  else {
+    watchButtonDisable.value = false
+    isEmailValid.value = true
+  }
 })
 
 const changeAccessRightModal = (collaborator, changeAccesright) => {
@@ -201,7 +231,7 @@ onBeforeMount(async () => {
               </ul>
             </div>
           </div>
-          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">something went wrong ! try againlater.</p>
+          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">{{ emailFieldErrorMassage }}</p>
           <!-- Collaborators -->
           <!-- <div v-for="i in 7"></div> -->
           <!-- button -->

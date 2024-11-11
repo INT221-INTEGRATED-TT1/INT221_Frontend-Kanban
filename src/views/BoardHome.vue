@@ -163,9 +163,9 @@ onBeforeMount(async () => {
               Created At {{ utilityStore.formatDateTime(board.createdOn) }}
             </p>
           </div>
-          <button class="tooltip tooltip-error text-normal" data-tip="Delete">
+          <!-- <button class="tooltip tooltip-error text-normal" data-tip="Delete">
             <DeleteIcon width="28" height="37" />
-          </button>
+          </button> -->
         </div>
       </div>
     </div>
