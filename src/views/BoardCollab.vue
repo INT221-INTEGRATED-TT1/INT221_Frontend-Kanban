@@ -50,7 +50,6 @@ const addNewCollaborator = async () => {
       // userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
 
       newCollaborator.status === 201 ? userStore.collaboratorManager.addCollaborator(newCollaborator.data, newFetchCollaboratorsForCollaboratorId.data) : ''
-
       addCollaboratorModal.value = false
       newCollaboratorModel.email = ""
       newCollaboratorModel.accessRight = "READ"

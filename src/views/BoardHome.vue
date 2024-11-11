@@ -30,9 +30,11 @@ onBeforeMount(async () => {
   }
   try {
     const fetchBoards = await getAllBoards()
-    utilityStore.boardManager.addBoards(fetchBoards)
+    utilityStore.boardManager.addBoards(fetchBoards[0])
     console.log(fetchBoards)
     console.log(utilityStore.boardManager.getBoards());
+    console.log(utilityStore.boardManager.getBoards().collaboratorBoards);
+
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }

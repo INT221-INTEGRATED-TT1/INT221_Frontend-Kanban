@@ -129,7 +129,7 @@ onBeforeMount(async () => {
   if (JWT_TOKEN) {
     try {
       const fetchBoards = await getAllBoards()
-      utilityStore.boardManager.addBoards(fetchBoards)
+      utilityStore.boardManager.addBoards(fetchBoards[0])
       utilityStore.selectedBoardId = route.params.boardID
 
       utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")

@@ -13,7 +13,7 @@ class CollaboratorManagement {
     const findCollaboratorId = newCollaborators.find(collaborator => collaborator.name === newCollaborator.collaboratorName).oid
     console.log(findCollaboratorId)
     let migrateNewCollaborator = {
-      oid : newCollaborator.findCollaboratorId,
+      oid : findCollaboratorId,
       name : newCollaborator.collaboratorName,
       email : newCollaborator.collaboratorEmail,
       accessRight : newCollaborator.accessRight,
