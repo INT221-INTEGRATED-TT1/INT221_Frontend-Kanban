@@ -14,6 +14,7 @@ import TeamPage from "@/views/TeamPage.vue"
 import LoginPage from "@/views/LoginPage.vue"
 import BoardHome from "@/views/BoardHome.vue"
 import BoardCreate from "@/views/BoardCreate.vue"
+import InvitationCollab from "@/views/InvitationCollab.vue"
 // import ShareTask from "@/views/ShareTask.vue"
 import { authorizedUser, getNewAccessToken } from "@/libs/FetchAPI"
 
@@ -51,11 +52,21 @@ const router = createRouter({
       ],
     },
     // {path: "/board/add", component: BoardCreate, name: "create-board"}
-    // {path:"/test", component: TestLen}
+    {path:"/test", component: InvitationCollab},
     {
       path: "/board/:boardID/task",
       component: Task,
       name: "board-task",
+      // beforeEnter: async (to, from, next) => {
+      //   // การทำงานก่อนที่จะอนุญาตให้เข้าถึง route ลูก
+      //   console.log("Starting task setup in Task component...");
+        
+      //   // ตัวอย่างการทำงาน (เช่น โหลดข้อมูล หรือเช็คเงื่อนไขบางอย่าง)
+      //   await new Promise((resolve) => setTimeout(resolve, 500));
+        
+      //   console.log("Task setup completed");
+      //   next(); // อนุญาตให้เข้าถึง route ลูก
+      // },
       children: [
         { path: ":taskID", component: TaskModalDetail, },
         { path: ":taskID/edit", component: TaskEdit, },
@@ -76,7 +87,11 @@ const router = createRouter({
       path: "/board/:boardID/collab",
       component: BoardCollab,
       name: "board-collab",
+      children: [
+        { path: "invitations", component: InvitationCollab, name: "collab-invitations" },
+      ],
     },
+    
   ]
 
 })

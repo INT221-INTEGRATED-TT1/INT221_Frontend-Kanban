@@ -91,6 +91,10 @@ onBeforeMount(async () => {
       utilityStore.collabAccessRight = collabIdentity.accessRight
       console.log(collabIdentity.accessRight)
       collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+      if(utilityStore.isOwnerBoard === false) {
+          router.push('/error')
+          return
+      }
     }
     
     status.value = fetchData
