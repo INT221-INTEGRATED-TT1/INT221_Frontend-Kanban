@@ -101,17 +101,23 @@ router.beforeEach(async (to, from, next) => {
   const accessToken = localStorage.getItem("JWT_TOKEN");
   // console.log(accessToken);
   // console.log(to.fullPath)
-  if(/\/board\/.{10}$/.test(to.fullPath)) {next(`${to.fullPath}/task`)}
+  if (/\/board\/.{10}$/.test(to.fullPath)) { next(`${to.fullPath}/task`) }
   if (accessToken) {
     // console.log(to);
     try {
       const authzUserResponse = await authorizedUser();
       if (authzUserResponse.status === 200) {
         // console.log('Authentication Pass');
+        const redirect = localStorage.getItem("REDIRECT_FULLPATH");
         if (to.name === 'login') {
           // If authenticated user tries to access login page, redirect to /board
           next('/board');
-        } else {
+        }
+        else if (redirect) {
+          next(redirect)
+          localStorage.removeItem("REDIRECT_FULLPATH");
+        }
+        else {
           // Proceed to the intended route
           next();
         }
@@ -137,8 +143,8 @@ router.beforeEach(async (to, from, next) => {
   } else {
     if (to.name === 'error') next('/error');
     else {
-       // If not authenticated, redirect to login
-      if (to.name === 'board-home' ) {
+      // If not authenticated, redirect to login
+      if (to.name === 'board-home') {
         next('/login');
       }
       // If already on the login page, proceed

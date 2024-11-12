@@ -180,7 +180,7 @@ onBeforeMount(async () => {
               Created At {{ utilityStore.formatDateTime(board.createdOn) }}
             </p>
           </div>
-          <button v-if="board.invitationStatus === 'PENDING'" class="text-yellow-500 text-sm " @click="router.push(`/board/${board.id}/collab/invitations`)">
+          <button v-if="board.invitationStatus === 'PENDING'" class="btn btn-outline btn-warning btn-xs text-sm " @click="router.push(`/board/${board.id}/collab/invitations`)">
             <!-- <DeleteIcon width="28" height="37" /> -->
             <p>Approve</p>
           </button>

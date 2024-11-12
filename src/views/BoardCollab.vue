@@ -150,10 +150,14 @@ onBeforeMount(async () => {
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
     // utilityStore.invitationBoardInformation = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.find(board => board.id === route.params.boardID)}
   }
-  // else {
-  //   router.push('/login')
-  //   return
-  // }
+  else {
+    console.log(route.fullPath)
+    if(route.fullPath.includes("/collab/invitations")){
+      localStorage.setItem("REDIRECT_FULLPATH", route.fullPath)
+      router.push('/login')
+      return
+    }
+  }
 
   try {
     const fetchCollaborators = await getCollaborators(route.params.boardID)
