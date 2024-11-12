@@ -336,7 +336,7 @@ onBeforeMount(async () => {
                 class="btn btn-sm btn-outline btn-error" 
                 :class="collaborator.invitationStatus === 'PENDING' ? 'opacity-60' : 'opacity-100'"
                 @click="utilityStore.confirmDeleteCollaborator(collaborator)"> 
-                {{ collaborator.oid !== userStore.userIdentity.oid ? 'Remove ' : 'Leave'}}
+                {{ collaborator.invitationStatus === 'PENDING' ? 'Cancel' : collaborator.oid !== userStore.userIdentity.oid ? 'Remove ' : 'Leave'}}
               </button>
             </td>
           </tr>
