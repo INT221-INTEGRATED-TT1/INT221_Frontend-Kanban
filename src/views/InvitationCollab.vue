@@ -4,12 +4,23 @@ import GroupCode from "@/components/icons/GroupCode.vue"
 import UserSetting from "@/components/UserSetting.vue"
 import InvitationIcon from "@/components/icons/InvitationIcon.vue"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
+import { acceptBoardCollabInvitation, declineBoardCollabInvitation } from "@/libs/FetchAPI.js"
+import { useRoute } from "vue-router"
+import router from "@/router/index.js"
 
 const utilityStore = useUtilityStore()
+const route = useRoute()
 
-// onBeforeMount(async () => {
-//   console.log(useUtilityStore.selectedBoard)
-// })
+const acceptBoardInvitation = async(boardId) => {
+  const acceptInvitationResponse = await acceptBoardCollabInvitation(boardId)
+  acceptInvitationResponse.status === 200 ? router.push('/board') : ''
+}
+
+const denyBoardInvitation = async(boardId) => {
+  const denyInvitationResponse = await declineBoardCollabInvitation(boardId)
+  denyInvitationResponse.status === 200 ? router.push('/board') : ''
+}
+
 </script>
 
 <template>
@@ -42,8 +53,8 @@ const utilityStore = useUtilityStore()
           on 
         <span class="underline text-blue-400">{{ utilityStore.invitationBoardInformation?.name }}</span></p>
       <div class="flex items-center gap-10 tracking-wider">
-        <button class="btn btn-error">Decline</button>
-        <button class="btn btn-success">Accept</button>
+        <button class="btn btn-error" @click="denyBoardInvitation(route.params.boardID)">Decline</button>
+        <button class="btn btn-success" @click="acceptBoardInvitation(route.params.boardID)">Accept</button>
       </div>
     </div>
   </main>
