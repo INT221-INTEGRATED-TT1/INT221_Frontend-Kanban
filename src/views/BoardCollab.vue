@@ -144,15 +144,17 @@ onBeforeMount(async () => {
     utilityStore.boardManager.addBoards(fetchBoards)
 
     utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : ""
+    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
+    utilityStore.invitationBoardInformation = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.find(board => board.id === route.params.boardID)}
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
-    
+    // utilityStore.invitationBoardInformation = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.find(board => board.id === route.params.boardID)}
   }
 
   try {
     const fetchCollaborators = await getCollaborators(route.params.boardID)
     userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
     console.log(userStore.collaboratorManager.getCollaborators())
+    console.log(utilityStore.invitationBoardInformation)
   }
   catch (error) {
     console.log("Error fetching Collaborators : ", error.status === 404)
@@ -281,7 +283,12 @@ onBeforeMount(async () => {
           </tr>
           <tr v-else v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()"
             class="text-white border-none mt-1">
-            <td></td>
+            <td>
+              <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-300"></span>
+              </span>
+            </td>
             <td>{{ ++index }}</td>
             <td>{{collaborator.name}}</td>
             <td>{{collaborator.email}}</td>
@@ -355,6 +362,7 @@ onBeforeMount(async () => {
     <DeleteConfirmationCollab @remove-collaborator="removeCollaborator(utilityStore.collabSelected.oid)" />
     <!-- delete confirmation -->
   </main>
+  <router-view />
 </template>
 
 <style scoped></style>

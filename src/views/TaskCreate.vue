@@ -15,7 +15,6 @@ import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import {useRoute} from "vue-router"
 import { useUserStore } from "@/stores/useUserStore"
-// import { event } from "cypress/types/jquery"
 
 const userStore = useUserStore()
 const route = useRoute()
