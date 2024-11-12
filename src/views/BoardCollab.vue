@@ -149,6 +149,10 @@ onBeforeMount(async () => {
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
     // utilityStore.invitationBoardInformation = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.find(board => board.id === route.params.boardID)}
   }
+  else {
+    router.push('/login')
+    return
+  }
 
   try {
     const fetchCollaborators = await getCollaborators(route.params.boardID)
@@ -282,9 +286,9 @@ onBeforeMount(async () => {
             </td>
           </tr>
           <tr v-else v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()"
-            class="text-white border-none mt-1">
+            class="text-white border-none mt-1" :class="collaborator.invitationStatus === 'PENDING' ? 'text-opacity-50' : 'opacity-100'">
             <td>
-              <span class="relative flex h-3 w-3">
+              <span v-if="collaborator.invitationStatus === 'PENDING'" class="relative flex h-3 w-3">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-300"></span>
               </span>
@@ -320,6 +324,7 @@ onBeforeMount(async () => {
               <button 
                 :disabled="!utilityStore.isOwnerBoard && collaborator.oid !== userStore.userIdentity.oid"
                 class="btn btn-sm btn-outline btn-error" 
+                :class="collaborator.invitationStatus === 'PENDING' ? 'opacity-60' : 'opacity-100'"
                 @click="utilityStore.confirmDeleteCollaborator(collaborator)"> 
                 {{ collaborator.oid !== userStore.userIdentity.oid ? 'Remove ' : 'Leave'}}
               </button>

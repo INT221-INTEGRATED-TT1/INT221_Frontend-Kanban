@@ -18,6 +18,7 @@ class CollaboratorManagement {
       email : newCollaborator.collaboratorEmail,
       accessRight : newCollaborator.accessRight,
       addedOn : '2024-10-14T03:11:41Z',
+      invitationStatus : newCollaborator.invitationStatus,
     }
 
     this.collaborators.push(migrateNewCollaborator)
