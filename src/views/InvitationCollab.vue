@@ -6,6 +6,7 @@ import InvitationIcon from "@/components/icons/InvitationIcon.vue"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { acceptBoardCollabInvitation, declineBoardCollabInvitation } from "@/libs/FetchAPI.js"
 import { useRoute } from "vue-router"
+import NoBoardBG from "@/components/icons/NoBoardBG.vue"
 import router from "@/router/index.js"
 
 const utilityStore = useUtilityStore()
@@ -13,7 +14,7 @@ const route = useRoute()
 
 const acceptBoardInvitation = async(boardId) => {
   const acceptInvitationResponse = await acceptBoardCollabInvitation(boardId)
-  acceptInvitationResponse.status === 200 ? router.push('/board') : ''
+  acceptInvitationResponse.status === 200 ? router.push(`/board/${route.params.boardID}`) : ''
 }
 
 const denyBoardInvitation = async(boardId) => {
@@ -43,18 +44,30 @@ const denyBoardInvitation = async(boardId) => {
     </div>
 
     <!-- content -->
-    <div class="flex flex-col items-center justify-center gap-4">
+    <div v-if="utilityStore.isInvitationActive && !utilityStore.isOwnerBoard" class="flex flex-col items-center justify-center gap-4">
       <h1 class="font-Inter text-4xl text-white font-bold tracking-wide">You have invited !</h1>
       <InvitationIcon />
       <p class="font-Inter text-xl text-white tracking-wide">
-        <span class="text-red-300">{{ utilityStore.invitationBoardInformation.owner?.name }}</span> 
-          has invited you to collaborate with
-        <span class="text-green-300">{{ utilityStore.invitationBoardInformation?.accessRight }}</span>  
-          on 
-        <span class="underline text-blue-400">{{ utilityStore.invitationBoardInformation?.name }}</span></p>
+        <span class="text-red-300">{{ utilityStore.invitationBoardInformation.owner?.name }}</span>
+        has invited you to collaborate with
+        <span class="text-green-300">{{ utilityStore.invitationBoardInformation?.accessRight }}</span>
+        on
+        <span class="underline text-blue-400">{{ utilityStore.invitationBoardInformation?.name }}</span>
+      </p>
       <div class="flex items-center gap-10 tracking-wider">
         <button class="btn btn-error" @click="denyBoardInvitation(route.params.boardID)">Decline</button>
         <button class="btn btn-success" @click="acceptBoardInvitation(route.params.boardID)">Accept</button>
+      </div>
+    </div>
+
+    <div v-else>
+      <div class="flex flex-col justify-center items-center mt-32">
+        <div>
+          <NoBoardBG />
+        </div>
+        <h1 class="text-center text-white text-opacity-40 font-Inter text-[24px] tracking-wider ml-12">
+          Sorry, we couldn't find your active invitation to this board.
+        </h1>
       </div>
     </div>
   </main>

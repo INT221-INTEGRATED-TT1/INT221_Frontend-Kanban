@@ -25,6 +25,7 @@ export const useUtilityStore = defineStore("utility", () => {
   const limitStatusNumber = ref(10)
   const selectedBoardId = ref('')
   const invitationBoardInformation = ref({})
+  const isInvitationActive = ref(true)
   const selectedBoard = ref({
     id : "",
     name : "",
@@ -112,5 +113,6 @@ export const useUtilityStore = defineStore("utility", () => {
     showChangeBoardVisibilityConfirmation,
     confirmDeleteCollaborator,
     collabAccessRight,
+    isInvitationActive,
   }
 })

@@ -98,7 +98,7 @@ onBeforeMount(async () => {
           <p class="font-Inter text-end"
             :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{
             board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
-          <div class="flex items-center min-h-16" :data-tip="board.name.length > 10 ? board.name : ''"
+          <div class="flex items-center min-h-16 cursor-pointer" :data-tip="board.name.length > 10 ? board.name : ''"
             :class="board.name.length > 10 ? 'tooltip' : ''">
             <div class="self-center pr-2">
               <AboutBoardIcon width="40" height="48" />

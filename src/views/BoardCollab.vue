@@ -134,6 +134,7 @@ const changeAccessRight = async () => {
 
 onBeforeMount(async () => {
   utilityStore.isOwnerBoard = false
+  utilityStore.isInvitationActive = true
   utilityStore.selectedBoardId = route.params.boardID
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
   if (JWT_TOKEN) {
@@ -149,20 +150,25 @@ onBeforeMount(async () => {
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
     // utilityStore.invitationBoardInformation = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.find(board => board.id === route.params.boardID)}
   }
-  else {
-    router.push('/login')
-    return
-  }
+  // else {
+  //   router.push('/login')
+  //   return
+  // }
 
   try {
     const fetchCollaborators = await getCollaborators(route.params.boardID)
     userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
     console.log(userStore.collaboratorManager.getCollaborators())
     console.log(utilityStore.invitationBoardInformation)
+    if(userStore.collaboratorManager.getCollaborators()?.some(collabUser => collabUser.oid === userStore.userIdentity.oid && collabUser.invitationStatus !== 'PENDING')){
+      utilityStore.isInvitationActive = false
+      console.log(utilityStore.isInvitationActive)
+    }
   }
   catch (error) {
-    console.log("Error fetching Collaborators : ", error.status === 404)
-    error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
+    // console.log("Error fetching Collaborators : ", error.status === 404)
+    utilityStore.isInvitationActive = false
+    error.status === 404 ? router.push({name: "not-found"})  : "router.push('/error')"
   }
 })
 
