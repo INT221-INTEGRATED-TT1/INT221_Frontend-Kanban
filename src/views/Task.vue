@@ -106,7 +106,7 @@ onBeforeMount(async () => {
     userStore.userIdentity = { ...JSON.parse(decodedData) }
 
     const fetchBoards = await getAllBoards()
-    utilityStore.boardManager.addBoards(fetchBoards[0])
+    utilityStore.boardManager.addBoards(fetchBoards)
 
     utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
 

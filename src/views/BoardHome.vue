@@ -37,7 +37,7 @@ onBeforeMount(async () => {
   }
   try {
     const fetchBoards = await getAllBoards()
-    utilityStore.boardManager.addBoards(fetchBoards[0])
+    utilityStore.boardManager.addBoards(fetchBoards)
     console.log(fetchBoards)
     console.log(utilityStore.boardManager.getBoards());
     console.log(utilityStore.boardManager.getBoards().collaboratorBoards);
@@ -141,7 +141,7 @@ onBeforeMount(async () => {
         @click="selectBoard(board.id)">
 
         <!-- <div class="flex gap-4"> -->
-        <p class="font-Inter text-end " :class="board.accessRight === '[WRITE]' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.accessRight === '[READ]' ? 'Read' : 'Write'}}</p>
+        <p class="font-Inter text-end " :class="board.accessRight === 'WRITE' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.accessRight === 'READ' ? 'Read' : 'Write'}}</p>
         <div class="flex items-center min-h-16" 
           :data-tip="board.name.length > 10 ? board.name : ''"
           :class="board.name.length > 10 ? 'tooltip' : ''">
