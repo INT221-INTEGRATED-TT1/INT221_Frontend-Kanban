@@ -13,6 +13,8 @@ import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
+import AttachIcon from "@/components/icons/AttachIcon.vue"
+import CloudUploadIcon from "@/components/icons/CloudUploadIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import { useUserStore } from "@/stores/useUserStore"
@@ -151,6 +153,15 @@ const isButtonDisable = computed(() => {
     utilityStore.transactionDisable
   )
 })
+
+const fileNames = ref(["CloudUploadIcon.svg","attachlink.svg"])
+// const files = ref([])
+const handleFileUpload = (event) => {
+  // console.log(event.target.files[0])
+  let files = event.target.files
+  fileNames.value = Array.from(files).map(file => file.name)
+  console.log(Array.from(files))
+}
 
 onBeforeMount(async () => {
   try {
@@ -334,6 +345,33 @@ onBeforeMount(async () => {
               {{ task.updated }}
             </div>
           </div>
+
+          <!-- Attachment -->
+          <div class="flex gap-x-10 items-center">
+            <div class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
+              <span>
+                <AttachIcon />
+              </span>
+              Attachment
+            </div>
+
+            <div>
+              <label class="flex items-center gap-2 rounded-lg bg-[#3D3C3C] px-3 py-1 w-auto cursor-pointer">
+                <input type="file" class="hidden" @change="handleFileUpload"/>
+                <CloudUploadIcon/>
+                <span class="font-Geist tracking-wide">upload file</span>
+              </label>
+            </div>
+          </div>
+          <div class="flex items-center gap-5">
+            <p>Files</p>
+            <ul v-if="fileNames" class="flex items-center gap-3 text-gray-500 ">
+              <li v-for="(file, index) in fileNames" :key="index">
+                {{ fileNames.length <= 1 ? file : index === fileNames.length - 1 ? file : file + " ," }}
+              </li>
+            </ul>
+        </div>
+          <!-- Attachment -->
 
           <!-- Description -->
           <textarea
