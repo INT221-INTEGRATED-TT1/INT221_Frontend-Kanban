@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onMounted, onBeforeMount, watch, reactive} from "vue"
-import {getAllBoards} from "@/libs/FetchAPI.js"
+import {getAllBoards, deleteBoard} from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import AboutBoardIcon from "@/components/icons/AboutBoard.vue"
@@ -21,7 +21,15 @@ const selectBoard = (selectBoardId) => {
   router.push(`/board/${selectBoardId}/task`)
 }
 
+const removeBoard = async (selectBoardId) => {
+  const responseDeleteBoard = await deleteBoard(selectBoardId) 
+  if(responseDeleteBoard.status === 200) {
+    utilityStore.boardManager.deleteBoard(selectBoardId)
+  }
+} 
+
 onBeforeMount(async () => {
+  utilityStore.collabAccessRight = ''
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN")
   if (JWT_TOKEN) {
     const decodedData = window.atob(JWT_TOKEN.split(".")[1])
@@ -32,6 +40,8 @@ onBeforeMount(async () => {
     utilityStore.boardManager.addBoards(fetchBoards)
     console.log(fetchBoards)
     console.log(utilityStore.boardManager.getBoards());
+    console.log(utilityStore.boardManager.getBoards().collaboratorBoards);
+
   } catch (error) {
     console.log("Error fetching tasks : ", error)
   }
@@ -60,11 +70,13 @@ onBeforeMount(async () => {
     <div class="flex justify-center items-center mt-2">
       <div class="flex mx-auto pl-44 gap-10 items-center">
         <button @click="personalORcollab = 'PERSONAL'"
-          class="text-headline text-xl tracking-wider w-36 py-1 rounded-xl hover:bg-[#272727] hover:duration-[350ms]" :class="personalORcollab === 'PERSONAL' ? 'bg-[#414141] bg-opacity-90': ''">
+          class="text-headline text-xl tracking-wider w-36 py-1 rounded-xl hover:bg-[#272727] hover:duration-[350ms]"
+          :class="personalORcollab === 'PERSONAL' ? 'bg-[#414141] bg-opacity-90': ''">
           Personal
         </button>
         <button @click="personalORcollab = 'COLLAB'"
-          class="text-headline text-xl tracking-wider py-1 w-36 rounded-xl hover:bg-[#272727] hover:duration-[350ms]" :class="personalORcollab === 'COLLAB' ? 'bg-[#414141] bg-opacity-90': ''">
+          class="text-headline text-xl tracking-wider py-1 w-36 rounded-xl hover:bg-[#272727] hover:duration-[350ms]"
+          :class="personalORcollab === 'COLLAB' ? 'bg-[#414141] bg-opacity-90': ''">
           Collab
         </button>
       </div>
@@ -79,21 +91,23 @@ onBeforeMount(async () => {
     <div v-if="utilityStore.boardManager.getBoards().personalBoards?.length > 0 && personalORcollab === 'PERSONAL'"
       class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem]">
       <div v-for="(board, index) in utilityStore.boardManager.getBoards().personalBoards" :key="board.id"
-        class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between hover:bg-normal hover:bg-opacity-10"
-        @click="selectBoard(board.id)">
+        class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between hover:bg-normal hover:bg-opacity-10">
 
         <!-- <div class="flex gap-4"> -->
-        <p class="font-Inter text-end" :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
-        <div class="flex items-center min-h-16" 
-          :data-tip="board.name.length > 10 ? board.name : ''"
-          :class="board.name.length > 10 ? 'tooltip' : ''">
-          <div class="self-center pr-2">
-            <AboutBoardIcon width="40" height="48" />
+        <div @click="selectBoard(board.id)">
+          <p class="font-Inter text-end"
+            :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{
+            board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
+          <div class="flex items-center min-h-16 cursor-pointer" :data-tip="board.name.length > 10 ? board.name : ''"
+            :class="board.name.length > 10 ? 'tooltip' : ''">
+            <div class="self-center pr-2">
+              <AboutBoardIcon width="40" height="48" />
+            </div>
+            <p class="text-xl font-bold text-start"
+              :class=" board.name.length > 24 ? 'text-nowrap max-h-16 truncate' : 'text-balance'">
+              {{ board.name }}
+            </p>
           </div>
-          <p class="text-xl font-bold text-start" 
-          :class=" board.name.length > 24 ? 'text-nowrap max-h-16 truncate' : 'text-balance'">
-            {{ board.name }}
-          </p>
         </div>
 
         <div class="flex items-end justify-between mt-7">
@@ -105,7 +119,7 @@ onBeforeMount(async () => {
               Created At {{ utilityStore.formatDateTime(board.createdOn) }}
             </p>
           </div>
-          <button class="tooltip tooltip-error text-normal" data-tip="Delete">
+          <button class="tooltip tooltip-error text-normal" data-tip="Delete" @click="removeBoard(board.id)">
             <DeleteIcon width="28" height="37" />
           </button>
         </div>
@@ -114,8 +128,10 @@ onBeforeMount(async () => {
 
     <div v-if="utilityStore.boardManager.getBoards().personalBoards?.length === 0 && personalORcollab === 'PERSONAL'">
       <div class="flex flex-col justify-center items-center mt-32">
-        <div ><NoBoardBG /></div>
-        <h1 class="text-center text-white text-opacity-40 font-Inter text-[24px] tracking-wider" >
+        <div>
+          <NoBoardBG />
+        </div>
+        <h1 class="text-center text-white text-opacity-40 font-Inter text-[24px] tracking-wider">
           It seems you don't have any boards yet. Please create a new board to get started.
         </h1>
       </div>
@@ -124,34 +140,49 @@ onBeforeMount(async () => {
     <div v-if="utilityStore.boardManager.getBoards().collaboratorBoards?.length > 0 && personalORcollab === 'COLLAB'"
       class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem]">
       <div v-for="(board, index) in utilityStore.boardManager.getBoards().collaboratorBoards" :key="board.id"
-        class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between hover:bg-normal hover:bg-opacity-10"
-        @click="selectBoard(board.id)">
+        class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between hover:bg-normal hover:bg-opacity-10">
 
         <!-- <div class="flex gap-4"> -->
-        <p class="font-Inter text-end" :class="board.visibility === 'PUBLIC' ? 'text-[#13FF80] text-opacity-65' : 'text-white text-opacity-30'">{{ board.visibility === 'PUBLIC' ? 'Publish' : 'Private'}}</p>
-        <div class="flex items-center min-h-16" 
-          :data-tip="board.name.length > 10 ? board.name : ''"
-          :class="board.name.length > 10 ? 'tooltip' : ''">
-          <div class="self-center pr-2">
-            <AboutBoardIcon width="40" height="48" />
+        <div @click="selectBoard(board.id)">
+          <div v-if="board.invitationStatus === 'PENDING'" class="flex items-center gap-2 justify-end">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-300"></span>
+            </span>
+            <p class="font-Inter text-end text-white text-opacity-30">Pending Invite</p>
           </div>
-          <p class="text-xl font-bold text-start" 
-          :class=" board.name.length > 24 ? 'text-nowrap max-h-16 truncate' : 'text-balance'">
-            {{ board.name }}
-          </p>
+          <p v-else class="font-Inter text-end "
+            :class="board.accessRight === 'WRITE' ? 'text-[#13FF80] text-opacity-65' : 'text-blue-400 text-opacity-65'">
+            {{ board.accessRight === 'READ' ? 'Read' : 'Write' }}</p>
+          <div class="flex items-center min-h-16 cursor-pointer" :data-tip="board.name.length > 10 ? board.name : ''"
+            :class="board.name.length > 10 ? 'tooltip' : ''">
+            <div class="self-center pr-2">
+              <AboutBoardIcon width="40" height="48" />
+            </div>
+            <p class="text-xl font-bold text-start"
+              :class="board.name.length > 24 ? 'text-nowrap max-h-16 truncate' : 'text-balance'">
+              {{ board.name }}
+            </p>
+          </div>
         </div>
 
-        <div class="flex items-end justify-between mt-7">
+        <div class="flex items-center justify-between mt-7">
           <div>
-            <p class="text-sm font-medium">
-              By {{ userStore.userIdentity.name }}
+            <p v-if="board.invitationStatus === 'PENDING'" class="text-xs font-light text-opacity-70"
+              :class="board.accessRight === 'WRITE' ? 'text-[#13FF80] ' : 'text-blue-400 '">
+              <!-- Created At {{ utilityStore.formatDateTime(board.createdOn) }} -->
+              {{ board.accessRight }}
             </p>
-            <p class="text-xs font-light opacity-55">
+            <p class="text-sm font-medium">
+              By {{ board.owner.name }}
+            </p>
+            <p v-if="board.invitationStatus !== 'PENDING'" class="text-xs font-light opacity-55">
               Created At {{ utilityStore.formatDateTime(board.createdOn) }}
             </p>
           </div>
-          <button class="tooltip tooltip-error text-normal" data-tip="Delete">
-            <DeleteIcon width="28" height="37" />
+          <button v-if="board.invitationStatus === 'PENDING'" class="btn btn-outline btn-warning btn-xs text-sm " @click="router.push(`/board/${board.id}/collab/invitations`)">
+            <!-- <DeleteIcon width="28" height="37" /> -->
+            <p>Approve</p>
           </button>
         </div>
       </div>
@@ -159,8 +190,10 @@ onBeforeMount(async () => {
 
     <div v-if="utilityStore.boardManager.getBoards().collaboratorBoards?.length === 0 && personalORcollab === 'COLLAB'">
       <div class="flex flex-col justify-center items-center mt-32">
-        <div ><NoBoardBG /></div>
-        <h1 class="text-center text-white text-opacity-40 font-Inter text-[24px] tracking-wider ml-12" >
+        <div>
+          <NoBoardBG />
+        </div>
+        <h1 class="text-center text-white text-opacity-40 font-Inter text-[24px] tracking-wider ml-12">
           You have not joined any boards yet.
         </h1>
       </div>

@@ -10,6 +10,7 @@ import {
   getAllStatuses,
   getAllBoards,
   deleteStatusTransfer,
+  findCollabById,
 } from "@/libs/FetchAPI";
 import StatusSetting from "@/components/StatusSetting.vue";
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue";
@@ -164,10 +165,21 @@ onBeforeMount(async () => {
     const fetchBoards = await getAllBoards()
     utilityStore.boardManager.addBoards(fetchBoards)
     utilityStore.selectedBoardId = route.params.boardID
-
     utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+
+    utilityStore.isOwnerBoard ? 
+    utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
+    utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.filter(board => board.id === route.params.boardID)[0]}
+
+    
     // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
     console.log("Owner Board : ",utilityStore.isOwnerBoard)
+    if(!utilityStore.isOwnerBoard){
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+    }
   }
   try {
     const fetchData = await getAllStatuses(route.params.boardID);
@@ -183,8 +195,8 @@ onBeforeMount(async () => {
     utilityStore.isStatusesMounted = true
   } catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
-    console.log("Error fetching tasks : ", error)
-    error.status === 404 ? router.push({name: 'not-found'}) : router.push('/error')
+    // console.log("Error fetching tasks : ", error)
+    // error.status === 404 ? router.push({name: 'not-found'}) : router.push('/error')
   }
 });
 
@@ -195,14 +207,17 @@ onBeforeMount(async () => {
     <div class="flex justify-between">
       <div>
         <router-link to="/board">
-          <h1
+          <!-- <h1
             class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand"
           >
             IT-BangMod Kradan Kanban
-          </h1>
+          </h1> -->
+          <div class="flex items-center gap-3 font-semibold text-[#ffffff] text-3xl "> 
+            <span class="text-headline text-sm text-opacity-50"> < </span>{{ utilityStore.selectedBoard.name }}
+          </div>
         </router-link>
 
-        <div class="ml-[22rem] tracking-in-expand-2">
+        <div class="opacity-0 ml-[22rem] ">
           <GroupCode />
         </div>
       </div>

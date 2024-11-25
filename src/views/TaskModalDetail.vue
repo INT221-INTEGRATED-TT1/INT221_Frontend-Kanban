@@ -11,6 +11,7 @@ import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
 import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
+import AttachIcon from "@/components/icons/AttachIcon.vue"
 
 const task = ref([])
 const route = useRoute()
@@ -83,7 +84,7 @@ onBeforeMount(async () => {
         <div
           class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5 break-all"
         >
-          {{ task.taskTitle }}
+          {{ task.title }}
         </div>
 
         <div class="grid grid-cols-1 grid-rows-4 gap-y-4">
@@ -142,15 +143,21 @@ onBeforeMount(async () => {
 
           <!-- UpdatedOn -->
           <div class="flex gap-x-10 items-center">
-            <div
-              class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
-            >
+            <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span><UpdatedDateIcon /></span> Updated On
             </div>
-            <div
-              class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
-            >
+            <div class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest">
               {{ task.updateOn }}
+            </div>
+          </div>
+
+          <!-- Attachment -->
+          <div class="flex gap-x-10 items-center">
+            <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
+              <span><AttachIcon /></span> Attachment
+            </div>
+            <div class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest">
+              File Uploaded
             </div>
           </div>
 

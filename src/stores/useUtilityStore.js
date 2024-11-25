@@ -2,7 +2,7 @@ import {TaskManagement} from "@/libs/TaskManagement"
 import {StatusManagement} from "@/libs/statusManagement"
 import {BoardManagement} from "@/libs/BoardManagement"
 import {defineStore} from "pinia"
-import {ref} from "vue"
+import {reactive, ref} from "vue"
 
 export const useUtilityStore = defineStore("utility", () => {
   const tasksManager = ref(new TaskManagement())
@@ -10,6 +10,10 @@ export const useUtilityStore = defineStore("utility", () => {
   const boardManager = ref(new BoardManagement())
   const selectedId = ref("")
   const taskTitleConfirm = ref("")
+  const collabSelected = reactive({
+    oid : '',
+    name : ''
+  })
   const statusTitle = ref("")
   const showDeleteConfirmation = ref(false)
   const showChangeBoardVisibilityConfirmation = ref(false)
@@ -20,6 +24,8 @@ export const useUtilityStore = defineStore("utility", () => {
   const isLimitEnable = ref(false)
   const limitStatusNumber = ref(10)
   const selectedBoardId = ref('')
+  const invitationBoardInformation = ref({})
+  const isInvitationActive = ref(true)
   const selectedBoard = ref({
     id : "",
     name : "",
@@ -29,6 +35,7 @@ export const useUtilityStore = defineStore("utility", () => {
     ownerId : ""
   })
   const isOwnerBoard = ref(false)
+  const collabAccessRight = ref('')
   const isTaskMounted = ref(false)
   const isStatusesMounted = ref(false)
 
@@ -46,6 +53,14 @@ export const useUtilityStore = defineStore("utility", () => {
     showDeleteConfirmation.value = true
     selectedId.value = taskId
     taskTitleConfirm.value = taskTitle
+  }
+
+  const confirmDeleteCollaborator = (collaborator) => {
+    showDeleteConfirmation.value = true
+    // console.log(collaborator)
+    collabSelected.oid = collaborator.oid
+    collabSelected.name = collaborator.name
+    // console.log(collabSelected)
   }
 
   const limitStatus = () => {
@@ -75,6 +90,7 @@ export const useUtilityStore = defineStore("utility", () => {
     selectedId,
     showDeleteConfirmation,
     taskTitleConfirm,
+    collabSelected,
     statusManager,
     selectedColor,
     statusTitle,
@@ -87,12 +103,16 @@ export const useUtilityStore = defineStore("utility", () => {
     isLimitEnable,
     limitStatusNumber,
     boardManager,
+    invitationBoardInformation,
     selectedBoard,
     selectedBoardId,
     formatDateTime,
     isOwnerBoard,
     isTaskMounted,
     isStatusesMounted,
-    showChangeBoardVisibilityConfirmation
+    showChangeBoardVisibilityConfirmation,
+    confirmDeleteCollaborator,
+    collabAccessRight,
+    isInvitationActive,
   }
 })

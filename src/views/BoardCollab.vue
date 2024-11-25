@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeMount, computed, reactive } from "vue"
+import { ref, onMounted, onBeforeMount, computed, reactive, watch } from "vue"
 import GroupCode from "@/components/icons/GroupCode.vue"
 import UserSetting from "@/components/UserSetting.vue"
 import Xmark from "@/components/icons/Xmark.vue"
@@ -9,12 +9,15 @@ import { getCollaborators, getAllBoards, addCollaborator, deleteCollaborator, ch
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useRoute } from "vue-router"
 import { useUserStore } from "@/stores/useUserStore"
+import DeleteConfirmationCollab from "@/components/DeleteConfirmationCollab.vue"
 
 const userStore = useUserStore()
 const route = useRoute()
 const utilityStore = useUtilityStore()
 const addCollaboratorModal = ref(false)
 const isEmailValid = ref(true)
+const emailFieldErrorMassage = ref('something went wrong ! try againlater.')
+const watchButtonDisable = ref(false)
 const confirmChangeAccessRight = ref(false)
 let collaboratorSelected = reactive({
   oid : '',
@@ -24,6 +27,8 @@ let collaboratorSelected = reactive({
   addedOn : '',
 })
 const newAccesRight = ref('')
+
+const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 // const numberofCollaborators = ref(6) getCollaborators
 const newCollaboratorModel = reactive({
   email : "",
@@ -37,18 +42,32 @@ let oldCollaboratorModel = reactive({
 
 const addNewCollaborator = async () => {
     oldCollaboratorModel = {...newCollaboratorModel}
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if(emailPattern.test(newCollaboratorModel.email)){
       isEmailValid.value = true
       console.log(newCollaboratorModel)
       const newCollaborator = await addCollaborator(route.params.boardID, newCollaboratorModel)
-      newCollaborator.status === 201 ? userStore.collaboratorManager.addCollaborator(newCollaborator.data) : ''
 
-      addCollaboratorModal.value = false
-      newCollaboratorModel.email = ""
-      newCollaboratorModel.accessRight = "READ"
+      const newFetchCollaboratorsForCollaboratorId = await getCollaborators(route.params.boardID)
+      // console.log(fetchCollaborators.data)
+      // userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
+
+      if(newCollaborator.status === 201) {
+        userStore.collaboratorManager.addCollaborator(newCollaborator.data, newFetchCollaboratorsForCollaboratorId.data)
+        addCollaboratorModal.value = false
+        newCollaboratorModel.email = ""
+        newCollaboratorModel.accessRight = "READ"
+      }
+      else if (newCollaborator.status === 404) {
+        emailFieldErrorMassage.value = 'The user does not exists.'
+        isEmailValid.value = false
+      }
+      else if (newCollaborator.status === 409) {
+        emailFieldErrorMassage.value = 'The user is already the collaborator of this board.'
+        isEmailValid.value = false
+      }
     } else{
       console.log("can't add new collab")
+      emailFieldErrorMassage.value = 'something went wrong ! try againlater.'
       isEmailValid.value = false
       utilityStore.transactionDisable = true
 
@@ -59,8 +78,12 @@ const addNewCollaborator = async () => {
 }
 
 const removeCollaborator = async (removeCollaboratorId) => {
+      console.log(removeCollaboratorId)
       const collaboratorRemoved = await deleteCollaborator(route.params.boardID, removeCollaboratorId)
       collaboratorRemoved.status === 200 ? userStore.collaboratorManager.deleteCollaborator(removeCollaboratorId) : ''
+      oldCollaboratorModel.email = ""
+      oldCollaboratorModel.accessRight = "READ"
+      utilityStore.showDeleteConfirmation = false
 }
 
 const cancelAddCollaboratorModal = () => {
@@ -73,9 +96,27 @@ const cancelAddCollaboratorModal = () => {
 
 const isButtonDisabled = computed(() => {
   oldCollaboratorModel.email !== newCollaboratorModel.email ? utilityStore.transactionDisable = false : oldCollaboratorModel.accessRight !== newCollaboratorModel.accessRight ? utilityStore.transactionDisable = false : utilityStore.transactionDisable = true
+  
   // console.log('new : ' , newCollaboratorModel)
   // console.log('old : ' , oldCollaboratorModel)
-  return !newCollaboratorModel.email || utilityStore.transactionDisable || (userStore.userIdentity.email === newCollaboratorModel.email)
+  return !newCollaboratorModel.email || utilityStore.transactionDisable || (userStore.userIdentity.email === newCollaboratorModel.email) || watchButtonDisable.value
+})
+
+
+watch(newCollaboratorModel, (newValue, oldValue) => {
+  // console.log(newValue)
+  if (!emailPattern.test(newValue.email)) {
+    watchButtonDisable.value = true
+  }
+
+  else if(userStore.userIdentity.email === newValue.email) {
+    emailFieldErrorMassage.value = 'Board owner cannot be collaborator of his/her own board'
+    isEmailValid.value = false
+  }
+  else {
+    watchButtonDisable.value = false
+    isEmailValid.value = true
+  }
 })
 
 const changeAccessRightModal = (collaborator, changeAccesright) => {
@@ -93,6 +134,7 @@ const changeAccessRight = async () => {
 
 onBeforeMount(async () => {
   utilityStore.isOwnerBoard = false
+  utilityStore.isInvitationActive = true
   utilityStore.selectedBoardId = route.params.boardID
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
   if (JWT_TOKEN) {
@@ -103,19 +145,34 @@ onBeforeMount(async () => {
     utilityStore.boardManager.addBoards(fetchBoards)
 
     utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : ""
+    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
+    utilityStore.invitationBoardInformation = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.find(board => board.id === route.params.boardID)}
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
-    
+    // utilityStore.invitationBoardInformation = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.find(board => board.id === route.params.boardID)}
+  }
+  else {
+    console.log(route.fullPath)
+    if(route.fullPath.includes("/collab/invitations")){
+      localStorage.setItem("REDIRECT_FULLPATH", route.fullPath)
+      router.push('/login')
+      return
+    }
   }
 
   try {
     const fetchCollaborators = await getCollaborators(route.params.boardID)
     userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
     console.log(userStore.collaboratorManager.getCollaborators())
+    console.log(utilityStore.invitationBoardInformation)
+    if(userStore.collaboratorManager.getCollaborators()?.some(collabUser => collabUser.oid === userStore.userIdentity.oid && collabUser.invitationStatus !== 'PENDING')){
+      utilityStore.isInvitationActive = false
+      console.log(utilityStore.isInvitationActive)
+    }
   }
   catch (error) {
-    console.log("Error fetching Collaborators : ", error.status === 404)
-    error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
+    // console.log("Error fetching Collaborators : ", error.status === 404)
+    utilityStore.isInvitationActive = false
+    error.status === 404 ? router.push({name: "not-found"})  : "router.push('/error')"
   }
 })
 
@@ -141,8 +198,9 @@ onBeforeMount(async () => {
     </div>
     <!-- Boad List Header & Add New board Button -->
     <div class="flex justify-end items-center mt-2">
-      <button @click="addCollaboratorModal = true"
-        class="flex items-center bg-[#E3E3E3] text-center py-2 px-5 rounded text-black text-sm font-semibold tracking-wid hover:bg-opacity-90">
+      <button @click="addCollaboratorModal = true" :disabled="!utilityStore.isOwnerBoard"
+        :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-white text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'hover:bg-opacity-90'"
+        class="flex items-center bg-[#E3E3E3] text-center py-2 px-5 rounded text-black text-sm font-semibold tracking-wid ">
         Add Collaborator
       </button>
     </div>
@@ -189,8 +247,7 @@ onBeforeMount(async () => {
               </ul>
             </div>
           </div>
-          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">something went wrong ! try again
-            later.</p>
+          <p v-if="!isEmailValid" class="font-Inter text-[15px] ml-3 text-red-500 mt-1">{{ emailFieldErrorMassage }}</p>
           <!-- Collaborators -->
           <!-- <div v-for="i in 7"></div> -->
           <!-- button -->
@@ -233,18 +290,29 @@ onBeforeMount(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()"
-            class="text-white border-none mt-1">
-            <td></td>
+          <tr v-if="userStore.collaboratorManager.getCollaborators().length === 0" class="border-none">
+            <td colspan="6" class="text-center font-bold text-xl text-headline text-opacity-50 p-10 tracking-wide">
+              No Collaborator
+            </td>
+          </tr>
+          <tr v-else v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()"
+            class="text-white border-none mt-1" :class="collaborator.invitationStatus === 'PENDING' ? 'text-opacity-50' : 'opacity-100'">
+            <td>
+              <span v-if="collaborator.invitationStatus === 'PENDING'" class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-300"></span>
+              </span>
+            </td>
             <td>{{ ++index }}</td>
             <td>{{collaborator.name}}</td>
             <td>{{collaborator.email}}</td>
             <td class="flex justify-center ">
               <div class="dropdown dropdown-bottom">
-                <button tabindex="0" role="button"
+                <button tabindex="0" role="button" :disabled="!utilityStore.isOwnerBoard"
+                  :class="!utilityStore.isOwnerBoard ? 'bg-opacity-15 text-opacity-40 tooltip cursor-not-allowed' : ''"
                   class="flex items-center gap-x-2 bg-[#5A5A5A] bg-opacity-30 px-4 py-2 rounded-3xl text-white text-sm tracking-wider hover:bg-opacity-90">
                   {{ collaborator.accessRight }}
-                  <DropdownIcon />
+                  <div :class="!utilityStore.isOwnerBoard ? 'opacity-45' : ''"><DropdownIcon /></div>
                 </button>
                 <ul tabindex="0"
                   class="dropdown-content z-[30] shadow border-[0.1px] border-opacity-25 border-[#CCB6B6] bg-[#18181B] rounded-md min-w-28 max-w-fit p-3 mt-1">
@@ -262,9 +330,14 @@ onBeforeMount(async () => {
               </div>
             </td>
             <td>
-              <div class="btn btn-sm btn-outline btn-error" @click="removeCollaborator(collaborator.oid)">
-                Remove
-              </div>
+              <!-- removeCollaborator(collaborator.oid) -->
+              <button 
+                :disabled="!utilityStore.isOwnerBoard && collaborator.oid !== userStore.userIdentity.oid"
+                class="btn btn-sm btn-outline btn-error" 
+                :class="collaborator.invitationStatus === 'PENDING' ? 'opacity-60' : 'opacity-100'"
+                @click="utilityStore.confirmDeleteCollaborator(collaborator)"> 
+                {{ collaborator.invitationStatus === 'PENDING' ? 'Cancel' : collaborator.oid !== userStore.userIdentity.oid ? 'Remove ' : 'Leave'}}
+              </button>
             </td>
           </tr>
         </tbody>
@@ -299,7 +372,12 @@ onBeforeMount(async () => {
           </div>
         </div>
     </div>
+
+    <!-- delete confirmation -->
+    <DeleteConfirmationCollab @remove-collaborator="removeCollaborator(utilityStore.collabSelected.oid)" />
+    <!-- delete confirmation -->
   </main>
+  <router-view />
 </template>
 
 <style scoped></style>

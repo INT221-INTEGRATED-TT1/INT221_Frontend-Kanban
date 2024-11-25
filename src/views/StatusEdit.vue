@@ -4,11 +4,13 @@ import router from "@/router"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import {getStatus, editStatus} from "@/libs/FetchAPI"
+import {getStatus, editStatus, findCollabById} from "@/libs/FetchAPI"
 import Xmark from "@/components/icons/Xmark.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
+import { useUserStore } from "@/stores/useUserStore"
 
+const userStore = useUserStore()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const route = useRoute()
@@ -71,6 +73,7 @@ const isButtonDisabled = computed(() => {
 onBeforeMount(async () => {
   try {
     const fetchData = await getStatus(route.params.boardID, route.params.statusID)
+
     utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
     if (!utilityStore.isOwnerBoard) {
       // router.push(`/board/${route.params.boardID}/status`).then(() => {
@@ -84,9 +87,16 @@ onBeforeMount(async () => {
       //       position: "bottom-right",
       //     })
       // })
-      router.push('/error')
-      return
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+      if(utilityStore.isOwnerBoard === false) {
+          router.push('/error')
+          return
+      }
     }
+    
     status.value = fetchData
     // console.log(status.value);
     // console.log(fetchData);
@@ -97,6 +107,8 @@ onBeforeMount(async () => {
     updateStatus.color = status.value.color
   } catch (error) {
     console.log(error)
+    router.push('/error')
+    return
   }
 })
 </script>
@@ -114,7 +126,7 @@ onBeforeMount(async () => {
         Status Editing
       </h1>
       <div class="flex justify-end px-14">
-        <button @click="router.back()">
+        <button @click="router.push(`/board/${route.params.boardID}/status`)">
           <span><Xmark /></span>
         </button>
       </div>

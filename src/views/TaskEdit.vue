@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, computed, reactive} from "vue"
-import {getTask, editTask} from "@/libs/FetchAPI.js"
+import {getTask, editTask, findCollabById} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
@@ -13,9 +13,13 @@ import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
+import AttachIcon from "@/components/icons/AttachIcon.vue"
+import CloudUploadIcon from "@/components/icons/CloudUploadIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
+import { useUserStore } from "@/stores/useUserStore"
 
+const userStore = useUserStore()
 const task = ref({})
 const route = useRoute()
 const utilityStore = useUtilityStore()
@@ -141,19 +145,29 @@ const isButtonDisable = computed(() => {
   //   utilityStore.transactionDisable = true
   // }
   return (
-    (updateTask.title === task.value.taskTitle &&
+    (updateTask.title === task.value.title &&
       updateTask.description === task.value.description &&
       updateTask.assignees === task.value.assignees &&
-      updateTask.status3 === task.value.statuses3.statusID) ||
+      updateTask.status3 === task.value.statuses3.id) ||
     !updateTask.title ||
     utilityStore.transactionDisable
   )
 })
 
+const fileNames = ref(["CloudUploadIcon.svg","attachlink.svg"])
+// const files = ref([])
+const handleFileUpload = (event) => {
+  // console.log(event.target.files[0])
+  let files = event.target.files
+  fileNames.value = Array.from(files).map(file => file.name)
+  console.log(Array.from(files))
+}
+
 onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.boardID, route.params.taskID)
     utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+
     if (!utilityStore.isOwnerBoard) {
       // router.push(`/board/${route.params.boardID}/task`).then(() => {
       //   toast(
@@ -166,11 +180,20 @@ onBeforeMount(async () => {
       //       position: "bottom-right",
       //     })
       // })
-      router.push('/error')
-      return
+
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+      
+      if(utilityStore.isOwnerBoard === false) {
+          router.push('/error')
+          return
+      }
     }
+
     task.value = fetchTask
-    // console.log(task.value)
+    console.log(task.value)
 
     task.value.createOn = utilityStore.formatDateTime(task.value.createOn)
     task.value.updateOn = utilityStore.formatDateTime(task.value.updateOn)
@@ -188,6 +211,8 @@ onBeforeMount(async () => {
     // console.log(updateTask.status.length)
   } catch (error) {
     console.log(`Error fetching task ${route.params.boardID}: `, error)
+    router.push('/error')
+    return
   }
 })
 </script>
@@ -320,6 +345,33 @@ onBeforeMount(async () => {
               {{ task.updated }}
             </div>
           </div>
+
+          <!-- Attachment -->
+          <div class="flex gap-x-10 items-center">
+            <div class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
+              <span>
+                <AttachIcon />
+              </span>
+              Attachment
+            </div>
+
+            <div>
+              <label class="flex items-center gap-2 rounded-lg bg-[#3D3C3C] px-3 py-1 w-auto cursor-pointer">
+                <input type="file" class="hidden" @change="handleFileUpload"/>
+                <CloudUploadIcon/>
+                <span class="font-Geist tracking-wide">upload file</span>
+              </label>
+            </div>
+          </div>
+          <div class="flex items-center gap-5">
+            <p>Files</p>
+            <ul v-if="fileNames" class="flex items-center gap-3 text-gray-500 ">
+              <li v-for="(file, index) in fileNames" :key="index">
+                {{ fileNames.length <= 1 ? file : index === fileNames.length - 1 ? file : file + " ," }}
+              </li>
+            </ul>
+        </div>
+          <!-- Attachment -->
 
           <!-- Description -->
           <textarea

@@ -1,6 +1,6 @@
 <script setup>
 import {ref, reactive, computed, onBeforeMount, watch, nextTick} from "vue"
-import {createTask, getAllBoards} from "@/libs/FetchAPI"
+import {createTask, getAllBoards, findCollabById} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -9,10 +9,14 @@ import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
+import AttachIcon from "@/components/icons/AttachIcon.vue"
+import CloudUploadIcon from "@/components/icons/CloudUploadIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import {useRoute} from "vue-router"
+import { useUserStore } from "@/stores/useUserStore"
 
+const userStore = useUserStore()
 const route = useRoute()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
@@ -121,6 +125,15 @@ const createNewTask = async () => {
   }
 }
 
+const fileNames = ref(["CloudUploadIcon.svg","attachlink.svg"])
+// const files = ref([])
+const handleFileUpload = (event) => {
+  // console.log(event.target.files[0])
+  let files = event.target.files
+  fileNames.value = Array.from(files).map(file => file.name)
+  console.log(Array.from(files))
+}
+
 onBeforeMount(async () => {
   utilityStore.isOwnerBoard = false
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
@@ -131,10 +144,11 @@ onBeforeMount(async () => {
       utilityStore.selectedBoardId = route.params.boardID
 
       utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-      utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+      // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
       console.log("Owner Board : ",utilityStore.isOwnerBoard)
 
       utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+
       if (!utilityStore.isOwnerBoard) {
         // router.push(`/board/${route.params.boardID}/task`).then(() => {
         //   toast(
@@ -147,9 +161,16 @@ onBeforeMount(async () => {
         //       position: "bottom-right",
         //     })
         // })
-        router.push('/error')
-        return
+        const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+        utilityStore.collabAccessRight = collabIdentity.accessRight
+        console.log(collabIdentity.accessRight)
+        collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+        // if(utilityStore.isOwnerBoard === false) {
+        //   router.push('/error')
+        //   return
+        // }
       }
+
       const firstStatus = utilityStore.statusManager.getStatus()[0]
       console.log(firstStatus)
       newTask.status3 = newStatus.id = firstStatus.id
@@ -159,8 +180,11 @@ onBeforeMount(async () => {
 
     } catch (error) {
       console.log(error)
+      router.push('/error')
+      return
     }
   }
+  
   if (!utilityStore.isOwnerBoard) {
         // router.push(`/board/${route.params.boardID}/task`).then(() => {
         //   toast(
@@ -218,7 +242,7 @@ onBeforeMount(async () => {
           >
         </div>
 
-        <div class="grid grid-cols-1 grid-rows-2 gap-y-8">
+        <div class="grid grid-cols-1 grid-rows-2 gap-y-5">
           <!-- Status -->
           <div class="flex gap-x-10 items-center">
             <div
@@ -241,9 +265,7 @@ onBeforeMount(async () => {
                   <DropdownIcon />
                 </span>
               </div>
-              <div
-                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-auto cursor-pointer"
-              >
+              <div class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-auto cursor-pointer">
                 <ul tabindex="0">
                   <li
                     v-for="status in utilityStore.statusManager.getStatus()"
@@ -262,9 +284,7 @@ onBeforeMount(async () => {
 
           <!-- Assignees -->
           <div class="flex gap-x-10 items-center">
-            <div
-              class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
-            >
+            <div class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span>
                 <AssigneeDetail />
               </span>
@@ -285,6 +305,33 @@ onBeforeMount(async () => {
             </div>
           </div>
           <!-- Assignees -->
+
+          <!-- Attachment -->
+          <div class="flex gap-x-10 items-center">
+            <div class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
+              <span>
+                <AttachIcon />
+              </span>
+              Attachment
+            </div>
+
+            <div>
+              <label class="flex items-center gap-2 rounded-lg bg-[#3D3C3C] px-3 py-1 w-auto cursor-pointer">
+                <input type="file" class="hidden" @change="handleFileUpload"/>
+                <CloudUploadIcon/>
+                <span class="font-Geist tracking-wide">upload file</span>
+              </label>
+            </div>
+          </div>
+          <div class="flex items-center gap-5">
+            <p>Files</p>
+            <ul v-if="fileNames" class="flex items-center gap-3 text-gray-500 ">
+              <li v-for="(file, index) in fileNames" :key="index">
+                {{ fileNames.length <= 1 ? file : index === fileNames.length - 1 ? file : file + " ," }}
+              </li>
+            </ul>
+        </div>
+          <!-- Attachment -->
 
           <!-- Description -->
           <div class="flex flex-col">

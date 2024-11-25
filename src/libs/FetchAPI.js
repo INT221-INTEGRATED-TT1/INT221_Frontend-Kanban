@@ -548,6 +548,66 @@ const changeCollaboratorAccessRisght = async (boardId, collaboratorId, newAccess
   }
 }
 
+const findCollabById = async (boardId, collaboratorId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs/${collaboratorId}`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        },
+      }
+    )
+    return response.json()
+  } catch (error) {
+    throw error
+  }
+}
+
+const acceptBoardCollabInvitation = async (boardId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs/invitations/accept`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${getAccessToken()}`,
+        }
+      }
+    )
+    return {
+      status: response.status,
+      message: "acceptBoardCollabInvitation successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const declineBoardCollabInvitation = async (boardId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/collabs/invitations/decline`,
+      {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        }
+      }
+    )
+    return {
+      status: response.status,
+      message: "declineBoardCollabInvitation successfully",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -572,4 +632,7 @@ export {
   addCollaborator,
   deleteCollaborator,
   changeCollaboratorAccessRisght,
+  findCollabById,
+  acceptBoardCollabInvitation,
+  declineBoardCollabInvitation,
 }

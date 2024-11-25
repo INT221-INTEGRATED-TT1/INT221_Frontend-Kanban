@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeMount, watch } from "vue"
-import { getAllTasks, deleteTask, getAllBoards, updateBoardVisibility } from "@/libs/FetchAPI.js"
+import { getAllTasks, deleteTask, getAllBoards, updateBoardVisibility, findCollabById } from "@/libs/FetchAPI.js"
 import router from "@/router/index.js"
 import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
@@ -97,6 +97,7 @@ const changeVisibilityBoard = async () => {
 }
 
 onBeforeMount(async () => {
+  utilityStore.collabAccessRight = ''
   utilityStore.isOwnerBoard = false
   utilityStore.selectedBoardId = route.params.boardID
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
@@ -108,16 +109,25 @@ onBeforeMount(async () => {
     utilityStore.boardManager.addBoards(fetchBoards)
 
     utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-    utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : ""
+
+    utilityStore.isOwnerBoard ? 
+    utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
+    utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.filter(board => board.id === route.params.boardID)[0]}
+
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
+
     if(utilityStore.isOwnerBoard) {
-      currentVisibility.value = utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0].visibility
+      currentVisibility.value = utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]?.visibility
       currentVisibility.value === 'PUBLIC' ? isToggled.value = true : isToggled.value = false
 
       console.log(isToggled.value)
 
     } else { 
       currentVisibility.value = ''
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
     }
   }
   try {
@@ -125,11 +135,11 @@ onBeforeMount(async () => {
     const fetchTasks = await getAllTasks(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
     // utilityStore.selectedBoard.name.length > 0 ? console.log('board has board name') : utilityStore.selectedBoard = {...fetchTasks[0]?.board}
-    !utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...fetchTasks[0]?.board} : ""
+    !utilityStore.selectedBoard.name ? utilityStore.selectedBoard = {...fetchTasks[0]?.board} : ""
     // console.log(utilityStore.selectedBoardId)
     console.log("Owner Board : ", utilityStore.isOwnerBoard)
     // console.log(fetchTasks)
-
+    // console.log(utilityStore.selectedBoard)
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
         ? (task.assignees = "Unassigned")
@@ -140,8 +150,8 @@ onBeforeMount(async () => {
   }
   catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
-    console.log("Error fetching tasks : ", error.status === 404)
-    error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
+    // console.log("Error fetching tasks : ", error.status === 404)
+    // error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
   }
 })
 
@@ -152,14 +162,17 @@ onBeforeMount(async () => {
     <div class="flex justify-between">
       <div>
         <router-link to="/board">
-          <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
+          <!-- <h1 class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand">
             IT-BangMod Kradan Kanban
-          </h1>
+          </h1> -->
+        <div class="flex items-center gap-3 font-semibold text-[#ffffff] text-3xl "> 
+          <span class="text-headline text-sm text-opacity-50"> < </span>{{ utilityStore.selectedBoard.name }}
+        </div>
         </router-link>
 
-        <div class="ml-[22rem] tracking-in-expand-2">
+        <!-- <div class="ml-[22rem] tracking-in-expand-2">
           <GroupCode />
-        </div>
+        </div> -->
       </div>
 
       <div class="flex items-center gap-x-3">
@@ -186,12 +199,12 @@ onBeforeMount(async () => {
 
     <div class="pt-10">
       <div class="flex justify-end items-center mb-6">
-        <div class="text-headline font-extrabold text-2xl tracking-wider mr-auto">{{ utilityStore.selectedBoard.name }}
-        </div>
+        <!-- <div class="text-headline font-extrabold text-2xl tracking-wider mr-auto">{{ utilityStore.selectedBoard.name }}</div> -->
         <div class="flex items-center gap-4 mr-10" >
-          <p :class="utilityStore.isOwnerBoard ? 'text-opacity-100': 'text-white text-opacity-35'">{{ utilityStore.isOwnerBoard ? 'Publish' : 'Cannot Publish'}}</p>
+          <p :class="utilityStore.isOwnerBoard && !utilityStore.collabAccessRight ? 'text-opacity-100': 'text-white text-opacity-35'">{{ utilityStore.isOwnerBoard && !utilityStore.collabAccessRight ? 'Publish' : 'Cannot Publish'}}</p>
           <!-- :class="currentVisibility === 'PUBLIC' ? 'border-[#565656] bg-white [--tglbg:#11FF70]' : ''" -->
-          <input type="checkbox" class="toggle hover:bg-gray-200" v-model="isToggled" @click="changeVisibilityBoardRadioClick" :checked="currentVisibility === 'PUBLIC' " :disabled="!utilityStore.isOwnerBoard" />
+          <input type="checkbox" class="toggle hover:bg-gray-200" :class="utilityStore.isOwnerBoard && !utilityStore.collabAccessRight ? '' : 'tooltip tooltip-top'" v-model="isToggled" data-tip="You need to be board owner to perform this action."
+            @click="changeVisibilityBoardRadioClick" :checked="currentVisibility === 'PUBLIC' " :disabled="!(utilityStore.isOwnerBoard && !utilityStore.collabAccessRight)" />
           <button class="flex items-center gap-1 text-[#005BC4] text-sm"
             :class="isToggled ? 'opacity-100' : 'opacity-0 '" @click="copyToClipboard"
             :disabled="copyLinkClicked || !isToggled">
@@ -201,12 +214,14 @@ onBeforeMount(async () => {
           </button>
         </div>
         <router-link :to="`/board/${route.params.boardID}/collab`">
-          <button :disabled="!utilityStore.isOwnerBoard"
-            :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'bg-[#338EF7]'"
+          <!-- :disabled = "!utilityStore.isOwnerBoard" -->
+          <!-- :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 text-opacity-15 tooltip tooltip-left cursor-not-allowed' : 'bg-[#338EF7]'" -->
+          <button 
             data-tip="You need to be board owner to perform this action."
-            class="flex items-center gap-2 text-white text-center font-Geist text-sm px-4 py-2 rounded-md self-end">
-            <div :class="!utilityStore.isOwnerBoard ? 'opacity-20' : 'opacity-100'"><UserIcon /></div>
-            Manage Contributor
+            class="flex items-center gap-2 text-white text-center font-Geist text-sm px-4 py-2 rounded-md self-end bg-[#338EF7]">
+            <!-- :class="!utilityStore.isOwnerBoard ? 'opacity-20' : 'opacity-100'" -->
+            <div><UserIcon /></div>
+            Manage Collaborator
           </button>
         </router-link>
       </div>
