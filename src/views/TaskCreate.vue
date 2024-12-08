@@ -1,6 +1,6 @@
 <script setup>
 import {ref, reactive, computed, onBeforeMount, watch, nextTick} from "vue"
-import {createTask, getAllBoards, findCollabById} from "@/libs/FetchAPI"
+import {createTask, getAllBoards, findCollabById, uploadFile} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -110,6 +110,9 @@ const createNewTask = async () => {
           position: "bottom-right",
         })
       }, 200)
+      console.log("response data form created : " , response.data)
+      const responseUploadFile = await uploadFile(route.params.boardID, response.data.id, selectedFiles.value)
+
     } else if (response.status === 400) {
       utilityStore.transactionDisable = false
       toast("Please fill in the required fields", {
@@ -125,13 +128,35 @@ const createNewTask = async () => {
   }
 }
 
-const fileNames = ref(["CloudUploadIcon.svg","attachlink.svg"])
-// const files = ref([])
+const selectedFiles = ref([])
+
 const handleFileUpload = (event) => {
-  // console.log(event.target.files[0])
-  let files = event.target.files
-  fileNames.value = Array.from(files).map(file => file.name)
-  console.log(Array.from(files))
+  let newSelectedFilesArray = Array.from(event.target.files)
+  if (newSelectedFilesArray.length > 0) {
+    if (selectedFiles.value.length === 0) {
+      selectedFiles.value = newSelectedFilesArray
+    }
+    else {
+      // Function to check if a file exists in an array based on specific properties
+      const isInArray = (array, file) => {
+        return array.some(item => 
+          item.name === file.name && 
+          item.size === file.size && 
+          item.type === file.type && 
+          item.lastModified === file.lastModified
+        );
+      };
+      // Filter files that are not already in selectedFiles.value
+      const fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(selectedFiles.value, file));
+      console.log('New files to add:', fileNotExistSelected);
+      // Append the new files
+      selectedFiles.value.push(...fileNotExistSelected);
+    }
+  }
+
+  console.log(selectedFiles.value)
+
+
 }
 
 onBeforeMount(async () => {
@@ -317,17 +342,17 @@ onBeforeMount(async () => {
 
             <div>
               <label class="flex items-center gap-2 rounded-lg bg-[#3D3C3C] px-3 py-1 w-auto cursor-pointer">
-                <input type="file" class="hidden" @change="handleFileUpload"/>
+                <input type="file" class="hidden" multiple @change="handleFileUpload"/>
                 <CloudUploadIcon/>
                 <span class="font-Geist tracking-wide">upload file</span>
               </label>
             </div>
           </div>
-          <div class="flex items-center gap-5">
-            <p>Files</p>
-            <ul v-if="fileNames" class="flex items-center gap-3 text-gray-500 ">
-              <li v-for="(file, index) in fileNames" :key="index">
-                {{ fileNames.length <= 1 ? file : index === fileNames.length - 1 ? file : file + " ," }}
+          <div class="flex gap-5">
+            <p class="indent-10">Files</p>
+            <ul v-if="selectedFiles" class="text-gray-500 ">
+              <li v-for="(file, index) in selectedFiles" :key="index">
+                {{ selectedFiles.length <= 1 ? file.name : index === selectedFiles.length - 1 ? file.name : file.name + " ," }}
               </li>
             </ul>
         </div>

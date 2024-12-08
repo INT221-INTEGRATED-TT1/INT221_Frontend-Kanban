@@ -1,8 +1,8 @@
 <script setup>
-import {ref, onBeforeMount, reactive} from "vue"
-import {getTask, getAllStatuses} from "@/libs/FetchAPI.js"
-import {useRoute} from "vue-router"
-import {useUtilityStore} from "@/stores/useUtilityStore.js"
+import { ref, onBeforeMount, reactive } from "vue"
+import { getTask, getAllStatuses, getUploadedFile, downloadFile } from "@/libs/FetchAPI.js"
+import { useRoute } from "vue-router"
+import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useStatusStyleStore } from "@/stores/useStatusStyleStore"
 import router from "@/router/index.js"
 import Xmark from "@/components/icons/Xmark.vue"
@@ -18,12 +18,14 @@ const route = useRoute()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 
+const fileUploaded = ref([])
+
 const formatTimezone = () => {
   const options = {
     timeZoneName: "long",
   }
   const formatter = new Intl.DateTimeFormat([], options)
-  const {timeZone} = formatter.resolvedOptions()
+  const { timeZone } = formatter.resolvedOptions()
   return timeZone
 }
 
@@ -32,9 +34,30 @@ const statusAtt = reactive({
   color: "",
 })
 
+const getFile = async (fileName) => {
+  const responseDownloadFile = await downloadFile(route.params.boardID, route.params.taskID, fileName)
+  // console.log(responseDownloadFile.data)
+  // Create a URL for the Blob and trigger the download
+  const url = window.URL.createObjectURL(responseDownloadFile.blob)
+  const fileType = responseDownloadFile.headers.get("Content-Type")
+  console.log(fileType)
+  if (fileType.startsWith("image/") || fileType === "application/pdf") {
+    // Open in a new tab for supported types
+    window.open(url, "_blank");
+  } else {
+    // Trigger download for unsupported types
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
+
 onBeforeMount(async () => {
   try {
-    const fetchTask = await getTask(route.params.boardID,route.params.taskID)
+    const fetchTask = await getTask(route.params.boardID, route.params.taskID)
     task.value = fetchTask
 
     statusAtt.name = task.value.statuses3.name
@@ -58,32 +81,30 @@ onBeforeMount(async () => {
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
+  const responseGetFileUploaded = await getUploadedFile(route.params.boardID, route.params.taskID)
+  fileUploaded.value = responseGetFileUploaded.data
+  console.log(fileUploaded.value)
 })
 </script>
 
 <template>
-  <section
-    class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-md"
-  >
-    <div
-      class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 flip-in-hor-bottom"
-    >
-      <h1
-        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-widest"
-      >
+  <section class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-md">
+    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 flip-in-hor-bottom">
+      <h1 class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-widest">
         Task Details
       </h1>
       <!-- close modal -->
       <div class="flex justify-end">
         <button @click="router.push(`/board/${route.params.boardID}/task`)">
-          <span><Xmark /></span>
+          <span>
+            <Xmark />
+          </span>
         </button>
       </div>
 
       <div class="flex flex-col gap-y-5">
         <div
-          class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5 break-all"
-        >
+          class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5 break-all">
           {{ task.title }}
         </div>
 
@@ -91,15 +112,15 @@ onBeforeMount(async () => {
           <!-- Status -->
           <div class="flex gap-x-10 items-center">
             <div
-              class="itbkk-status text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-3"
-            >
-              <span><StatusDetail /></span> Status
+              class="itbkk-status text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-3">
+              <span>
+                <StatusDetail />
+              </span> Status
             </div>
             <div>
               <div
                 class="rounded-xl px-2 py-1 font-semibold font-Inter text-[14px] text-center tracking-wider flex items-center gap-x-3"
-                :class="statusStyleStore.statusCustomStyle(statusAtt.color)"
-              >
+                :class="statusStyleStore.statusCustomStyle(statusAtt.color)">
                 {{ statusAtt.name }}
               </div>
             </div>
@@ -107,36 +128,28 @@ onBeforeMount(async () => {
 
           <!-- Assignees -->
           <div class="flex gap-x-10 items-center">
-            <div
-              class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
-            >
-              <span><AssigneeDetail /></span> Assignees
+            <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
+              <span>
+                <AssigneeDetail />
+              </span> Assignees
             </div>
 
-            <textarea
-              maxlength="30"
-              rows="1"
+            <textarea maxlength="30" rows="1"
               class="itbkk-assignees rounded-md bg-[#1A1B1D] resize-none font-normal text-[14px] text-opacity-90 textarea-xs italic w-[20rem]"
-              :class="
-                task.assignees === 'Unassigned'
+              :class="task.assignees === 'Unassigned'
                   ? 'italic text-gray-500'
                   : ' text-[#F99B1D]'
-              "
-              readonly
-              :value="task.assignees"
-            ></textarea>
+                " readonly :value="task.assignees"></textarea>
           </div>
 
           <!-- CreatedOn -->
           <div class="flex gap-x-10 items-center">
-            <div
-              class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
-            >
-              <span><CreatedDateIcon /></span> Created On
+            <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
+              <span>
+                <CreatedDateIcon />
+              </span> Created On
             </div>
-            <div
-              class="itbkk-created-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
-            >
+            <div class="itbkk-created-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest">
               {{ task.createOn }}
             </div>
           </div>
@@ -144,7 +157,9 @@ onBeforeMount(async () => {
           <!-- UpdatedOn -->
           <div class="flex gap-x-10 items-center">
             <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
-              <span><UpdatedDateIcon /></span> Updated On
+              <span>
+                <UpdatedDateIcon />
+              </span> Updated On
             </div>
             <div class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest">
               {{ task.updateOn }}
@@ -154,27 +169,27 @@ onBeforeMount(async () => {
           <!-- Attachment -->
           <div class="flex gap-x-10 items-center">
             <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
-              <span><AttachIcon /></span> Attachment
+              <span>
+                <AttachIcon />
+              </span> Attachment
             </div>
             <div class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest">
               File Uploaded
+              <ul v-if="fileUploaded" class="text-gray-500 ">
+                <li v-for="(file, index) in fileUploaded" :key="index">
+                  <a @click="getFile(file.fileName)">{{ file.fileName }}</a>
+                </li>
+              </ul>
             </div>
           </div>
 
           <!-- Description -->
           <textarea
             class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-8"
-            rows="5"
-            placeholder="Description"
-            maxlength="500"
-            readonly
-            :value="task.description"
-            :class="
-              task.description === 'No Description Provided'
+            rows="5" placeholder="Description" maxlength="500" readonly :value="task.description" :class="task.description === 'No Description Provided'
                 ? 'italic text-gray-500'
                 : 'text-normal text opacity-80'
-            "
-          ></textarea>
+              "></textarea>
           <!-- :value="task.description" -->
 
           <!-- <textarea style="resize: none; overflow: hidden; min-height: 100px;" @input="resizeTextarea" class="texarea textarea-bordered rounded w-full p-2" placeholder="Title" ref="textArea"></textarea> -->
@@ -184,10 +199,10 @@ onBeforeMount(async () => {
         <div class="flex justify-between">
           <!-- timezone -->
           <div class="itbkk-timezone flex items-center gap-x-2">
-            <div
-              class="text-[1.1rem] font-bold text-headline text-opacity-70 flex items-center gap-x-3"
-            >
-              <span><TimezoneIcon /></span>TimeZone :
+            <div class="text-[1.1rem] font-bold text-headline text-opacity-70 flex items-center gap-x-3">
+              <span>
+                <TimezoneIcon />
+              </span>TimeZone :
             </div>
 
             <div class="text-[1rem] text-headline text-opacity-55 pt-[3px]">
@@ -196,10 +211,8 @@ onBeforeMount(async () => {
           </div>
 
           <div class="flex gap-x-3">
-            <button
-              @click="router.push(`/board/${route.params.boardID}/task`)"
-              class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-none hover:bg-opacity-30"
-            >
+            <button @click="router.push(`/board/${route.params.boardID}/task`)"
+              class="itbkk-button btn px-14 bg-[#007305] bg-opacity-35 text-[#13FF80] w-[4rem] border-none hover:bg-opacity-30">
               OK
             </button>
           </div>

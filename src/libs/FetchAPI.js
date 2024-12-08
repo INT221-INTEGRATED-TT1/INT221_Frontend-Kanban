@@ -608,6 +608,74 @@ const declineBoardCollabInvitation = async (boardId) => {
   }
 }
 
+const getUploadedFile = async (boardId, taskId) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}/attachments`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        }
+      }
+    )
+    return {
+      status: response.status,
+      message: "Get I chob Function",
+      data: await response.json(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
+const uploadFile = async (boardId, taskId, files) => {
+  try {
+    const formData = new FormData()
+    files.forEach(file => { formData.append("file", file)});
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}/attachments`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`
+        },
+        body: formData,
+      }
+    )
+    return {
+      status: response.status,
+      message: "Files uploaded successfully",
+      data: await response.text(),
+    }
+  } catch (error) {
+    console.error("Error uploading files:", error);
+    throw error
+  }
+}
+
+const downloadFile = async (boardId, taskId, fileName) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}/${fileName}/attachments`,
+      {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        }
+      }
+    )
+    return {
+      status: response.status,
+      message: "Get a file Function",
+      headers: response.headers,
+      blob: await response.blob(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -635,4 +703,7 @@ export {
   findCollabById,
   acceptBoardCollabInvitation,
   declineBoardCollabInvitation,
+  getUploadedFile,
+  uploadFile,
+  downloadFile,
 }
