@@ -41,7 +41,7 @@ const getFile = async (fileName) => {
   const url = window.URL.createObjectURL(responseDownloadFile.blob)
   const fileType = responseDownloadFile.headers.get("Content-Type")
   console.log(fileType)
-  if (fileType.startsWith("image/") || fileType === "application/pdf") {
+  if (fileType.startsWith("image/") || fileType === "application/pdf" ) {
     // Open in a new tab for supported types
     window.open(url, "_blank");
   } else {
@@ -76,8 +76,8 @@ onBeforeMount(async () => {
       task.value.assignees = "Unassigned"
     }
 
-    task.value.createOn = utilityStore.formatDateTime(task.value.createdOn)
-    task.value.updateOn = utilityStore.formatDateTime(task.value.updated)
+    task.value.createdOn = utilityStore.formatDateTime(task.value.createdOn)
+    task.value.updatedOn = utilityStore.formatDateTime(task.value.updatedOn)
   } catch (error) {
     console.log(`Error fetching task ${route.params.id}: `, error)
   }
@@ -150,7 +150,7 @@ onBeforeMount(async () => {
               </span> Created On
             </div>
             <div class="itbkk-created-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest">
-              {{ task.createOn }}
+              {{ task.createdOn }}
             </div>
           </div>
 
@@ -162,7 +162,7 @@ onBeforeMount(async () => {
               </span> Updated On
             </div>
             <div class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest">
-              {{ task.updateOn }}
+              {{ task.updatedOn }}
             </div>
           </div>
 

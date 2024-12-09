@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, computed, reactive} from "vue"
-import {getTask, editTask, findCollabById} from "@/libs/FetchAPI.js"
+import {getTask, editTask, findCollabById, getUploadedFile, downloadFile} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
@@ -154,13 +154,36 @@ const isButtonDisable = computed(() => {
   )
 })
 
-const fileNames = ref(["CloudUploadIcon.svg","attachlink.svg"])
+// const fileNames = ref(["CloudUploadIcon.svg","attachlink.svg"])
 // const files = ref([])
+
+const fileUploaded = ref([])
+const selectedFiles = ref([])
+
 const handleFileUpload = (event) => {
-  // console.log(event.target.files[0])
-  let files = event.target.files
-  fileNames.value = Array.from(files).map(file => file.name)
-  console.log(Array.from(files))
+  let newSelectedFilesArray = Array.from(event.target.files)
+  if (newSelectedFilesArray.length > 0) {
+    if (selectedFiles.value.length === 0) {
+      selectedFiles.value = newSelectedFilesArray
+    }
+    else {
+      // Function to check if a file exists in an array based on specific properties
+      const isInArray = (array, file) => {
+        return array.some(item => 
+          item.name === file.name && 
+          item.size === file.size && 
+          item.type === file.type && 
+          item.lastModified === file.lastModified
+        );
+      };
+      // Filter files that are not already in selectedFiles.value
+      const fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(selectedFiles.value, file));
+      console.log('New files to add:', fileNotExistSelected);
+      // Append the new files
+      selectedFiles.value.push(...fileNotExistSelected);
+    }
+  }
+  console.log(selectedFiles.value)
 }
 
 onBeforeMount(async () => {
@@ -195,8 +218,8 @@ onBeforeMount(async () => {
     task.value = fetchTask
     console.log(task.value)
 
-    task.value.createOn = utilityStore.formatDateTime(task.value.createOn)
-    task.value.updateOn = utilityStore.formatDateTime(task.value.updateOn)
+    task.value.createdOn = utilityStore.formatDateTime(task.value.createdOn)
+    task.value.updatedOn = utilityStore.formatDateTime(task.value.updatedOn)
 
     updateTask.title = task.value.title
     updateTask.description = task.value.description
@@ -209,6 +232,10 @@ onBeforeMount(async () => {
     newStatus.color = task.value.statuses3.color
 
     // console.log(updateTask.status.length)
+    const responseGetFileUploaded = await getUploadedFile(route.params.boardID, route.params.taskID)
+    fileUploaded.value = responseGetFileUploaded.data
+    console.log(fileUploaded.value)
+
   } catch (error) {
     console.log(`Error fetching task ${route.params.boardID}: `, error)
     router.push('/error')
@@ -218,9 +245,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <section
-    class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-sm"
-  >
+  <section class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-sm">
     <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10">
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
@@ -342,7 +367,7 @@ onBeforeMount(async () => {
             <div
               class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
             >
-              {{ task.updated }}
+              {{ task.updatedOn }}
             </div>
           </div>
 
@@ -365,9 +390,9 @@ onBeforeMount(async () => {
           </div>
           <div class="flex items-center gap-5">
             <p>Files</p>
-            <ul v-if="fileNames" class="flex items-center gap-3 text-gray-500 ">
-              <li v-for="(file, index) in fileNames" :key="index">
-                {{ fileNames.length <= 1 ? file : index === fileNames.length - 1 ? file : file + " ," }}
+            <ul v-if="fileUploaded" class="text-gray-500 ">
+              <li v-for="(file, index) in fileUploaded" :key="index">
+                <a @click="getFile(file.fileName)">{{ file.fileName }}</a>
               </li>
             </ul>
         </div>
