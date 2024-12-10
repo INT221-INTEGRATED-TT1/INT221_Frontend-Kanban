@@ -139,7 +139,7 @@ onBeforeMount(async () => {
 
     <div v-if="utilityStore.boardManager.getBoards().collaboratorBoards?.length > 0 && personalORcollab === 'COLLAB'"
       class="grid grid-cols-4 grid-flow-row justify-center gap-10 w-auto h-auto mt-[4rem]">
-      <div v-for="(board, index) in utilityStore.boardManager.getBoards().collaboratorBoards" :key="board.id"
+      <div v-for="(board) in utilityStore.boardManager.getBoards().collaboratorBoards" :key="board.id"
         class="p-6 bg-[#141414] border border-[#454545] rounded-md items-center justify-between hover:bg-normal hover:bg-opacity-10">
 
         <!-- <div class="flex gap-4"> -->
