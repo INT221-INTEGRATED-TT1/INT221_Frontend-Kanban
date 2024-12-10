@@ -136,7 +136,7 @@ const editTaskData = async (newTask) => {
         position: "bottom-right",
       })
     }
-    
+
     if (filesToDelete.value.length > 0) {
       filesToDelete.value.forEach(async (eFile) => {
         await deleteFile(route.params.boardID, route.params.taskID, eFile.fileName)
@@ -177,8 +177,7 @@ const filesToDelete = ref([])
 // Function to check if a file exists in an array based on specific properties
 const isInArray = (array, file) => {
   return array.some(item =>
-    item.fileName === file.name &&
-    item.fileSize === file.size 
+    item.fileName === file.name
     // item.type === file.type &&
     // item.lastModified === file.lastModified
   );
@@ -186,8 +185,7 @@ const isInArray = (array, file) => {
 
 const isInArraySameAttr = (array, file) => {
   return array.some(item =>
-    item.fileName === file.fileName &&
-    item.fileSize === file.fileSize 
+    item.fileName === file.fileName
   )
 };
 
@@ -224,6 +222,25 @@ const handleFileUpload = (event) => {
         )
         return
       }
+
+      if (isInArray(fileUploaded.value, file)) {
+        toast(
+          `File with the same filename cannot be added or updated to the attachments. Please delete the attachment and add again to update the file`,
+          {
+            type: "error",
+            timeout: 5000,
+            theme: "dark",
+            transition: "flip",
+            position: "bottom-right",
+            style: {
+              width: "500px", // Adjust the width as needed
+              maxWidth: "90%", // Prevent it from being too wide on smaller screens
+            },
+          }
+        )
+        return
+      }
+
 
       // Check if the file is already uploaded
       if (!isInArray(fileUploaded.value, file)) {
@@ -275,7 +292,7 @@ const handleFileUpload = (event) => {
 
   }
 
-  if(fileOverMaxSize.length > 0 && fileUploaded.value.length > 0){
+  if(fileOverMaxSize.length > 0 && fileUploaded.value.length > 10){
     let fileOverMaxLength = fileUploaded.value.slice(10, fileUploaded.value.length )
     console.log("fileOverMaxLength", fileOverMaxLength)
 
@@ -285,7 +302,7 @@ const handleFileUpload = (event) => {
     let errorMessage = ''
     errorFilesCombined.forEach(file => errorMessage += "\n" + "- " + file.fileName)
     toast(
-      `- Each task can have at most 10 files. \n - Each file cannot be larger than 200 MB. \n The following files are not added: ${errorMessage} `,
+      `- Each task can have at most 10 files. \n - Each file cannot be larger than 20 MB. \n The following files are not added: ${errorMessage} `,
       {
         type: "error",
         timeout: 5000,
@@ -324,7 +341,7 @@ const handleFileUpload = (event) => {
   else if(fileOverMaxSize.length > 0){
     let errorFiles = fileOverMaxSize
     let errorMessage = ''
-    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.name)
+    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.fileName)
     toast(
       `Each file cannot be larger than 20 MB. The following files are not added: ${errorMessage} `,
       {
@@ -398,8 +415,15 @@ const getFile = async (fileName) => {
   const responseDownloadFile = await downloadFile(route.params.boardID, route.params.taskID, fileName)
   const url = window.URL.createObjectURL(responseDownloadFile.blob)
   const fileType = responseDownloadFile.headers.get("Content-Type")
+  const supportedTypes = [
+    "text/plain",       // .txt
+    "application/rtf",  // .rtf
+    "image/jpeg",       // .jpg
+    "image/png",        // .png
+    "application/pdf"   // .pdf
+  ];
   console.log(fileType)
-  if (fileType.startsWith("image/") || fileType === "application/pdf" ) {
+  if (supportedTypes.includes(fileType)) {
     // Open in a new tab for supported types
     window.open(url, "_blank");
   } else {

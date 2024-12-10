@@ -45,8 +45,15 @@ const getFile = async (fileName) => {
   // Create a URL for the Blob and trigger the download
   const url = window.URL.createObjectURL(responseDownloadFile.blob)
   const fileType = responseDownloadFile.headers.get("Content-Type")
+  const supportedTypes = [
+    "text/plain",       // .txt
+    "application/rtf",  // .rtf
+    "image/jpeg",       // .jpg
+    "image/png",        // .png
+    "application/pdf"  // .pdf
+  ];
   console.log(fileType)
-  if (fileType.startsWith("image/") || fileType === "application/pdf" ) {
+  if (supportedTypes.includes(fileType)) {
     // Open in a new tab for supported types
     window.open(url, "_blank");
   } else {

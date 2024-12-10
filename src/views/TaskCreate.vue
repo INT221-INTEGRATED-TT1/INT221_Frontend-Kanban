@@ -242,8 +242,15 @@ const cancelSelectedFile = (seletedFile) => {
 const getFile = async (file) => {
   const url = window.URL.createObjectURL(file)
   const fileType = file.type
+  const supportedTypes = [
+    "text/plain",       // .txt
+    "application/rtf",  // .rtf
+    "image/jpeg",       // .jpg
+    "image/png",        // .png
+    "application/pdf"   // .pdf
+  ];
   console.log(fileType)
-  if (fileType.startsWith("image/") || fileType === "application/pdf" ) {
+  if (supportedTypes.includes(fileType)) {
     // Open in a new tab for supported types
     window.open(url, "_blank");
   } else {
