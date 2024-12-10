@@ -299,8 +299,13 @@ onBeforeMount(async () => {
             class="text-white border-none mt-1" :class="collaborator.invitationStatus === 'PENDING' ? 'text-opacity-50' : 'opacity-100'">
             <td>
               <span v-if="collaborator.invitationStatus === 'PENDING'" class="relative flex h-3 w-3">
+                
+                <div class="tooltip" data-tip="invite pending">
+                  <span class="relative flex h-3 w-3">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-300"></span>
+              </span>
+              </div>
               </span>
             </td>
             <td>{{ ++index }}</td>
