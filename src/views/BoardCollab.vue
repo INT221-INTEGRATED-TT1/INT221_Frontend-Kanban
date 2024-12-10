@@ -10,12 +10,14 @@ import { useUtilityStore } from "@/stores/useUtilityStore.js"
 import { useRoute } from "vue-router"
 import { useUserStore } from "@/stores/useUserStore"
 import DeleteConfirmationCollab from "@/components/DeleteConfirmationCollab.vue"
+import {toast} from "vue3-toastify"
 
 const userStore = useUserStore()
 const route = useRoute()
 const utilityStore = useUtilityStore()
 const addCollaboratorModal = ref(false)
 const isEmailValid = ref(true)
+const isSendingEmail = ref(false)
 const emailFieldErrorMassage = ref('something went wrong ! try againlater.')
 const watchButtonDisable = ref(false)
 const confirmChangeAccessRight = ref(false)
@@ -45,7 +47,17 @@ const addNewCollaborator = async () => {
     if(emailPattern.test(newCollaboratorModel.email)){
       isEmailValid.value = true
       console.log(newCollaboratorModel)
-      const newCollaborator = await addCollaborator(route.params.boardID, newCollaboratorModel)
+
+     
+        isSendingEmail.value = true
+        const newCollaborator = await addCollaborator(route.params.boardID, newCollaboratorModel)
+        isSendingEmail.value = false
+
+        
+        
+    
+      
+      
 
       const newFetchCollaboratorsForCollaboratorId = await getCollaborators(route.params.boardID)
       // console.log(fetchCollaborators.data)
@@ -56,6 +68,13 @@ const addNewCollaborator = async () => {
         addCollaboratorModal.value = false
         newCollaboratorModel.email = ""
         newCollaboratorModel.accessRight = "READ"
+        toast("Successfully sent invitation", {
+              type: "success",
+              timeout: 2000,
+              theme: "dark",
+              transition: "flip",
+              position: "bottom-right",
+            })
       }
       else if (newCollaborator.status === 404) {
         emailFieldErrorMassage.value = 'The user does not exists.'
@@ -208,7 +227,7 @@ onBeforeMount(async () => {
     <!-- Toggle Add Collaborator Modal-->
     <div v-if="addCollaboratorModal"
       class="itbkk-modal-setting fixed inset-0 backdrop-blur-md flex justify-center items-center z-30">
-      <div class="bg-[#18181B] rounded-lg w-[45rem] h-96 flex flex-col">
+      <div class="bg-[#18181B] rounded-lg w-[45rem] h-auto flex flex-col">
         <div class="flex justify-between">
           <h1 class="text-[#F5F5F5] text-opacity-80 font-bold text-2xl flex px-10 pt-6 tracking-wider">
             Add Collaborator
@@ -251,7 +270,12 @@ onBeforeMount(async () => {
           <!-- Collaborators -->
           <!-- <div v-for="i in 7"></div> -->
           <!-- button -->
-          <div class="flex justify-end items-center gap-x-[1rem] mt-44">
+          <div v-show="isSendingEmail" class="flex items-center justify-center mt-10 w-full gap-1">
+            <span class="loading loading-dots loading-sm"></span>
+            <p>Sending Invite</p>
+          </div>
+
+          <div class="flex justify-end items-center gap-x-[1rem] mt-24 sticky">
             <button
               class="btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
               @click="cancelAddCollaboratorModal">
@@ -295,12 +319,17 @@ onBeforeMount(async () => {
               No Collaborator
             </td>
           </tr>
-          <tr v-else v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()"
+          <tr v-else v-for="(collaborator,index) in userStore.collaboratorManager.getCollaborators()" :key="index"
             class="text-white border-none mt-1" :class="collaborator.invitationStatus === 'PENDING' ? 'text-opacity-50' : 'opacity-100'">
             <td>
               <span v-if="collaborator.invitationStatus === 'PENDING'" class="relative flex h-3 w-3">
+                
+                <div class="tooltip" data-tip="invite pending">
+                  <span class="relative flex h-3 w-3">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-300"></span>
+              </span>
+              </div>
               </span>
             </td>
             <td>{{ ++index }}</td>
