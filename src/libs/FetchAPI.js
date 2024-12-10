@@ -676,6 +676,28 @@ const downloadFile = async (boardId, taskId, fileName) => {
   }
 }
 
+const deleteFile = async (boardId, taskId, fileName) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/${boardId}/tasks/${taskId}/${fileName}/attachments`,
+      {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${getAccessToken()}`,
+        }
+      }
+    )
+    return {
+      status: response.status,
+      message: "delete a file Function",
+      headers: response.headers,
+      blob: await response.text(),
+    }
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   getAllTasks,
   getTask,
@@ -706,4 +728,5 @@ export {
   getUploadedFile,
   uploadFile,
   downloadFile,
+  deleteFile
 }

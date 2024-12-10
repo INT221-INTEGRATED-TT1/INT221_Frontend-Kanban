@@ -1,6 +1,6 @@
 <script setup>
 import {ref, reactive, computed, onBeforeMount, watch, nextTick} from "vue"
-import {createTask, getAllBoards, findCollabById, uploadFile} from "@/libs/FetchAPI"
+import {createTask, getAllBoards, findCollabById, uploadFile, downloadFile} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -11,6 +11,11 @@ import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
 import AttachIcon from "@/components/icons/AttachIcon.vue"
 import CloudUploadIcon from "@/components/icons/CloudUploadIcon.vue"
+import DocumentIcon from "@/components/icons/DocumentIcon.vue"
+import ImageFileIcon from "@/components/icons/ImageFileIcon.vue"
+import PDFIcon from "@/components/icons/PDFIcon.vue"
+import VideoFileIcon from "@/components/icons/VideoFileIcon.vue"
+import ZIPIcon from "@/components/icons/ZIPIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import {useRoute} from "vue-router"
@@ -111,7 +116,9 @@ const createNewTask = async () => {
         })
       }, 200)
       console.log("response data form created : " , response.data)
-      const responseUploadFile = await uploadFile(route.params.boardID, response.data.id, selectedFiles.value)
+      if(selectedFiles.value.length > 0){
+        await uploadFile(route.params.boardID, response.data.id, selectedFiles.value)
+      }
 
     } else if (response.status === 400) {
       utilityStore.transactionDisable = false
@@ -129,35 +136,133 @@ const createNewTask = async () => {
 }
 
 const selectedFiles = ref([])
+// const fileUploaded = ref([])
+
+// Function to check if a file exists in an array based on specific properties
+const isInArray = (array, file) => {
+  return array.some(item =>
+    item.name === file.name &&
+    item.size === file.size &&
+    item.type === file.type &&
+    item.lastModified === file.lastModified
+  );
+};
 
 const handleFileUpload = (event) => {
   let newSelectedFilesArray = Array.from(event.target.files)
+  let fileOverMaxSize = newSelectedFilesArray.filter(file => (file.size / (1024 * 1024)) >= 20)
+
   if (newSelectedFilesArray.length > 0) {
-    if (selectedFiles.value.length === 0) {
-      selectedFiles.value = newSelectedFilesArray
-    }
-    else {
-      // Function to check if a file exists in an array based on specific properties
-      const isInArray = (array, file) => {
-        return array.some(item => 
-          item.name === file.name && 
-          item.size === file.size && 
-          item.type === file.type && 
-          item.lastModified === file.lastModified
-        );
-      };
-      // Filter files that are not already in selectedFiles.value
-      const fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(selectedFiles.value, file));
-      console.log('New files to add:', fileNotExistSelected);
-      // Append the new files
-      selectedFiles.value.push(...fileNotExistSelected);
-    }
+    // Filter files that are not already in selectedFiles.value
+    const fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(selectedFiles.value, file) && (file.size / (1024 * 1024) < 20))
+    console.log('New files to add:', fileNotExistSelected)
+
+    // Append the new files
+    selectedFiles.value.push(...fileNotExistSelected)
+  }
+  
+  if(fileOverMaxSize.length > 0 && selectedFiles.value.length > 0){
+    let fileOverMaxLength = selectedFiles.value.slice(10, selectedFiles.value.length )
+    console.log("fileOverMaxLength", fileOverMaxLength)
+
+    selectedFiles.value.splice(10, selectedFiles.value.length - 10)
+    let errorFilesCombined = fileOverMaxSize.concat(fileOverMaxLength)
+    console.log("errorFilesCombined", errorFilesCombined)
+    let errorMessage = ''
+    errorFilesCombined.forEach(file => errorMessage += "\n" + "- " + file.name)
+    toast(
+      `- Each task can have at most 20 files. \n - Each file cannot be larger than 200 MB. \n The following files are not added: ${errorMessage} `,
+      {
+        type: "error",
+        timeout: 5000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+        style: {
+          width: "500px", // Adjust the width as needed
+          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+        },
+      }
+    )
   }
 
-  console.log(selectedFiles.value)
+  else if(fileOverMaxSize.length > 0){
+    let errorFiles = fileOverMaxSize
+    let errorMessage = ''
+    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.name)
+    toast(
+      `Each file cannot be larger than 20 MB. The following files are not added: ${errorMessage} `,
+      {
+        type: "error",
+        timeout: 5000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+        style: {
+          width: "500px", // Adjust the width as needed
+          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+        },
+      }
+    )
+  }
 
-
+  else if (selectedFiles.value.length > 10) {
+    let errorFiles = selectedFiles.value.slice(10, selectedFiles.value.length)
+    console.log("fileOverMaxLength", errorFiles)
+    
+    let errorMessage = ''
+    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.name)
+    selectedFiles.value.splice(10, selectedFiles.value.length - 10)
+    toast(
+      `Each task can have at most 10 files. The following files are not added: ${errorMessage} `,
+      {
+        type: "error",
+        timeout: 5000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+        style: {
+          width: "500px", // Adjust the width as needed
+          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+        },
+      }
+    )
+  }
 }
+
+
+const cancelSelectedFile = (seletedFile) => {
+  let deleteFileIndex = selectedFiles.value.findIndex(file => {
+    file.name === seletedFile.name &&
+    file.size === seletedFile.size 
+  })
+  selectedFiles.value.splice(deleteFileIndex, 1)
+}
+
+const getFile = async (file) => {
+  const url = window.URL.createObjectURL(file)
+  const fileType = file.type
+  console.log(fileType)
+  if (fileType.startsWith("image/") || fileType === "application/pdf" ) {
+    // Open in a new tab for supported types
+    window.open(url, "_blank");
+  } else {
+    // Trigger download for unsupported types
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
+
+const computedFilesSize = computed(() => {
+  if(selectedFiles.value.length > 0) {
+    return (selectedFiles.value.reduce((sum, file) => sum + file.size, 0) / (1024 * 1024)).toFixed(2)
+  }
+  return 0
+})
 
 onBeforeMount(async () => {
   utilityStore.isOwnerBoard = false
@@ -233,7 +338,7 @@ onBeforeMount(async () => {
     class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-md"
   >
     <div
-      class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 transition ease-in-out"
+      class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-24 py-10 transition ease-in-out"
     >
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
@@ -341,27 +446,43 @@ onBeforeMount(async () => {
             </div>
 
             <div>
-              <label class="flex items-center gap-2 rounded-lg bg-[#3D3C3C] px-3 py-1 w-auto cursor-pointer">
-                <input type="file" class="hidden" multiple @change="handleFileUpload"/>
+              <label class="flex items-center gap-2 rounded-lg bg-[#3D3C3C] px-3 py-1 w-auto cursor-pointer" :class="selectedFiles.length === 10 ? 'opacity-30' : 'opacity-100'" >
+                <input type="file" class="hidden" :disabled="selectedFiles.length === 10 ? true : false" multiple @change="handleFileUpload"/>
                 <CloudUploadIcon/>
                 <span class="font-Geist tracking-wide">upload file</span>
               </label>
             </div>
           </div>
-          <div class="flex gap-5">
-            <p class="indent-10">Files</p>
-            <ul v-if="selectedFiles" class="text-gray-500 ">
-              <li v-for="(file, index) in selectedFiles" :key="index">
-                {{ selectedFiles.length <= 1 ? file.name : index === selectedFiles.length - 1 ? file.name : file.name + " ," }}
-              </li>
-            </ul>
-        </div>
+
+          <!-- Files -->
+          <div class="flex items-center justify-between font-Inter text-white tracking-wide">
+            <p >Files ({{ selectedFiles.length }}/10) </p>
+            <p class="text-sm">{{ computedFilesSize }}/200 MB</p>
+          </div>
+          <div v-if="selectedFiles.length > 0" class="h-44 overflow-y-auto pl-3 ">
+            <div class="flex flex-col gap-2 w-9/12">
+              <div v-for="(file, index) in selectedFiles" :key="index" class="flex items-center border border-[#B8B8B8] border-opacity-20 p-3 pl-8 rounded-md gap-6">
+                <div v-if="file.name && /\.(mp4|mov|avi|mkv|wmv|flv|webm|mpeg|mpg|3gp)$/i.test(file.name)"><VideoFileIcon class="h-16"/></div>
+                <div v-else-if="file.name && /\.(jpeg|jpg|png|gif|bmp|tiff|tif|webp|svg)$/i.test(file.name)"><ImageFileIcon class="h-16"/></div>
+                <div v-else-if="file.name.toLowerCase().endsWith('.zip')"><ZIPIcon class="h-16"/></div>
+                <div v-else-if="file.name.toLowerCase().endsWith('.pdf')"><PDFIcon class="h-16"/></div>
+                <div v-else><DocumentIcon class="h-16"/></div>
+                <div class="font-Inter gap-1 cursor-pointer" @click="getFile(file)">
+                  <p class="text-white text-sm hover:underline tracking-wider">{{ file.name }}</p>
+                  <p class="text-white text-sm text-opacity-30">{{ (file.size / (1024 * 1024)).toFixed(2) }} MB</p>
+                </div>
+                <button class="ml-auto mr-2 text-red-500 self-start" @click="cancelSelectedFile(file)">x</button>
+              </div>
+            </div>
+          </div>
+          <!-- Files -->
+        
           <!-- Attachment -->
 
           <!-- Description -->
           <div class="flex flex-col">
             <textarea
-              class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-5"
+              class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered resize-none mt-5"
               rows="4"
               placeholder="Enter Task Description"
               v-model.trim="newTask.description"

@@ -12,6 +12,11 @@ import CreatedDateIcon from "@/components/icons/CreatedDateIcon.vue"
 import UpdatedDateIcon from "@/components/icons/UpdatedDateIcon.vue"
 import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 import AttachIcon from "@/components/icons/AttachIcon.vue"
+import DocumentIcon from "@/components/icons/DocumentIcon.vue"
+import ImageFileIcon from "@/components/icons/ImageFileIcon.vue"
+import PDFIcon from "@/components/icons/PDFIcon.vue"
+import VideoFileIcon from "@/components/icons/VideoFileIcon.vue"
+import ZIPIcon from "@/components/icons/ZIPIcon.vue"
 
 const task = ref([])
 const route = useRoute()
@@ -89,7 +94,7 @@ onBeforeMount(async () => {
 
 <template>
   <section class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-md">
-    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 flip-in-hor-bottom">
+    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-24 py-10 flip-in-hor-bottom">
       <h1 class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-widest">
         Task Details
       </h1>
@@ -110,7 +115,7 @@ onBeforeMount(async () => {
 
         <div class="grid grid-cols-1 grid-rows-4 gap-y-4">
           <!-- Status -->
-          <div class="flex gap-x-10 items-center">
+          <div class="flex gap-x-10 items-center ml-7">
             <div
               class="itbkk-status text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-3">
               <span>
@@ -127,7 +132,7 @@ onBeforeMount(async () => {
           </div>
 
           <!-- Assignees -->
-          <div class="flex gap-x-10 items-center">
+          <div class="flex gap-x-10 items-center ml-7">
             <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span>
                 <AssigneeDetail />
@@ -143,7 +148,7 @@ onBeforeMount(async () => {
           </div>
 
           <!-- CreatedOn -->
-          <div class="flex gap-x-10 items-center">
+          <div class="flex gap-x-10 items-center ml-7">
             <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span>
                 <CreatedDateIcon />
@@ -155,7 +160,7 @@ onBeforeMount(async () => {
           </div>
 
           <!-- UpdatedOn -->
-          <div class="flex gap-x-10 items-center">
+          <div class="flex gap-x-10 items-center ml-7">
             <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span>
                 <UpdatedDateIcon />
@@ -167,26 +172,45 @@ onBeforeMount(async () => {
           </div>
 
           <!-- Attachment -->
-          <div class="flex gap-x-10 items-center">
+          <!-- <div class="flex gap-x-10 items-center ml-7">
             <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span>
                 <AttachIcon />
               </span> Attachment
             </div>
-            <div class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest">
-              File Uploaded
-              <ul v-if="fileUploaded" class="text-gray-500 ">
-                <li v-for="(file, index) in fileUploaded" :key="index">
-                  <a @click="getFile(file.fileName)">{{ file.fileName }}</a>
-                </li>
-              </ul>
+          </div> -->
+
+          <!-- Files -->
+          <div class="flex items-center justify-between font-Inter text-white tracking-wide ml-7">
+            <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
+              <span>
+                <AttachIcon />
+              </span> Attachment
+            </div>
+            <p class="text-sm">{{ fileUploaded.length > 0 ? fileUploaded.length : 0 }}/10</p>
+          </div>
+          <div v-if="fileUploaded.length > 0" class="h-44 overflow-y-auto pl-3 ml-7">
+            <div class="flex flex-col gap-2 w-9/12">
+              <div v-for="(file, index) in fileUploaded" :key="index" 
+              class="flex items-center border border-[#B8B8B8] border-opacity-20 p-3 pl-8 rounded-md gap-6">
+                <div v-if="file.fileName && /\.(mp4|mov|avi|mkv|wmv|flv|webm|mpeg|mpg|3gp)$/i.test(file.fileName)"><VideoFileIcon class="h-16"/></div>
+                <div v-else-if="file.fileName && /\.(jpeg|jpg|png|gif|bmp|tiff|tif|webp|svg)$/i.test(file.fileName)"><ImageFileIcon class="h-16"/></div>
+                <div v-else-if="file.fileName.toLowerCase().endsWith('.zip')"><ZIPIcon class="h-16"/></div>
+                <div v-else-if="file.fileName.toLowerCase().endsWith('.pdf')"><PDFIcon class="h-16"/></div>
+                <div v-else><DocumentIcon class="h-16"/></div>
+                <div class="font-Inter gap-1">
+                  <p class="text-white text-sm hover:underline cursor-pointer tracking-wider" @click="getFile(file.fileName)">{{ file.fileName }}</p>
+                  <p class="text-white text-sm text-opacity-30">{{ (file.fileSize / (1024 * 1024)).toFixed(2) }} MB</p>
+                </div>
+              </div>
             </div>
           </div>
+          <!-- Files -->
 
           <!-- Description -->
           <textarea
-            class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-8"
-            rows="5" placeholder="Description" maxlength="500" readonly :value="task.description" :class="task.description === 'No Description Provided'
+            class="itbkk-description textarea bg-[#1A1B1D] text-normal text opacity-80 resize-none mt-8"
+            rows="4" placeholder="Description" maxlength="500" readonly :value="task.description" :class="task.description === 'No Description Provided'
                 ? 'italic text-gray-500'
                 : 'text-normal text opacity-80'
               "></textarea>
