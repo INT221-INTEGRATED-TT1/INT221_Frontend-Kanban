@@ -136,15 +136,17 @@ const editTaskData = async (newTask) => {
         position: "bottom-right",
       })
     }
-
-    if(filesToAdd.value.length > 0){ 
-      await uploadFile(route.params.boardID, route.params.taskID, filesToAdd.value)
-    }
+    
     if (filesToDelete.value.length > 0) {
       filesToDelete.value.forEach(async (eFile) => {
         await deleteFile(route.params.boardID, route.params.taskID, eFile.fileName)
       })
     }
+
+    if(filesToAdd.value.length > 0){ 
+      await uploadFile(route.params.boardID, route.params.taskID, filesToAdd.value)
+    }
+    
 
   } catch (error) {
     console.log("Error updating task: ", error)
@@ -198,7 +200,7 @@ const handleFileUpload = (event) => {
       const fileSizeInMB = file.size / (1024 * 1024);
       
       // Skip files larger than 20MB
-      if (fileSizeInMB >= 20) {
+      if (fileSizeInMB > 20) {
         console.log(`File ${file.name} exceeds the 20MB size limit and was skipped.`);
         // fileOverMaxSize.push(file.name)
         return;
@@ -250,7 +252,7 @@ const handleFileUpload = (event) => {
 
     fileNotExistSelected.forEach(file => {
       fileOverMaxSize = []
-      if(file.size / (1024 * 1024) < 20){
+      if(file.size / (1024 * 1024) <= 20){
         fileUploaded.value.push({
           fileName: file.name,
           fileSize: file.size,

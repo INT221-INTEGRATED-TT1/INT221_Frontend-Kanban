@@ -150,11 +150,11 @@ const isInArray = (array, file) => {
 
 const handleFileUpload = (event) => {
   let newSelectedFilesArray = Array.from(event.target.files)
-  let fileOverMaxSize = newSelectedFilesArray.filter(file => (file.size / (1024 * 1024)) >= 20)
+  let fileOverMaxSize = newSelectedFilesArray.filter(file => (file.size / (1024 * 1024)) > 20)
 
   if (newSelectedFilesArray.length > 0) {
     // Filter files that are not already in selectedFiles.value
-    const fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(selectedFiles.value, file) && (file.size / (1024 * 1024) < 20))
+    const fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(selectedFiles.value, file) && (file.size / (1024 * 1024) <= 20))
     console.log('New files to add:', fileNotExistSelected)
 
     // Append the new files
