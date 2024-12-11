@@ -287,7 +287,7 @@ const deleteStatusTransfer = async (boardId, oldId, newId) => {
 const toggleStatusLimit = async (newToggleStatus) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/v2/statuses/maximum-task`,
+      `${import.meta.env.VITE_BACKEND_URL}/v3/boards/maximum-task`,
       {
         method: "PATCH",
         headers: {

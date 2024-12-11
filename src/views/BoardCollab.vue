@@ -43,6 +43,7 @@ let oldCollaboratorModel = reactive({
 })
 
 const addNewCollaborator = async () => {
+    utilityStore.transactionDisable = true
     oldCollaboratorModel = {...newCollaboratorModel}
     if(emailPattern.test(newCollaboratorModel.email)){
       isEmailValid.value = true
@@ -75,6 +76,9 @@ const addNewCollaborator = async () => {
               transition: "flip",
               position: "bottom-right",
             })
+            utilityStore.transactionDisable = false
+
+
       }
       else if (newCollaborator.status === 404) {
         emailFieldErrorMassage.value = 'The user does not exists.'
@@ -283,7 +287,7 @@ onBeforeMount(async () => {
             </button>
             <button
               class="btn btn-sm px-8 text-xs tracking-widest bg-[#007305] bg-opacity-35 text-[#13FF80] text-opacity-85 hover:border-none hover:bg-base"
-              :disabled="isButtonDisabled" @click="addNewCollaborator">
+              :disabled="isButtonDisabled "  @click="addNewCollaborator">
               Add
             </button>
           </div>
