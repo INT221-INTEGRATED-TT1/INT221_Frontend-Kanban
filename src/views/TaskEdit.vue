@@ -177,7 +177,8 @@ const filesToDelete = ref([])
 // Function to check if a file exists in an array based on specific properties
 const isInArray = (array, file) => {
   return array.some(item =>
-    item.fileName === file.name
+    item.fileName === file.name &&
+    item.fileSize === file.name
     // item.type === file.type &&
     // item.lastModified === file.lastModified
   );
@@ -185,145 +186,103 @@ const isInArray = (array, file) => {
 
 const isInArraySameAttr = (array, file) => {
   return array.some(item =>
-    item.fileName === file.fileName
+    item.fileName === file.fileName &&
+    item.fileSize === file.fileSize
   )
 };
 
 const handleFileUpload = (event) => {
   const newSelectedFilesArray = Array.from(event.target.files);
   let fileOverMaxSize = []
+  let fileOverMaxLength = []
+  let fileSameName = []
 
   if (newSelectedFilesArray.length > 0) {
-      newSelectedFilesArray.forEach(file => {
+    fileOverMaxSize = []
+    fileSameName = []
+    // Check for files not already uploaded
+    fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(fileUploaded.value, file))
+
+    fileNotExistSelected.forEach(file => {
+      //check if each file size > 20MB
       const fileSizeInMB = file.size / (1024 * 1024);
-      
-      // Skip files larger than 20MB
       if (fileSizeInMB > 20) {
         console.log(`File ${file.name} exceeds the 20MB size limit and was skipped.`);
-        // fileOverMaxSize.push(file.name)
+        fileOverMaxSize.push({
+          fileName: file.name,
+          fileSize: file.size,
+          lastModified: file.lastModifiedDate,
+        });
         return;
       }
 
-      // already in filupload and originalfileUploaded
-      if (isInArray(originalfileUploaded, file) && isInArray(fileUploaded.value, file)) {
-        toast(
-          `File with the same filename cannot be added or updated to the attachments. Please delete the attachment and add again to update the file`,
-          {
-            type: "error",
-            timeout: 5000,
-            theme: "dark",
-            transition: "flip",
-            position: "bottom-right",
-            style: {
-              width: "500px", // Adjust the width as needed
-              maxWidth: "90%", // Prevent it from being too wide on smaller screens
-            },
-          }
-        )
-        return
+      //Check if the file is the same name of some item in fileUploaded
+      if (fileUploaded.value.some(item => item.fileName === file.name)) {
+        fileSameName.push({
+          fileName: file.name,
+          fileSize: file.size,
+          lastModified: file.lastModifiedDate,
+        })
+        return;
       }
 
-      if (isInArray(fileUploaded.value, file)) {
-        toast(
-          `File with the same filename cannot be added or updated to the attachments. Please delete the attachment and add again to update the file`,
-          {
-            type: "error",
-            timeout: 5000,
-            theme: "dark",
-            transition: "flip",
-            position: "bottom-right",
-            style: {
-              width: "500px", // Adjust the width as needed
-              maxWidth: "90%", // Prevent it from being too wide on smaller screens
-            },
-          }
-        )
-        return
-      }
-
-
-      // Check if the file is already uploaded
+      //Check if the file is not already in fileuploaded
       if (!isInArray(fileUploaded.value, file)) {
         fileUploaded.value.push({
           fileName: file.name,
           fileSize: file.size,
           lastModified: file.lastModifiedDate,
         });
-
         // Add file to `filesToAdd` if it's not part of `originalfileUploaded`
         if (!isInArray(originalfileUploaded, file)) {
           filesToAdd.value.push(file);
         }
       }
-
+      
       // Remove file from `filesToDelete` if it was previously marked for deletion
-      const deleteIndex = filesToDelete.value.findIndex(fileToDelete => fileToDelete.fileName === file.name);
+      const deleteIndex = filesToDelete.value.findIndex(fileToDelete => (fileToDelete.fileName === file.name) && (fileToDelete.fileSize === file.size));
       if (deleteIndex !== -1) {
         filesToDelete.value.splice(deleteIndex, 1);
-        console.log(`File ${file.name} was removed from deletion list.`);
+        // console.log(`File ${file.name} was removed from deletion list.`);
       }
-    });
 
-    // Check for files not already uploaded
-    fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(fileUploaded.value, file))
-
-    fileNotExistSelected.forEach(file => {
-      fileOverMaxSize = []
-      if(file.size / (1024 * 1024) <= 20){
-        fileUploaded.value.push({
-          fileName: file.name,
-          fileSize: file.size,
-          lastModified: file.lastModifiedDate,
-        });
-      } else {
-        fileOverMaxSize.push({
-          fileName: file.name,
-          fileSize: file.size,
-          lastModified: file.lastModifiedDate,
-        });
-      }
-      filesToAdd.value.push(file);
-    });
+    })
 
     // console.log("Updated fileUploaded:", fileUploaded.value);
-    // console.log("Files to add:", filesToAdd);
+    // console.log("Files to add:", filesToAdd.value);
     // console.log("File not exist selected:", fileNotExistSelected);
-    // console.log('filesToDelete : ',filesToDelete);
+    // console.log('filesToDelete : ',filesToDelete.value);
 
   }
 
-  if(fileOverMaxSize.length > 0 && fileUploaded.value.length > 10){
-    let fileOverMaxLength = fileUploaded.value.slice(10, fileUploaded.value.length )
-    console.log("fileOverMaxLength", fileOverMaxLength)
-
+  // Clear Files that over slot
+  if (fileUploaded.value.length > 10) {
+    fileOverMaxLength = fileUploaded.value.slice(10, fileUploaded.value.length)
     fileUploaded.value.splice(10, fileUploaded.value.length - 10)
-    let errorFilesCombined = fileOverMaxSize.concat(fileOverMaxLength)
-    console.log("errorFilesCombined", errorFilesCombined)
-    let errorMessage = ''
-    errorFilesCombined.forEach(file => errorMessage += "\n" + "- " + file.fileName)
-    toast(
-      `- Each task can have at most 10 files. \n - Each file cannot be larger than 20 MB. \n The following files are not added: ${errorMessage} `,
-      {
-        type: "error",
-        timeout: 5000,
-        theme: "dark",
-        transition: "flip",
-        position: "bottom-right",
-        style: {
-          width: "500px", // Adjust the width as needed
-          maxWidth: "90%", // Prevent it from being too wide on smaller screens
-        },
-      }
-    )
+    fileOverMaxLength.forEach(errorItem => {
+      const deleteIndex = filesToAdd.value.findIndex(fileToDelete => (fileToDelete.name === errorItem.fileName) && (fileToDelete.size === errorItem.fileSize));
+      if (deleteIndex !== -1) { filesToAdd.value.splice(deleteIndex, 1); }
+    })
   }
 
-  else if(fileUploaded.value.length > 10){
-    let errorFiles = fileUploaded.value.slice(10, fileUploaded.value.length)
+  if(fileOverMaxSize.length > 0 || fileOverMaxLength.length > 0 || fileSameName.length > 0){
+    let errorFilesCombined = []
     let errorMessage = ''
-    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.fileName)
-    fileUploaded.value.splice(10, fileUploaded.value.length - 10)
+    let errorFiles = ''
+    if(fileOverMaxSize.length > 0){
+      errorMessage += '• Each file cannot be larger than 20 MB. \n '
+    }
+    if(fileOverMaxLength.length > 0){
+      errorMessage += '• Each task can have at most 10 files. \n '
+    }
+    if(fileSameName.length > 0){
+      errorMessage += '• File with the same filename cannot be added or updated to the attachments. Please delete the attachment and add again to update the file. \n '
+    }
+    errorMessage += 'The following files are not added: \n '
+    errorFilesCombined = [...fileOverMaxSize, ...fileOverMaxLength, ...fileSameName]
+    errorFilesCombined.forEach(file => errorFiles += "\n" + "- " + file.fileName)
     toast(
-      `Each task can have at most 10 files. The following files are not added: ${errorMessage} `,
+      `${errorMessage} ${errorFiles} `,
       {
         type: "error",
         timeout: 5000,
@@ -331,28 +290,8 @@ const handleFileUpload = (event) => {
         transition: "flip",
         position: "bottom-right",
         style: {
-        width: "500px", // Adjust the width as needed
-        maxWidth: "90%", // Prevent it from being too wide on smaller screens
-      },
-      }
-    )
-  }
-
-  else if(fileOverMaxSize.length > 0){
-    let errorFiles = fileOverMaxSize
-    let errorMessage = ''
-    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.fileName)
-    toast(
-      `Each file cannot be larger than 20 MB. The following files are not added: ${errorMessage} `,
-      {
-        type: "error",
-        timeout: 5000,
-        theme: "dark",
-        transition: "flip",
-        position: "bottom-right",
-        style: {
-          width: "500px", // Adjust the width as needed
-          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+          width: "500px", 
+          maxWidth: "90%", 
         },
       }
     )
