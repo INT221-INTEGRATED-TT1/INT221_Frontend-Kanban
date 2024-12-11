@@ -1,6 +1,6 @@
 <script setup>
 import {ref, onBeforeMount, computed, reactive} from "vue"
-import {getTask, editTask, findCollabById} from "@/libs/FetchAPI.js"
+import {getTask, editTask, findCollabById, getUploadedFile, downloadFile, uploadFile, deleteFile} from "@/libs/FetchAPI.js"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
@@ -15,6 +15,11 @@ import TimezoneIcon from "@/components/icons/TimezoneIcon.vue"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
 import AttachIcon from "@/components/icons/AttachIcon.vue"
 import CloudUploadIcon from "@/components/icons/CloudUploadIcon.vue"
+import DocumentIcon from "@/components/icons/DocumentIcon.vue"
+import ImageFileIcon from "@/components/icons/ImageFileIcon.vue"
+import PDFIcon from "@/components/icons/PDFIcon.vue"
+import VideoFileIcon from "@/components/icons/VideoFileIcon.vue"
+import ZIPIcon from "@/components/icons/ZIPIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import { useUserStore } from "@/stores/useUserStore"
@@ -131,6 +136,18 @@ const editTaskData = async (newTask) => {
         position: "bottom-right",
       })
     }
+
+    if (filesToDelete.value.length > 0) {
+      filesToDelete.value.forEach(async (eFile) => {
+        await deleteFile(route.params.boardID, route.params.taskID, eFile.fileName)
+      })
+    }
+
+    if(filesToAdd.value.length > 0){ 
+      await uploadFile(route.params.boardID, route.params.taskID, filesToAdd.value)
+    }
+    
+
   } catch (error) {
     console.log("Error updating task: ", error)
   }
@@ -141,32 +158,293 @@ const isButtonDisable = computed(() => {
   if (newStatus.id !== filterStatus.value.id) {
     utilityStore.transactionDisable = false
   }
-  // else if (newStatus.id === filterStatus.value.id) {
-  //   utilityStore.transactionDisable = true
-  // }
-  return (
-    (updateTask.title === task.value.title &&
-      updateTask.description === task.value.description &&
-      updateTask.assignees === task.value.assignees &&
-      updateTask.status3 === task.value.statuses3.id) ||
-    !updateTask.title ||
-    utilityStore.transactionDisable
-  )
+  const isTaskUnchanged = (updateTask.title === task.value.title && updateTask.description === task.value.description && updateTask.assignees === task.value.assignees && updateTask.status3 === task.value.statuses3.id)
+  const hasFileChanges = (filesToAdd.value.length > 0 || filesToDelete.value.length > 0);
+  // console.log("hasFileChanges: ", hasFileChanges)
+  const shouldUpdate = (isTaskUnchanged || !updateTask.title || utilityStore.transactionDisable) && !hasFileChanges
+  // console.log("roum mid", (isTaskUnchanged || !updateTask.title || utilityStore.transactionDisable))
+  // console.log("shouldUpdate", shouldUpdate)
+  return shouldUpdate
+  // return ( isTaskUnchanged || !updateTask.title || utilityStore.transactionDisable)
 })
 
-const fileNames = ref(["CloudUploadIcon.svg","attachlink.svg"])
-// const files = ref([])
+const fileUploaded = ref([])
+let fileNotExistSelected = []
+let originalfileUploaded = []
+const filesToAdd = ref([])
+const filesToDelete = ref([])
+
+// Function to check if a file exists in an array based on specific properties
+const isInArray = (array, file) => {
+  return array.some(item =>
+    item.fileName === file.name
+    // item.type === file.type &&
+    // item.lastModified === file.lastModified
+  );
+};
+
+const isInArraySameAttr = (array, file) => {
+  return array.some(item =>
+    item.fileName === file.fileName
+  )
+};
+
 const handleFileUpload = (event) => {
-  // console.log(event.target.files[0])
-  let files = event.target.files
-  fileNames.value = Array.from(files).map(file => file.name)
-  console.log(Array.from(files))
+  const newSelectedFilesArray = Array.from(event.target.files);
+  let fileOverMaxSize = []
+
+  if (newSelectedFilesArray.length > 0) {
+      newSelectedFilesArray.forEach(file => {
+      const fileSizeInMB = file.size / (1024 * 1024);
+      
+      // Skip files larger than 20MB
+      if (fileSizeInMB > 20) {
+        console.log(`File ${file.name} exceeds the 20MB size limit and was skipped.`);
+        // fileOverMaxSize.push(file.name)
+        return;
+      }
+
+      // already in filupload and originalfileUploaded
+      if (isInArray(originalfileUploaded, file) && isInArray(fileUploaded.value, file)) {
+        toast(
+          `File with the same filename cannot be added or updated to the attachments. Please delete the attachment and add again to update the file`,
+          {
+            type: "error",
+            timeout: 5000,
+            theme: "dark",
+            transition: "flip",
+            position: "bottom-right",
+            style: {
+              width: "500px", // Adjust the width as needed
+              maxWidth: "90%", // Prevent it from being too wide on smaller screens
+            },
+          }
+        )
+        return
+      }
+
+      if (isInArray(fileUploaded.value, file)) {
+        toast(
+          `File with the same filename cannot be added or updated to the attachments. Please delete the attachment and add again to update the file`,
+          {
+            type: "error",
+            timeout: 5000,
+            theme: "dark",
+            transition: "flip",
+            position: "bottom-right",
+            style: {
+              width: "500px", // Adjust the width as needed
+              maxWidth: "90%", // Prevent it from being too wide on smaller screens
+            },
+          }
+        )
+        return
+      }
+
+
+      // Check if the file is already uploaded
+      if (!isInArray(fileUploaded.value, file)) {
+        fileUploaded.value.push({
+          fileName: file.name,
+          fileSize: file.size,
+          lastModified: file.lastModifiedDate,
+        });
+
+        // Add file to `filesToAdd` if it's not part of `originalfileUploaded`
+        if (!isInArray(originalfileUploaded, file)) {
+          filesToAdd.value.push(file);
+        }
+      }
+
+      // Remove file from `filesToDelete` if it was previously marked for deletion
+      const deleteIndex = filesToDelete.value.findIndex(fileToDelete => fileToDelete.fileName === file.name);
+      if (deleteIndex !== -1) {
+        filesToDelete.value.splice(deleteIndex, 1);
+        console.log(`File ${file.name} was removed from deletion list.`);
+      }
+    });
+
+    // Check for files not already uploaded
+    fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(fileUploaded.value, file))
+
+    fileNotExistSelected.forEach(file => {
+      fileOverMaxSize = []
+      if(file.size / (1024 * 1024) <= 20){
+        fileUploaded.value.push({
+          fileName: file.name,
+          fileSize: file.size,
+          lastModified: file.lastModifiedDate,
+        });
+      } else {
+        fileOverMaxSize.push({
+          fileName: file.name,
+          fileSize: file.size,
+          lastModified: file.lastModifiedDate,
+        });
+      }
+      filesToAdd.value.push(file);
+    });
+
+    // console.log("Updated fileUploaded:", fileUploaded.value);
+    // console.log("Files to add:", filesToAdd);
+    // console.log("File not exist selected:", fileNotExistSelected);
+    // console.log('filesToDelete : ',filesToDelete);
+
+  }
+
+  if(fileOverMaxSize.length > 0 && fileUploaded.value.length > 10){
+    let fileOverMaxLength = fileUploaded.value.slice(10, fileUploaded.value.length )
+    console.log("fileOverMaxLength", fileOverMaxLength)
+
+    fileUploaded.value.splice(10, fileUploaded.value.length - 10)
+    let errorFilesCombined = fileOverMaxSize.concat(fileOverMaxLength)
+    console.log("errorFilesCombined", errorFilesCombined)
+    let errorMessage = ''
+    errorFilesCombined.forEach(file => errorMessage += "\n" + "- " + file.fileName)
+    toast(
+      `- Each task can have at most 10 files. \n - Each file cannot be larger than 20 MB. \n The following files are not added: ${errorMessage} `,
+      {
+        type: "error",
+        timeout: 5000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+        style: {
+          width: "500px", // Adjust the width as needed
+          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+        },
+      }
+    )
+  }
+
+  else if(fileUploaded.value.length > 10){
+    let errorFiles = fileUploaded.value.slice(10, fileUploaded.value.length)
+    let errorMessage = ''
+    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.fileName)
+    fileUploaded.value.splice(10, fileUploaded.value.length - 10)
+    toast(
+      `Each task can have at most 10 files. The following files are not added: ${errorMessage} `,
+      {
+        type: "error",
+        timeout: 5000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+        style: {
+        width: "500px", // Adjust the width as needed
+        maxWidth: "90%", // Prevent it from being too wide on smaller screens
+      },
+      }
+    )
+  }
+
+  else if(fileOverMaxSize.length > 0){
+    let errorFiles = fileOverMaxSize
+    let errorMessage = ''
+    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.fileName)
+    toast(
+      `Each file cannot be larger than 20 MB. The following files are not added: ${errorMessage} `,
+      {
+        type: "error",
+        timeout: 5000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+        style: {
+          width: "500px", // Adjust the width as needed
+          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+        },
+      }
+    )
+  }
+}
+
+const cancelSelectedOrDeleteFile = (file) => {
+  console.log('Click detected on file:', file);
+
+  if (isInArraySameAttr(originalfileUploaded, file)) {
+    console.log(`File ${file.fileName} found in originalfileUploaded, moving to filesToDelete.`);
+    const indexInUploaded = fileUploaded.value.findIndex(
+      fileUpload => fileUpload.fileName === file.fileName
+    );
+
+    if (indexInUploaded !== -1) {
+      fileUploaded.value.splice(indexInUploaded, 1);
+      filesToDelete.value.push(file);
+    } else {
+      console.warn(`File ${file.fileName} not found in fileUploaded.`);
+    }
+  } 
+  else if (isInArray(filesToAdd.value, file)) {
+    console.log(`File ${file.fileName} found in filesToAdd, removing from filesToAdd and fileUploaded.`);
+    const indexInFilesToAdd = filesToAdd.value.findIndex(
+      fileInAdd => fileInAdd.name === file.fileName
+    );
+    const indexInUploaded = fileUploaded.value.findIndex(
+      fileUpload => fileUpload.fileName === file.fileName
+    );
+
+    if (indexInFilesToAdd !== -1) {
+      filesToAdd.value.splice(indexInFilesToAdd, 1);
+    } else {
+      console.warn(`File ${file.fileName} not found in filesToAdd.`);
+    }
+
+    if (indexInUploaded !== -1) {
+      fileUploaded.value.splice(indexInUploaded, 1);
+    } else {
+      console.warn(`File ${file.fileName} not found in fileUploaded.`);
+    }
+  } 
+  else {
+    console.log(`File ${file.fileName} not found in any list, no action taken.`);
+  }
+
+  console.log('Updated filesToAdd:', filesToAdd.value);
+  console.log('Updated filesToDelete:', filesToDelete.value);
+};
+
+const computedFilesSize = computed(() => {
+  if(fileUploaded.value.length > 0) {
+    return (fileUploaded.value.reduce((sum, file) => sum + file.fileSize, 0) / (1024 * 1024)).toFixed(2)
+  }
+  return 0
+})
+
+const getFile = async (fileName) => {
+  const responseDownloadFile = await downloadFile(route.params.boardID, route.params.taskID, fileName)
+  const url = window.URL.createObjectURL(responseDownloadFile.blob)
+  const fileType = responseDownloadFile.headers.get("Content-Type")
+  const supportedTypes = [
+    "text/plain",       // .txt
+    "application/rtf",  // .rtf
+    "image/jpeg",       // .jpg
+    "image/png",        // .png
+    "application/pdf"   // .pdf
+  ];
+  console.log(fileType)
+  if (supportedTypes.includes(fileType)) {
+    // Open in a new tab for supported types
+    window.open(url, "_blank");
+  } else {
+    // Trigger download for unsupported types
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 }
 
 onBeforeMount(async () => {
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN")
+  const decodedData = window.atob(JWT_TOKEN.split('.')[1])
+  userStore.userIdentity = { ...JSON.parse(decodedData) }
   try {
     const fetchTask = await getTask(route.params.boardID, route.params.taskID)
-    utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+    fetchTask.board.ownerId === userStore.userIdentity.oid ? utilityStore.isOwnerBoard = true : "false"
+    // utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
 
     if (!utilityStore.isOwnerBoard) {
       // router.push(`/board/${route.params.boardID}/task`).then(() => {
@@ -193,10 +471,10 @@ onBeforeMount(async () => {
     }
 
     task.value = fetchTask
-    console.log(task.value)
+    // console.log(task.value)
 
-    task.value.createOn = utilityStore.formatDateTime(task.value.createOn)
-    task.value.updateOn = utilityStore.formatDateTime(task.value.updateOn)
+    task.value.createdOn = utilityStore.formatDateTime(task.value.createdOn)
+    task.value.updatedOn = utilityStore.formatDateTime(task.value.updatedOn)
 
     updateTask.title = task.value.title
     updateTask.description = task.value.description
@@ -209,22 +487,23 @@ onBeforeMount(async () => {
     newStatus.color = task.value.statuses3.color
 
     // console.log(updateTask.status.length)
+    const responseGetFileUploaded = await getUploadedFile(route.params.boardID, route.params.taskID)
+    fileUploaded.value = responseGetFileUploaded.data
+    originalfileUploaded = [...fileUploaded.value ]
+    // console.log(fileUploaded.value)
+
   } catch (error) {
     console.log(`Error fetching task ${route.params.boardID}: `, error)
-    router.push('/error')
+    // router.push('/error')
     return
   }
 })
 </script>
 
 <template>
-  <section
-    class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-sm"
-  >
-    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10">
-      <h1
-        class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
-      >
+  <section class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-sm">
+    <div class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-24 py-10">
+      <h1 class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider">
         Task Editing
       </h1>
       <!-- close modal -->
@@ -236,10 +515,12 @@ onBeforeMount(async () => {
         </button>
       </div>
 
-      <div class="flex flex-col gap-y-5">
+      <!-- Title -->
+      <div class="flex flex-col gap-y-5 mt-5">
         <textarea
-          class="itbkk-title bg-transparent outline-none scroll resize-none w-full text-3xl font-bold text-headline mt-5"
+          class="itbkk-title bg-[#1A1B1D] rounded-xl outline-none resize-none w-full text-2xl font-semibold text-headline p-4 pl-6 "
           maxlength="100"
+          rows="1"
           :placeholder="task.title"
           v-model.trim="updateTask.title"
         >
@@ -248,10 +529,8 @@ onBeforeMount(async () => {
         <div class="grid grid-cols-1 grid-rows-4 gap-y-4">
           <!-- Status -->
           <div class="flex gap-x-10 items-center">
-            <div
-              class="itbkk-status text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-3"
-            >
-              <span clas>
+            <div class="itbkk-status text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-3">
+              <span>
                 <StatusDetail />
               </span>
               Status
@@ -289,9 +568,7 @@ onBeforeMount(async () => {
 
           <!-- Assignees -->
           <div class="flex gap-x-10 items-center">
-            <div
-              class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
-            >
+            <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span>
                 <AssigneeDetail />
               </span>
@@ -314,9 +591,7 @@ onBeforeMount(async () => {
 
           <!-- CreatedOn -->
           <div class="flex gap-x-10 items-center">
-            <div
-              class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
-            >
+            <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span>
                 <CreatedDateIcon />
               </span>
@@ -331,18 +606,14 @@ onBeforeMount(async () => {
 
           <!-- UpdatedOn -->
           <div class="flex gap-x-10 items-center">
-            <div
-              class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
-            >
+            <div class="text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span>
                 <UpdatedDateIcon />
               </span>
               Updated On
             </div>
-            <div
-              class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest"
-            >
-              {{ task.updated }}
+            <div class="itbkk-updated-on font-normal text-[14px] text-headline text-opacity-50 tracking-widest">
+              {{ task.updatedOn }}
             </div>
           </div>
 
@@ -355,28 +626,43 @@ onBeforeMount(async () => {
               Attachment
             </div>
 
+          <!-- Uploadfile Button -->
             <div>
-              <label class="flex items-center gap-2 rounded-lg bg-[#3D3C3C] px-3 py-1 w-auto cursor-pointer">
-                <input type="file" class="hidden" @change="handleFileUpload"/>
+              <label class="flex items-center gap-2 rounded-lg bg-[#3D3C3C] px-3 py-1 w-auto cursor-pointer" :class="fileUploaded.length === 10 ? 'opacity-30' : 'opacity-100'">
+                <input type="file" class="hidden" :disabled="fileUploaded.length === 10 ? true : false" multiple @change="handleFileUpload"/>
                 <CloudUploadIcon/>
-                <span class="font-Geist tracking-wide">upload file</span>
+                <span class="font-Geist text-white text-opacity-80 tracking-wide">upload file</span>
               </label>
             </div>
           </div>
-          <div class="flex items-center gap-5">
-            <p>Files</p>
-            <ul v-if="fileNames" class="flex items-center gap-3 text-gray-500 ">
-              <li v-for="(file, index) in fileNames" :key="index">
-                {{ fileNames.length <= 1 ? file : index === fileNames.length - 1 ? file : file + " ," }}
-              </li>
-            </ul>
-        </div>
-          <!-- Attachment -->
+
+          <!-- Files -->
+          <div class="flex items-center justify-between font-Inter text-white tracking-wide">
+            <p >Files ({{ fileUploaded.length > 0 ? fileUploaded.length : 0 }}/10)</p>
+            <p class="text-sm">{{ computedFilesSize }}/200 MB</p>
+          </div>
+          <div v-if="fileUploaded.length > 0" class="h-44 overflow-y-auto pl-3 ">
+            <div class="flex flex-col gap-2 w-9/12">
+              <div v-for="(file, index) in fileUploaded" :key="index" class="flex items-center border border-[#B8B8B8] border-opacity-20 p-3 pl-8 rounded-md gap-6">
+                <div v-if="file.fileName && /\.(mp4|mov|avi|mkv|wmv|flv|webm|mpeg|mpg|3gp)$/i.test(file.fileName)"><VideoFileIcon class="h-16"/></div>
+                <div v-else-if="file.fileName && /\.(jpeg|jpg|png|gif|bmp|tiff|tif|webp|svg)$/i.test(file.fileName)"><ImageFileIcon class="h-16"/></div>
+                <div v-else-if="file.fileName.toLowerCase().endsWith('.zip')"><ZIPIcon class="h-16"/></div>
+                <div v-else-if="file.fileName.toLowerCase().endsWith('.pdf')"><PDFIcon class="h-16"/></div>
+                <div v-else><DocumentIcon class="h-16"/></div>
+                <div class="font-Inter gap-1 cursor-pointer" @click="getFile(file.fileName)">
+                  <p class="text-white text-sm hover:underline tracking-wider">{{ file.fileName }}</p>
+                  <p class="text-white text-sm text-opacity-30">{{ (file.fileSize / (1024 * 1024)).toFixed(2) }} MB</p>
+                </div>
+                <button class="ml-auto mr-2 text-red-500 self-start" @click="cancelSelectedOrDeleteFile(file)">x</button>
+              </div>
+            </div>
+          </div>
+          <!-- Files -->
 
           <!-- Description -->
           <textarea
-            class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-8"
-            rows="6"
+            class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered resize-none mt-8"
+            rows="4"
             maxlength="500"
             :class="
               task.description === 'No Description Provided'
@@ -439,4 +725,5 @@ onBeforeMount(async () => {
   </section>
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>

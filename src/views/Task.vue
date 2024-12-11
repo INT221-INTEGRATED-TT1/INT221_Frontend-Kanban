@@ -114,13 +114,13 @@ onBeforeMount(async () => {
     utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
     utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.filter(board => board.id === route.params.boardID)[0]}
 
-    console.log("Owner Board : ", utilityStore.isOwnerBoard)
+    // console.log("Owner Board : ", utilityStore.isOwnerBoard)
 
     if(utilityStore.isOwnerBoard) {
       currentVisibility.value = utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]?.visibility
       currentVisibility.value === 'PUBLIC' ? isToggled.value = true : isToggled.value = false
 
-      console.log(isToggled.value)
+      // console.log(isToggled.value)
 
     } else { 
       currentVisibility.value = ''
@@ -137,7 +137,7 @@ onBeforeMount(async () => {
     // utilityStore.selectedBoard.name.length > 0 ? console.log('board has board name') : utilityStore.selectedBoard = {...fetchTasks[0]?.board}
     !utilityStore.selectedBoard.name ? utilityStore.selectedBoard = {...fetchTasks[0]?.board} : ""
     // console.log(utilityStore.selectedBoardId)
-    console.log("Owner Board : ", utilityStore.isOwnerBoard)
+    // console.log("Owner Board : ", utilityStore.isOwnerBoard)
     // console.log(fetchTasks)
     // console.log(utilityStore.selectedBoard)
     for (const task of utilityStore.tasksManager.getTasks()) {
