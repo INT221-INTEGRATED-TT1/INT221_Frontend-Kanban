@@ -20,11 +20,13 @@ import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import {useRoute} from "vue-router"
 import { useUserStore } from "@/stores/useUserStore"
-
 const userStore = useUserStore()
 const route = useRoute()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
+
+
+const isUploading = ref(false)
 
 const newStatus = reactive({
   id: -1,
@@ -95,30 +97,33 @@ const createNewTask = async () => {
     // newTask.description.trim().length === 0 ? (newTask.description = null) : ""
     const response = await createTask(route.params.boardID, newTask)
     if (response.status === 201) {
-      utilityStore.transactionDisable = false
       // newStatus.id = 1
       utilityStore.tasksManager.addTask(response.data)
-      utilityStore.statusManager.getStatus()[
-        utilityStore.statusManager
-          .getStatus()
-          .findIndex((status) => status.id === newStatus.id)
-      ].count += 1
+      utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex((status) => status.id === newStatus.id)].count += 1
 
-      router.push(`/board/${utilityStore.selectedBoardId}/task`)
       filterStatus.value = {}
-      setTimeout(() => {
-        toast("The task has been successfully added", {
-          type: "success",
-          timeout: 2000,
-          theme: "dark",
-          transition: "flip",
-          position: "bottom-right",
-        })
-      }, 200)
+      
       console.log("response data form created : " , response.data)
       if(selectedFiles.value.length > 0){
-        await uploadFile(route.params.boardID, response.data.id, selectedFiles.value)
+        isUploading.value = true
+        const responseUploadedFile = await uploadFile(route.params.boardID, response.data.id, selectedFiles.value)
+        if(responseUploadedFile.status === 200) {
+          isUploading.value = false
+          router.push(`/board/${utilityStore.selectedBoardId}/task`)
+          utilityStore.transactionDisable = false
+          setTimeout(() => {
+            toast("The task has been successfully added", {
+              type: "success",
+              timeout: 2000,
+              theme: "dark",
+              transition: "flip",
+              position: "bottom-right",
+            })
+          }, 200)
+         }
       }
+
+
 
     } else if (response.status === 400) {
       utilityStore.transactionDisable = false
@@ -287,17 +292,6 @@ onBeforeMount(async () => {
       utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
 
       if (!utilityStore.isOwnerBoard) {
-        // router.push(`/board/${route.params.boardID}/task`).then(() => {
-        //   toast(
-        //     `You don't have permission to edit this board`,
-        //     {
-        //       type: "error",
-        //       timeout: 2000,
-        //       theme: "dark",
-        //       transition: "flip",
-        //       position: "bottom-right",
-        //     })
-        // })
         const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
         utilityStore.collabAccessRight = collabIdentity.accessRight
         console.log(collabIdentity.accessRight)
@@ -457,6 +451,7 @@ onBeforeMount(async () => {
                 <input type="file" class="hidden" :disabled="selectedFiles.length === 10 ? true : false" multiple @change="handleFileUpload"/>
                 <CloudUploadIcon/>
                 <span class="font-Geist tracking-wide">upload file</span>
+                <span v-show="isUploading" class="loading loading-spinner loading-xs"></span>
               </label>
             </div>
           </div>
