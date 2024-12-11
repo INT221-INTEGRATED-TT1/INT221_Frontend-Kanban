@@ -46,4 +46,9 @@
 const test = new URLSearchParams()
 test.append('tes1', 'as')
 test.append('test2', 'asasas')
-console.log(test);
+console.log(test.toString());
+
+const st = ""
+console.log(st.length);
+const baseUrl = process.env.VITE_BASE_URL;
+console.log(baseUrl)

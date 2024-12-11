@@ -4,11 +4,13 @@ import router from "@/router"
 import {useRoute} from "vue-router"
 import {useUtilityStore} from "@/stores/useUtilityStore"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import {getStatus3, editStatus3} from "@/libs/FetchAPI"
+import {getStatus, editStatus, findCollabById} from "@/libs/FetchAPI"
 import Xmark from "@/components/icons/Xmark.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
+import { useUserStore } from "@/stores/useUserStore"
 
+const userStore = useUserStore()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const route = useRoute()
@@ -28,7 +30,8 @@ const updateColor = (index) => {
 
 const editStatusData = async (newStatus) => {
   try {
-    const response = await editStatus3(route.params.boardID, route.params.statusID, newStatus)
+    newStatus.description === null ? (newStatus.description = null) : ""
+    const response = await editStatus(route.params.boardID, route.params.statusID, newStatus)
     if (response.status === 200) {
       utilityStore.statusManager.editStatus(route.params.statusID, newStatus)
       router.push(`/board/${route.params.boardID}/status`)
@@ -69,7 +72,31 @@ const isButtonDisabled = computed(() => {
 
 onBeforeMount(async () => {
   try {
-    const fetchData = await getStatus3(route.params.boardID, route.params.statusID)
+    const fetchData = await getStatus(route.params.boardID, route.params.statusID)
+
+    utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+    if (!utilityStore.isOwnerBoard) {
+      // router.push(`/board/${route.params.boardID}/status`).then(() => {
+      //   toast(
+      //     `You don't have permission to edit this board`,
+      //     {
+      //       type: "error",
+      //       timeout: 2000,
+      //       theme: "dark",
+      //       transition: "flip",
+      //       position: "bottom-right",
+      //     })
+      // })
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+      if(utilityStore.isOwnerBoard === false) {
+          router.push('/error')
+          return
+      }
+    }
+    
     status.value = fetchData
     // console.log(status.value);
     // console.log(fetchData);
@@ -80,6 +107,8 @@ onBeforeMount(async () => {
     updateStatus.color = status.value.color
   } catch (error) {
     console.log(error)
+    router.push('/error')
+    return
   }
 })
 </script>
@@ -97,7 +126,7 @@ onBeforeMount(async () => {
         Status Editing
       </h1>
       <div class="flex justify-end px-14">
-        <button @click="router.back()">
+        <button @click="router.push(`/board/${route.params.boardID}/status`)">
           <span><Xmark /></span>
         </button>
       </div>

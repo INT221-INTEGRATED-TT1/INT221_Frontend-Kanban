@@ -15,8 +15,7 @@ const addNewBoard = async (newBoard) => {
   try {
     const response = await createBoard(newBoard)
     if (response.status === 201) {
-      console.log(response.data);
-      
+      // console.log(response.data);
       utilityStore.boardManager.addBoard(response.data)
       router.push('/board')
     }
@@ -50,7 +49,7 @@ const addNewBoard = async (newBoard) => {
             120</span>
         </div>
         <!-- button -->
-        <div class="flex justify-end gap-x-[1rem]">
+        <div class="flex justify-end items-center gap-x-[1rem]">
           <button
             class="btn text-xs text-[#FFFFFF] tracking-widest bg-transparent text-opacity-70 border-none hover:bg-transparent"
             @click="router.push('/board')">

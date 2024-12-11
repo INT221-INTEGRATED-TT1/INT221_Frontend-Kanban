@@ -1,14 +1,16 @@
 <script setup>
-import {ref, reactive, watch, computed} from "vue"
+import {ref, reactive, onBeforeMount, computed} from "vue"
 import {useUtilityStore} from "@/stores/useUtilityStore"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
-import {createStatus3} from "@/libs/FetchAPI"
+import {createStatus, getAllBoards, findCollabById} from "@/libs/FetchAPI"
 import router from "@/router"
 import {useRoute} from "vue-router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
+import { useUserStore } from "@/stores/useUserStore"
 
+const userStore = useUserStore()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
 const route = useRoute()
@@ -33,7 +35,8 @@ const isButtonDisabled = computed(() => {
 const createNewStatus = async () => {
   utilityStore.transactionDisable = true
   try {
-    const response = await createStatus3(route.params.boardID, newStatus)
+    // newStatus.description.trim().length === 0 ? newStatus.description = null : newStatus.description = newStatus.description
+    const response = await createStatus(route.params.boardID, newStatus)
     // console.log(response.data)
     if (response.status === 201) {
       // console.log(newStatus)
@@ -66,6 +69,62 @@ const createNewStatus = async () => {
     console.log(error)
   }
 }
+
+onBeforeMount(async () => {
+  utilityStore.isOwnerBoard = false
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  if (JWT_TOKEN) {
+    try {
+      const fetchBoards = await getAllBoards()
+      utilityStore.boardManager.addBoards(fetchBoards)
+      utilityStore.selectedBoardId = route.params.boardID
+
+      utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+      // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+      console.log("Owner Board : ",utilityStore.isOwnerBoard)
+
+      utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+      if (!utilityStore.isOwnerBoard) {
+        // router.push(`/board/${route.params.boardID}/status`).then(() => {
+        //   toast(
+        //     `You don't have permission to edit this board`,
+        //     {
+        //       type: "error",
+        //       timeout: 2000,
+        //       theme: "dark",
+        //       transition: "flip",
+        //       position: "bottom-right",
+        //     })
+        // })
+        const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+        utilityStore.collabAccessRight = collabIdentity.accessRight
+        console.log(collabIdentity.accessRight)
+        collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+        // router.push('/error')
+        // return
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  if (!utilityStore.isOwnerBoard) {
+        // router.push(`/board/${route.params.boardID}/status`).then(() => {
+        //   toast(
+        //     `You don't have permission to edit this board`,
+        //     {
+        //       type: "error",
+        //       timeout: 2000,
+        //       theme: "dark",
+        //       transition: "flip",
+        //       position: "bottom-right",
+        //     })
+        // })
+        router.push('/error')
+        return
+      }
+})
+
 </script>
 
 <template>

@@ -42,7 +42,8 @@ const verifyUserCredentials = async () => {
             errorLogin.value = false
             problemLogin.value = false
             localStorage.setItem("JWT_TOKEN", response.data.access_token)
-            console.log(localStorage.getItem("JWT_TOKEN"))
+            localStorage.setItem("JWT_REFRESH_TOKEN", response.data.refresh_token)
+            // console.log(localStorage.getItem("JWT_TOKEN"))
             router.push(`/board`)
         }
         else if (response.status === 400 || response.status === 401) {

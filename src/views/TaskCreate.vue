@@ -1,6 +1,6 @@
 <script setup>
-import {ref, reactive, computed, onBeforeMount, watch} from "vue"
-import {createTask3} from "@/libs/FetchAPI"
+import {ref, reactive, computed, onBeforeMount, watch, nextTick} from "vue"
+import {createTask, getAllBoards, findCollabById, uploadFile, downloadFile} from "@/libs/FetchAPI"
 import router from "@/router"
 import Xmark from "@/components/icons/Xmark.vue"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
@@ -9,10 +9,19 @@ import DropdownIcon from "@/components/icons/DropdownIcon.vue"
 import StatusDetail from "@/components/icons/StatusDetail.vue"
 import AssigneeDetail from "@/components/icons/AssigneeDetail.vue"
 import WarningIcon from "@/components/icons/WarningIcon.vue"
+import AttachIcon from "@/components/icons/AttachIcon.vue"
+import CloudUploadIcon from "@/components/icons/CloudUploadIcon.vue"
+import DocumentIcon from "@/components/icons/DocumentIcon.vue"
+import ImageFileIcon from "@/components/icons/ImageFileIcon.vue"
+import PDFIcon from "@/components/icons/PDFIcon.vue"
+import VideoFileIcon from "@/components/icons/VideoFileIcon.vue"
+import ZIPIcon from "@/components/icons/ZIPIcon.vue"
 import {toast} from "vue3-toastify"
 import "vue3-toastify/dist/index.css"
 import {useRoute} from "vue-router"
+import { useUserStore } from "@/stores/useUserStore"
 
+const userStore = useUserStore()
 const route = useRoute()
 const utilityStore = useUtilityStore()
 const statusStyleStore = useStatusStyleStore()
@@ -82,9 +91,9 @@ const createNewTask = async () => {
   }
 
   try {
-    const response = await createTask3(route.params.boardID, newTask)
-    // console.log(newTask)
-
+    // newTask.assignees.trim().length === 0 ? (newTask.assignees = null) : ""
+    // newTask.description.trim().length === 0 ? (newTask.description = null) : ""
+    const response = await createTask(route.params.boardID, newTask)
     if (response.status === 201) {
       utilityStore.transactionDisable = false
       // newStatus.id = 1
@@ -106,6 +115,11 @@ const createNewTask = async () => {
           position: "bottom-right",
         })
       }, 200)
+      console.log("response data form created : " , response.data)
+      if(selectedFiles.value.length > 0){
+        await uploadFile(route.params.boardID, response.data.id, selectedFiles.value)
+      }
+
     } else if (response.status === 400) {
       utilityStore.transactionDisable = false
       toast("Please fill in the required fields", {
@@ -120,13 +134,209 @@ const createNewTask = async () => {
     console.log(error)
   }
 }
-onBeforeMount(() => {
-  const firstStatus = utilityStore.statusManager.getStatus()[0]
-  console.log(firstStatus)
-  newTask.status3 = newStatus.id = firstStatus.id
-  newStatus.name = firstStatus.name
-  newStatus.description = firstStatus.description
-  newStatus.color = firstStatus.color
+
+const selectedFiles = ref([])
+// const fileUploaded = ref([])
+
+// Function to check if a file exists in an array based on specific properties
+const isInArray = (array, file) => {
+  return array.some(item =>
+    item.name === file.name &&
+    item.size === file.size &&
+    item.type === file.type &&
+    item.lastModified === file.lastModified
+  );
+};
+
+const handleFileUpload = (event) => {
+  let newSelectedFilesArray = Array.from(event.target.files)
+  let fileOverMaxSize = newSelectedFilesArray.filter(file => (file.size / (1024 * 1024)) > 20)
+
+  if (newSelectedFilesArray.length > 0) {
+    // Filter files that are not already in selectedFiles.value
+    const fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(selectedFiles.value, file) && (file.size / (1024 * 1024) <= 20))
+    console.log('New files to add:', fileNotExistSelected)
+
+    // Append the new files
+    selectedFiles.value.push(...fileNotExistSelected)
+  }
+  
+  if(fileOverMaxSize.length > 0 && selectedFiles.value.length > 0){
+    let fileOverMaxLength = selectedFiles.value.slice(10, selectedFiles.value.length )
+    console.log("fileOverMaxLength", fileOverMaxLength)
+
+    selectedFiles.value.splice(10, selectedFiles.value.length - 10)
+    let errorFilesCombined = fileOverMaxSize.concat(fileOverMaxLength)
+    console.log("errorFilesCombined", errorFilesCombined)
+    let errorMessage = ''
+    errorFilesCombined.forEach(file => errorMessage += "\n" + "- " + file.name)
+    toast(
+      `- Each task can have at most 20 files. \n - Each file cannot be larger than 200 MB. \n The following files are not added: ${errorMessage} `,
+      {
+        type: "error",
+        timeout: 5000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+        style: {
+          width: "500px", // Adjust the width as needed
+          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+        },
+      }
+    )
+  }
+
+  else if(fileOverMaxSize.length > 0){
+    let errorFiles = fileOverMaxSize
+    let errorMessage = ''
+    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.name)
+    toast(
+      `Each file cannot be larger than 20 MB. The following files are not added: ${errorMessage} `,
+      {
+        type: "error",
+        timeout: 5000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+        style: {
+          width: "500px", // Adjust the width as needed
+          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+        },
+      }
+    )
+  }
+
+  else if (selectedFiles.value.length > 10) {
+    let errorFiles = selectedFiles.value.slice(10, selectedFiles.value.length)
+    console.log("fileOverMaxLength", errorFiles)
+    
+    let errorMessage = ''
+    errorFiles.forEach(file => errorMessage += "\n" + "- " + file.name)
+    selectedFiles.value.splice(10, selectedFiles.value.length - 10)
+    toast(
+      `Each task can have at most 10 files. The following files are not added: ${errorMessage} `,
+      {
+        type: "error",
+        timeout: 5000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+        style: {
+          width: "500px", // Adjust the width as needed
+          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+        },
+      }
+    )
+  }
+}
+
+
+const cancelSelectedFile = (seletedFile) => {
+  let deleteFileIndex = selectedFiles.value.findIndex(file => {
+    file.name === seletedFile.name &&
+    file.size === seletedFile.size 
+  })
+  selectedFiles.value.splice(deleteFileIndex, 1)
+}
+
+const getFile = async (file) => {
+  const url = window.URL.createObjectURL(file)
+  const fileType = file.type
+  const supportedTypes = [
+    "text/plain",       // .txt
+    "application/rtf",  // .rtf
+    "image/jpeg",       // .jpg
+    "image/png",        // .png
+    "application/pdf"   // .pdf
+  ];
+  console.log(fileType)
+  if (supportedTypes.includes(fileType)) {
+    // Open in a new tab for supported types
+    window.open(url, "_blank");
+  } else {
+    // Trigger download for unsupported types
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+}
+
+const computedFilesSize = computed(() => {
+  if(selectedFiles.value.length > 0) {
+    return (selectedFiles.value.reduce((sum, file) => sum + file.size, 0) / (1024 * 1024)).toFixed(2)
+  }
+  return 0
+})
+
+onBeforeMount(async () => {
+  utilityStore.isOwnerBoard = false
+  const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
+  if (JWT_TOKEN) {
+    try {
+      const fetchBoards = await getAllBoards()
+      utilityStore.boardManager.addBoards(fetchBoards)
+      utilityStore.selectedBoardId = route.params.boardID
+
+      utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+      // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+      console.log("Owner Board : ",utilityStore.isOwnerBoard)
+
+      utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
+
+      if (!utilityStore.isOwnerBoard) {
+        // router.push(`/board/${route.params.boardID}/task`).then(() => {
+        //   toast(
+        //     `You don't have permission to edit this board`,
+        //     {
+        //       type: "error",
+        //       timeout: 2000,
+        //       theme: "dark",
+        //       transition: "flip",
+        //       position: "bottom-right",
+        //     })
+        // })
+        const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+        utilityStore.collabAccessRight = collabIdentity.accessRight
+        console.log(collabIdentity.accessRight)
+        collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+        // if(utilityStore.isOwnerBoard === false) {
+        //   router.push('/error')
+        //   return
+        // }
+      }
+
+      const firstStatus = utilityStore.statusManager.getStatus()[0]
+      console.log(firstStatus)
+      newTask.status3 = newStatus.id = firstStatus.id
+      newStatus.name = firstStatus.name
+      newStatus.description = firstStatus.description
+      newStatus.color = firstStatus.color
+
+    } catch (error) {
+      console.log(error)
+      router.push('/error')
+      return
+    }
+  }
+  
+  if (!utilityStore.isOwnerBoard) {
+        // router.push(`/board/${route.params.boardID}/task`).then(() => {
+        //   toast(
+        //     `You don't have permission to edit this board`,
+        //     {
+        //       type: "error",
+        //       timeout: 2000,
+        //       theme: "dark",
+        //       transition: "flip",
+        //       position: "bottom-right",
+        //     })
+        // })
+        router.push('/error')
+        return
+      }
 })
 </script>
 
@@ -135,7 +345,7 @@ onBeforeMount(() => {
     class="fixed inset-0 z-30 flex items-center justify-center backdrop-blur-md"
   >
     <div
-      class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-14 py-10 transition ease-in-out"
+      class="w-[60rem] bg-[#1F1F1F] rounded-2xl px-24 py-10 transition ease-in-out"
     >
       <h1
         class="text-[12px] text-headline text-opacity-[0.43] font-bold text-center mt-5 tracking-wider"
@@ -169,7 +379,7 @@ onBeforeMount(() => {
           >
         </div>
 
-        <div class="grid grid-cols-1 grid-rows-2 gap-y-8">
+        <div class="grid grid-cols-1 grid-rows-2 gap-y-5">
           <!-- Status -->
           <div class="flex gap-x-10 items-center">
             <div
@@ -192,9 +402,7 @@ onBeforeMount(() => {
                   <DropdownIcon />
                 </span>
               </div>
-              <div
-                class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-auto cursor-pointer"
-              >
+              <div class="dropdown-content z-[1] menu shadow rounded-lg bg-[#3D3C3C] w-52 break-all max-h-52 overflow-y-auto cursor-pointer">
                 <ul tabindex="0">
                   <li
                     v-for="status in utilityStore.statusManager.getStatus()"
@@ -213,9 +421,7 @@ onBeforeMount(() => {
 
           <!-- Assignees -->
           <div class="flex gap-x-10 items-center">
-            <div
-              class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4"
-            >
+            <div class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
               <span>
                 <AssigneeDetail />
               </span>
@@ -237,10 +443,53 @@ onBeforeMount(() => {
           </div>
           <!-- Assignees -->
 
+          <!-- Attachment -->
+          <div class="flex gap-x-10 items-center">
+            <div class="itbkk-assignees text-xl text-headline text-opacity-70 tracking-wider w-[10rem] flex items-center gap-x-4">
+              <span>
+                <AttachIcon />
+              </span>
+              Attachment
+            </div>
+
+            <div>
+              <label class="flex items-center gap-2 rounded-lg bg-[#3D3C3C] px-3 py-1 w-auto cursor-pointer" :class="selectedFiles.length === 10 ? 'opacity-30' : 'opacity-100'" >
+                <input type="file" class="hidden" :disabled="selectedFiles.length === 10 ? true : false" multiple @change="handleFileUpload"/>
+                <CloudUploadIcon/>
+                <span class="font-Geist tracking-wide">upload file</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Files -->
+          <div class="flex items-center justify-between font-Inter text-white tracking-wide">
+            <p >Files ({{ selectedFiles.length }}/10) </p>
+            <p class="text-sm">{{ computedFilesSize }}/200 MB</p>
+          </div>
+          <div v-if="selectedFiles.length > 0" class="h-44 overflow-y-auto pl-3 ">
+            <div class="flex flex-col gap-2 w-9/12">
+              <div v-for="(file, index) in selectedFiles" :key="index" class="flex items-center border border-[#B8B8B8] border-opacity-20 p-3 pl-8 rounded-md gap-6">
+                <div v-if="file.name && /\.(mp4|mov|avi|mkv|wmv|flv|webm|mpeg|mpg|3gp)$/i.test(file.name)"><VideoFileIcon class="h-16"/></div>
+                <div v-else-if="file.name && /\.(jpeg|jpg|png|gif|bmp|tiff|tif|webp|svg)$/i.test(file.name)"><ImageFileIcon class="h-16"/></div>
+                <div v-else-if="file.name.toLowerCase().endsWith('.zip')"><ZIPIcon class="h-16"/></div>
+                <div v-else-if="file.name.toLowerCase().endsWith('.pdf')"><PDFIcon class="h-16"/></div>
+                <div v-else><DocumentIcon class="h-16"/></div>
+                <div class="font-Inter gap-1 cursor-pointer" @click="getFile(file)">
+                  <p class="text-white text-sm hover:underline tracking-wider">{{ file.name }}</p>
+                  <p class="text-white text-sm text-opacity-30">{{ (file.size / (1024 * 1024)).toFixed(2) }} MB</p>
+                </div>
+                <button class="ml-auto mr-2 text-red-500 self-start" @click="cancelSelectedFile(file)">x</button>
+              </div>
+            </div>
+          </div>
+          <!-- Files -->
+        
+          <!-- Attachment -->
+
           <!-- Description -->
           <div class="flex flex-col">
             <textarea
-              class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered w-[90%] mx-auto resize-none mt-5"
+              class="itbkk-description textarea bg-[#D9D9D9] bg-opacity-5 text-normal text opacity-80 textarea-bordered resize-none mt-5"
               rows="4"
               placeholder="Enter Task Description"
               v-model.trim="newTask.description"
@@ -265,7 +514,7 @@ onBeforeMount(() => {
             <div class="flex gap-x-3">
               <button
                 @click="
-                  router.push(`/board/${utilityStore.selectedBoardId}/task`)
+                  router.push(`/board/${route.params.boardID}/task`)
                 "
                 class="itbkk-button-cancel btn border-[#DB1058] px-14 bg-opacity-35 text-[#DB1058] w-[4rem] hover:border-none hover:bg-opacity-30 bg-transparent"
               >

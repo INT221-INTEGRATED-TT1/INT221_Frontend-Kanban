@@ -6,9 +6,11 @@ import { useStatusStyleStore } from "@/stores/useStatusStyleStore.js";
 import {useSortAndFilterStore} from "@/stores/useSortAndFilterStore.js"
 import {useUserStore} from "@/stores/useUserStore"
 import {
-  deleteStatuses3,
-  getAllStatuses3,
-  deleteStatusTransfer3,
+  deleteStatuses,
+  getAllStatuses,
+  getAllBoards,
+  deleteStatusTransfer,
+  findCollabById,
 } from "@/libs/FetchAPI";
 import StatusSetting from "@/components/StatusSetting.vue";
 import CreateTaskIcon from "@/components/icons/CreateTaskIcon.vue";
@@ -52,7 +54,7 @@ const deleteModal = (statuses) => {
 const deleteStatus = async (deleteId) => {
   // console.log(statuses.value)
   try {
-    const response = await deleteStatuses3(route.params.boardID, deleteId);
+    const response = await deleteStatuses(route.params.boardID, deleteId);
     if (response.status === 200) {
       utilityStore.statusManager.deleteStatus(deleteId);
       utilityStore.showDeleteConfirmation = false;
@@ -102,7 +104,7 @@ const deleteTransfer = async (oldDeleteId, newDeleteId) => {
     );
     return;
   }
-  const response = await deleteStatusTransfer3(route.params.boardID, oldDeleteId, newDeleteId);
+  const response = await deleteStatusTransfer(route.params.boardID, oldDeleteId, newDeleteId);
   if (response.status === 200) {
     utilityStore.statusManager.deleteTransferStatus(oldDeleteId, newDeleteId);
     utilityStore.disableTransfer = false;
@@ -153,19 +155,34 @@ watch(newStatus, () => {
     : (utilityStore.transactionDisable = true);
 });
 
-const logout = () => {
-  localStorage.removeItem("JWT_TOKEN")
-  router.push('/login')
-}
-
 onBeforeMount(async () => {
+  utilityStore.isOwnerBoard = false
   const JWT_TOKEN = localStorage.getItem("JWT_TOKEN");
   if (JWT_TOKEN) {
     const decodedData = window.atob(JWT_TOKEN.split('.')[1]);
     userStore.userIdentity = { ...JSON.parse(decodedData) }
+
+    const fetchBoards = await getAllBoards()
+    utilityStore.boardManager.addBoards(fetchBoards)
+    utilityStore.selectedBoardId = route.params.boardID
+    utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+
+    utilityStore.isOwnerBoard ? 
+    utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
+    utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.filter(board => board.id === route.params.boardID)[0]}
+
+    
+    // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
+    console.log("Owner Board : ",utilityStore.isOwnerBoard)
+    if(!utilityStore.isOwnerBoard){
+      const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
+      utilityStore.collabAccessRight = collabIdentity.accessRight
+      console.log(collabIdentity.accessRight)
+      collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
+    }
   }
   try {
-    const fetchData = await getAllStatuses3(route.params.boardID);
+    const fetchData = await getAllStatuses(route.params.boardID);
     utilityStore.statusManager.addStatuses(fetchData);
     
     sortAndFilterStore.filterStatusArray = []
@@ -175,8 +192,11 @@ onBeforeMount(async () => {
       }
     }
     // console.log(utilityStore.statusManager.getStatus())
+    utilityStore.isStatusesMounted = true
   } catch (error) {
-    console.log(error);
+    // localStorage.removeItem("JWT_TOKEN")
+    // console.log("Error fetching tasks : ", error)
+    // error.status === 404 ? router.push({name: 'not-found'}) : router.push('/error')
   }
 });
 
@@ -187,14 +207,17 @@ onBeforeMount(async () => {
     <div class="flex justify-between">
       <div>
         <router-link to="/board">
-          <h1
+          <!-- <h1
             class="text-headline font-extrabold text-3xl text-opacity-70 tracking-in-expand"
           >
             IT-BangMod Kradan Kanban
-          </h1>
+          </h1> -->
+          <div class="flex items-center gap-3 font-semibold text-[#ffffff] text-3xl "> 
+            <span class="text-headline text-sm text-opacity-50"> < </span>{{ utilityStore.selectedBoard.name }}
+          </div>
         </router-link>
 
-        <div class="ml-[22rem] tracking-in-expand-2">
+        <div class="opacity-0 ml-[22rem] ">
           <GroupCode />
         </div>
       </div>
@@ -210,19 +233,21 @@ onBeforeMount(async () => {
         </router-link>
 
         <router-link to="status/add">
-          <div
-            class="border-secondary border-[0.1px] border-opacity-75 px-3 py-1 rounded-lg flex items-center gap-x-2 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer"
-          >
-            <span><CreateTaskIcon /></span>
-            <button class="itbkk-button-add text-normal text-opacity-75">
+          <button :disabled="!utilityStore.isOwnerBoard"
+            :class="!utilityStore.isOwnerBoard ? 'bg-gray-600 bg-opacity-15 tooltip tooltip-top border-opacity-15 text-opacity-15 cursor-not-allowed'
+            : 'border-opacity-75 hover:bg-[#272727] hover:duration-[350ms] cursor-pointer text-opacity-75'"
+            data-tip="You need to be board owner to perform this action."
+            class="itbkk-button-add border-secondary border-[0.1px] px-3 py-1 rounded-lg flex items-center gap-x-2 text-normal">
+            <span :class="!utilityStore.isOwnerBoard ? 'opacity-15' : ''"><CreateTaskIcon /></span>
+            <!-- <button class="itbkk-button-add text-normal text-opacity-75"> -->
               Add Status
-            </button>
-          </div>
+            <!-- </button> -->
+          </button>
         </router-link>
 
         <UserSetting />
 
-        <button
+        <button v-if="utilityStore.isOwnerBoard"
           class="itbkk-status-setting hover:bg-[#1f1f1f] px-1 tracking-wider rounded-xl border border-[#E3E3E3] border-opacity-50"
           @click="utilityStore.limitStatus"
         >
@@ -254,7 +279,7 @@ onBeforeMount(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr
+          <tr 
             v-for="(statuses, index) in utilityStore.statusManager.getStatus()"
             class="border-none"
           >
@@ -281,57 +306,40 @@ onBeforeMount(async () => {
                 {{ statuses.description }}
               </div>
             </td>
-            <td class="flex gap-x-3 justify-center items-center">
+            <td v-if="utilityStore.isOwnerBoard" class="flex gap-x-3 justify-center items-center">
               <!-- <div class="flex gap-x-2"> -->
               <div
-                class="tooltip tooltip-edit"
-                :data-tip="
-                  statuses.name === 'No Status' || statuses.name === 'Done'
-                    ? 'Cannot Edit'
-                    : 'Edit'
-                "
-              >
+                class="tooltip tooltip-edit" :data-tip=" statuses.name === 'No Status' || statuses.name === 'Done' ? 'Cannot Edit' : 'Edit' ">
                 <button
                   @click="router.push(`status/${statuses.id}/edit`)"
                   class="itbkk-button-edit"
-                  :disabled="
-                    statuses.name === 'No Status' || statuses.name === 'Done'
-                      ? disabledActionButton
-                      : false
-                  "
-                  :class="{
-                    'opacity-50 cursor-not-allowed':
-                      statuses.name === 'No Status' || statuses.name === 'Done',
-                  }"
-                >
+                  :disabled="statuses.name === 'No Status' || statuses.name === 'Done' ? disabledActionButton : false"
+                  :class="{'opacity-50 cursor-not-allowed': statuses.name === 'No Status' || statuses.name === 'Done',}">
                   <EditTaskStatus />
                 </button>
               </div>
               <div
-                class="tooltip text-normal tooltip-error"
-                :data-tip="
-                  statuses.name === 'No Status' || statuses.name === 'Done'
-                    ? 'Cannot Delete'
-                    : 'Delete'
-                "
-              >
+                class="tooltip text-normal tooltip-error":data-tip="statuses.name === 'No Status' || statuses.name === 'Done' ? 'Cannot Delete' : 'Delete'">
                 <button
                   class="itbkk-button-delete"
-                  @click="deleteModal(statuses)"
-                  :disabled="
-                    statuses.name === 'No Status' || statuses.name === 'Done'
-                      ? disabledActionButton
-                      : false
-                  "
-                  :class="{
-                    'opacity-50 cursor-not-allowed ':
-                      statuses.name === 'No Status' || statuses.name === 'Done',
-                  }"
-                >
+                  @click="deleteModal(statuses)":disabled="statuses.name === 'No Status' || statuses.name === 'Done' ? disabledActionButton: false"
+                  :class="{'opacity-50 cursor-not-allowed ': statuses.name === 'No Status' || statuses.name === 'Done',}" >
                   <DeleteIcon width="22" height="31" />
                 </button>
               </div>
               <!-- </div> -->
+            </td>
+            <td v-else class="flex gap-x-3 justify-center items-center">
+              <div class="tooltip tooltip-edit" data-tip="Cannot Edit" >
+                <button class="itbkk-button-edit opacity-50 cursor-not-allowed " disabled="true" >
+                  <EditTaskStatus />
+                </button>
+              </div>
+              <div class="tooltip text-normal tooltip-error" data-tip="Cannot Delete" >
+                <button class="itbkk-button-delete opacity-50 cursor-not-allowed " disabled="true" >
+                  <DeleteIcon width="22" height="31"/>
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

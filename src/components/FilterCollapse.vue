@@ -1,10 +1,11 @@
 <script setup>
 import {ref, onBeforeMount} from "vue"
-import {getAllStatuses3} from "@/libs/FetchAPI.js"
+import {getAllStatuses} from "@/libs/FetchAPI.js"
 import {useUtilityStore} from "@/stores/useUtilityStore.js"
 import {useSortAndFilterStore} from "@/stores/useSortAndFilterStore.js"
 import {useStatusStyleStore} from "@/stores/useStatusStyleStore"
 import {useRoute} from "vue-router"
+import router from "@/router/index.js"
 import FilterIcon from "@/components/icons/FilterIcon.vue"
 
 const route = useRoute()
@@ -14,22 +15,22 @@ const statusStyleStore = useStatusStyleStore()
 
 onBeforeMount(async () => {
   try {
-    const fetchStatuses = await getAllStatuses3(route.params.boardID)
+    const fetchStatuses = await getAllStatuses(route.params.boardID)
     utilityStore.statusManager.addStatuses(fetchStatuses)
     utilityStore.statusManager.addFilteredField()
     
   } catch (error) {
-    console.log(error)
+    // localStorage.removeItem("JWT_TOKEN")
+    console.log("Error fetching tasks : ", error.message)
+    error.status === 404 ? router.push({name: 'not-found'}) : router.push('/error')
   }
 })
 </script>
 
 <template>
-
+  
   <div class="mb-5 collapse">
-    <h1
-      class="itbkk-status-filter flex items-center text-normal gap-x-3 collapse-title tracking-wider"
-    >
+    <h1 class="itbkk-status-filter flex items-center text-normal gap-x-3 collapse-title tracking-wider">
       <FilterIcon /> Filters
     </h1>
     <input type="checkbox" />

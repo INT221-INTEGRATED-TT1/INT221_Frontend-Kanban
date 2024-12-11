@@ -1,7 +1,7 @@
 import {defineStore} from "pinia"
 import {ref} from "vue"
 import {useUtilityStore} from "./useUtilityStore"
-import {getAllTasks3} from "@/libs/FetchAPI"
+import {getAllTasks} from "@/libs/FetchAPI"
 import { useRoute } from "vue-router"
 
 
@@ -36,11 +36,11 @@ export const useSortAndFilterStore = defineStore("sortAndFilter", () => {
       }
     } 
 
-    const sorted = await getAllTasks3(
+    const sorted = await getAllTasks(
       route.params.boardID,
-      sortDirection.value,
       currentSortBy.value,
-      filterStatusArray.value
+      filterStatusArray.value,
+      sortDirection.value
     )
     utilityStore.tasksManager.addTasks(sorted)
 
