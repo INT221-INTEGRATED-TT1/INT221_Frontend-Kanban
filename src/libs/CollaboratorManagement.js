@@ -8,10 +8,7 @@ class CollaboratorManagement {
   }
 
   addCollaborator(newCollaborator, newCollaborators) {
-    // console.log('thiss', this.collaborators)
-    // console.log(newCollaborator.collaboratorName)
     const findCollaboratorId = newCollaborators.find(collaborator => collaborator.name === newCollaborator.collaboratorName).oid
-    console.log(findCollaboratorId)
     let migrateNewCollaborator = {
       oid : findCollaboratorId,
       name : newCollaborator.collaboratorName,

@@ -52,7 +52,6 @@ const deleteModal = (statuses) => {
 };
 
 const deleteStatus = async (deleteId) => {
-  // console.log(statuses.value)
   try {
     const response = await deleteStatuses(route.params.boardID, deleteId);
     if (response.status === 200) {
@@ -143,7 +142,6 @@ const newStatus = reactive({
 });
 
 const selectStatus = (status) => {
-  // console.log(status)
   newStatus.name = status.name;
   newStatus.color = status.color;
   newStatus.id = status.id;
@@ -171,13 +169,9 @@ onBeforeMount(async () => {
     utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
     utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.filter(board => board.id === route.params.boardID)[0]}
 
-    
-    // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-    console.log("Owner Board : ",utilityStore.isOwnerBoard)
     if(!utilityStore.isOwnerBoard){
       const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
       utilityStore.collabAccessRight = collabIdentity.accessRight
-      console.log(collabIdentity.accessRight)
       collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
     }
   }
@@ -191,12 +185,10 @@ onBeforeMount(async () => {
         status.description = "No description is provided";
       }
     }
-    // console.log(utilityStore.statusManager.getStatus())
     utilityStore.isStatusesMounted = true
   } catch (error) {
-    // localStorage.removeItem("JWT_TOKEN")
-    // console.log("Error fetching tasks : ", error)
-    // error.status === 404 ? router.push({name: 'not-found'}) : router.push('/error')
+    console.log("Error : ", error)
+    error.status === 404 ? router.push({name: 'not-found'}) : router.push('/error')
   }
 });
 

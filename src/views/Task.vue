@@ -32,13 +32,10 @@ const isToggled = ref(false)
 // const filteredStatus = ref([])
 const deleteATask = async (deleteId) => {
   try {
-    // console.log(deleteId)
     const findStatusIdFromTask = utilityStore.tasksManager.getTasks().filter(task => task.id === deleteId)[0].statuses3.id
-    console.log(findStatusIdFromTask)
     const response = await deleteTask(route.params.boardID, deleteId)
     if (response.status === 200) {
       utilityStore.tasksManager.deleteTask(deleteId)
-      // console.log
       utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex(status => status.id === findStatusIdFromTask)].count -= 1
       utilityStore.showDeleteConfirmation = false
       toast("Task has been deleted", {
@@ -74,10 +71,7 @@ const copyToClipboard = async () => {
 }
 
 const changeVisibilityBoardRadioClick = () => {
-    console.log('first',isToggled.value)
     isToggled.value = !isToggled.value
-    console.log('second',isToggled.value)
-
     let fsVisibility = ''
     isToggled.value ? fsVisibility = 'PUBLIC' : fsVisibility = 'PRIVATE'
     currentVisibility.value === fsVisibility ? utilityStore.showChangeBoardVisibilityConfirmation = false : utilityStore.showChangeBoardVisibilityConfirmation = true
@@ -114,44 +108,31 @@ onBeforeMount(async () => {
     utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
     utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.filter(board => board.id === route.params.boardID)[0]}
 
-    // console.log("Owner Board : ", utilityStore.isOwnerBoard)
-
     if(utilityStore.isOwnerBoard) {
       currentVisibility.value = utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]?.visibility
       currentVisibility.value === 'PUBLIC' ? isToggled.value = true : isToggled.value = false
-
-      // console.log(isToggled.value)
 
     } else { 
       currentVisibility.value = ''
       const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
       utilityStore.collabAccessRight = collabIdentity.accessRight
-      console.log(collabIdentity.accessRight)
       collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
     }
   }
   try {
-    // console.log(route.params.boardID)
     const fetchTasks = await getAllTasks(route.params.boardID)
     utilityStore.tasksManager.addTasks(fetchTasks)
-    // utilityStore.selectedBoard.name.length > 0 ? console.log('board has board name') : utilityStore.selectedBoard = {...fetchTasks[0]?.board}
     !utilityStore.selectedBoard.name ? utilityStore.selectedBoard = {...fetchTasks[0]?.board} : ""
-    // console.log(utilityStore.selectedBoardId)
-    // console.log("Owner Board : ", utilityStore.isOwnerBoard)
-    // console.log(fetchTasks)
-    // console.log(utilityStore.selectedBoard)
     for (const task of utilityStore.tasksManager.getTasks()) {
       task.assignees === null || task.assignees.trim().length === 0
         ? (task.assignees = "Unassigned")
         : ""
     }
-
-    // utilityStore.isTaskMounted = true
   }
   catch (error) {
     // localStorage.removeItem("JWT_TOKEN")
-    // console.log("Error fetching tasks : ", error.status === 404)
-    // error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
+    console.log("Error fetching tasks : ", error)
+    error.status === 404 ? router.push({name: "not-found"})  : router.push('/error')
   }
 })
 

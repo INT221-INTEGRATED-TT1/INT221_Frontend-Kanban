@@ -17,9 +17,7 @@ class BoardManagement {
   // }
 
   changeVisibilityBoard(boardId, newVisibility){
-    // console.log(this.boards[this.boards.findIndex(board => board.id === boardId)].visibility)
     this.boards.personalBoards[this.boards.personalBoards.findIndex(board => board.id === boardId)].visibility = newVisibility
-    // console.log(this.boards[this.boards.findIndex(board => board.id === boardId)].visibility)
   }
 
   deleteBoard(deleteId) {
