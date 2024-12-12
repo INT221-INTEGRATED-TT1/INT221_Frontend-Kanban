@@ -70,7 +70,6 @@ const createNewTask = async () => {
     .filter((status) => status.id === newStatus.id)
 
   filterStatus.value = filterStatusId[0]
-  console.log(filterStatus.value)
   if (
     filterStatusId[0].count >= utilityStore.limitStatusNumber &&
     utilityStore.isLimitEnable === true &&
@@ -93,38 +92,32 @@ const createNewTask = async () => {
   }
 
   try {
-    // newTask.assignees.trim().length === 0 ? (newTask.assignees = null) : ""
-    // newTask.description.trim().length === 0 ? (newTask.description = null) : ""
     const response = await createTask(route.params.boardID, newTask)
     if (response.status === 201) {
-      // newStatus.id = 1
       utilityStore.tasksManager.addTask(response.data)
       utilityStore.statusManager.getStatus()[utilityStore.statusManager.getStatus().findIndex((status) => status.id === newStatus.id)].count += 1
 
       filterStatus.value = {}
       
-      console.log("response data form created : " , response.data)
-      if(selectedFiles.value.length > 0){
+      if (selectedFiles.value.length > 0) {
         isUploading.value = true
         const responseUploadedFile = await uploadFile(route.params.boardID, response.data.id, selectedFiles.value)
-        if(responseUploadedFile.status === 200) {
+        if (responseUploadedFile.status === 200) {
           isUploading.value = false
-          router.push(`/board/${utilityStore.selectedBoardId}/task`)
+          // router.push(`/board/${utilityStore.selectedBoardId}/task`)
           utilityStore.transactionDisable = false
-          setTimeout(() => {
-            toast("The task has been successfully added", {
-              type: "success",
-              timeout: 2000,
-              theme: "dark",
-              transition: "flip",
-              position: "bottom-right",
-            })
-          }, 200)
-         }
+        }
       }
-
-
-
+      setTimeout(() => {
+        toast("The task has been successfully added", {
+          type: "success",
+          timeout: 2000,
+          theme: "dark",
+          transition: "flip",
+          position: "bottom-right",
+        })
+      }, 200)
+      router.push(`/board/${utilityStore.selectedBoardId}/task`)
     } else if (response.status === 400) {
       utilityStore.transactionDisable = false
       toast("Please fill in the required fields", {
@@ -135,6 +128,7 @@ const createNewTask = async () => {
         position: "bottom-right",
       })
     }
+
   } catch (error) {
     console.log(error)
   }
@@ -160,7 +154,6 @@ const handleFileUpload = (event) => {
   if (newSelectedFilesArray.length > 0) {
     // Filter files that are not already in selectedFiles.value
     const fileNotExistSelected = newSelectedFilesArray.filter(file => !isInArray(selectedFiles.value, file) && (file.size / (1024 * 1024) <= 20))
-    console.log('New files to add:', fileNotExistSelected)
 
     // Append the new files
     selectedFiles.value.push(...fileNotExistSelected)
@@ -168,11 +161,8 @@ const handleFileUpload = (event) => {
   
   if(fileOverMaxSize.length > 0 && selectedFiles.value.length > 0){
     let fileOverMaxLength = selectedFiles.value.slice(10, selectedFiles.value.length )
-    console.log("fileOverMaxLength", fileOverMaxLength)
-
     selectedFiles.value.splice(10, selectedFiles.value.length - 10)
     let errorFilesCombined = fileOverMaxSize.concat(fileOverMaxLength)
-    console.log("errorFilesCombined", errorFilesCombined)
     let errorMessage = ''
     errorFilesCombined.forEach(file => errorMessage += "\n" + "- " + file.name)
     toast(
@@ -213,7 +203,6 @@ const handleFileUpload = (event) => {
 
   else if (selectedFiles.value.length > 10) {
     let errorFiles = selectedFiles.value.slice(10, selectedFiles.value.length)
-    console.log("fileOverMaxLength", errorFiles)
     
     let errorMessage = ''
     errorFiles.forEach(file => errorMessage += "\n" + "- " + file.name)
@@ -227,8 +216,8 @@ const handleFileUpload = (event) => {
         transition: "flip",
         position: "bottom-right",
         style: {
-          width: "500px", // Adjust the width as needed
-          maxWidth: "90%", // Prevent it from being too wide on smaller screens
+          width: "500px", 
+          maxWidth: "90%", 
         },
       }
     )
@@ -254,7 +243,6 @@ const getFile = async (file) => {
     "image/png",        // .png
     "application/pdf"   // .pdf
   ];
-  console.log(fileType)
   if (supportedTypes.includes(fileType)) {
     // Open in a new tab for supported types
     window.open(url, "_blank");
@@ -286,24 +274,15 @@ onBeforeMount(async () => {
       utilityStore.selectedBoardId = route.params.boardID
 
       utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-      // utilityStore.boardManager.getBoards()?.collaboratorBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
-      console.log("Owner Board : ",utilityStore.isOwnerBoard)
-
-      utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
 
       if (!utilityStore.isOwnerBoard) {
         const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
         utilityStore.collabAccessRight = collabIdentity.accessRight
-        console.log(collabIdentity.accessRight)
         collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
-        // if(utilityStore.isOwnerBoard === false) {
-        //   router.push('/error')
-        //   return
-        // }
       }
 
       const firstStatus = utilityStore.statusManager.getStatus()[0]
-      console.log(firstStatus)
+
       newTask.status3 = newStatus.id = firstStatus.id
       newStatus.name = firstStatus.name
       newStatus.description = firstStatus.description
@@ -317,17 +296,6 @@ onBeforeMount(async () => {
   }
   
   if (!utilityStore.isOwnerBoard) {
-        // router.push(`/board/${route.params.boardID}/task`).then(() => {
-        //   toast(
-        //     `You don't have permission to edit this board`,
-        //     {
-        //       type: "error",
-        //       timeout: 2000,
-        //       theme: "dark",
-        //       transition: "flip",
-        //       position: "bottom-right",
-        //     })
-        // })
         router.push('/error')
         return
       }

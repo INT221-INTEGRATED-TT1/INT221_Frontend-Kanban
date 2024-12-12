@@ -20,10 +20,6 @@ class TaskManagement {
   }
 
   editTask(taskId, newTask) {
-    console.log(taskId);
-    
-    console.log(newTask);
-    
     newTask.assignees === null ? (newTask.assignees = "Unassigned") : ""
     newTask.description === null
       ? (newTask.description = "No Description Provided")

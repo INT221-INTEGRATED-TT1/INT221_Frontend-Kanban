@@ -63,17 +63,12 @@ const formatTimezone = () => {
 const filterStatus = ref({})
 
 const editTaskData = async (newTask) => {
-  console.log("Editing Status");
-  
   const filterStatusId = utilityStore.statusManager
     .getStatus()
     .filter((status) => status.id === newStatus.id)
-  
-
-  console.log("filterStatusID", filterStatusId)
 
   filterStatus.value = filterStatusId[0]
-  console.log(filterStatus.value)
+
   if (
     filterStatusId[0].count >= utilityStore.limitStatusNumber &&
     utilityStore.isLimitEnable === true &&
@@ -152,20 +147,13 @@ const editTaskData = async (newTask) => {
     console.log("Error updating task: ", error)
   }
 }
-// console.log(filterStatus.value);
 
 const isButtonDisable = computed(() => {
-  if (newStatus.id !== filterStatus.value.id) {
-    utilityStore.transactionDisable = false
-  }
+  if (newStatus.id !== filterStatus.value.id) {utilityStore.transactionDisable = false}
   const isTaskUnchanged = (updateTask.title === task.value.title && updateTask.description === task.value.description && updateTask.assignees === task.value.assignees && updateTask.status3 === task.value.statuses3.id)
   const hasFileChanges = (filesToAdd.value.length > 0 || filesToDelete.value.length > 0);
-  // console.log("hasFileChanges: ", hasFileChanges)
   const shouldUpdate = (isTaskUnchanged || !updateTask.title || utilityStore.transactionDisable) && !hasFileChanges
-  // console.log("roum mid", (isTaskUnchanged || !updateTask.title || utilityStore.transactionDisable))
-  // console.log("shouldUpdate", shouldUpdate)
   return shouldUpdate
-  // return ( isTaskUnchanged || !updateTask.title || utilityStore.transactionDisable)
 })
 
 const fileUploaded = ref([])
@@ -207,7 +195,6 @@ const handleFileUpload = (event) => {
       //check if each file size > 20MB
       const fileSizeInMB = file.size / (1024 * 1024);
       if (fileSizeInMB > 20) {
-        console.log(`File ${file.name} exceeds the 20MB size limit and was skipped.`);
         fileOverMaxSize.push({
           fileName: file.name,
           fileSize: file.size,
@@ -243,15 +230,9 @@ const handleFileUpload = (event) => {
       const deleteIndex = filesToDelete.value.findIndex(fileToDelete => (fileToDelete.fileName === file.name) && (fileToDelete.fileSize === file.size));
       if (deleteIndex !== -1) {
         filesToDelete.value.splice(deleteIndex, 1);
-        // console.log(`File ${file.name} was removed from deletion list.`);
       }
 
     })
-
-    // console.log("Updated fileUploaded:", fileUploaded.value);
-    // console.log("Files to add:", filesToAdd.value);
-    // console.log("File not exist selected:", fileNotExistSelected);
-    // console.log('filesToDelete : ',filesToDelete.value);
 
   }
 
@@ -299,10 +280,7 @@ const handleFileUpload = (event) => {
 }
 
 const cancelSelectedOrDeleteFile = (file) => {
-  console.log('Click detected on file:', file);
-
   if (isInArraySameAttr(originalfileUploaded, file)) {
-    console.log(`File ${file.fileName} found in originalfileUploaded, moving to filesToDelete.`);
     const indexInUploaded = fileUploaded.value.findIndex(
       fileUpload => fileUpload.fileName === file.fileName
     );
@@ -315,7 +293,6 @@ const cancelSelectedOrDeleteFile = (file) => {
     }
   } 
   else if (isInArray(filesToAdd.value, file)) {
-    console.log(`File ${file.fileName} found in filesToAdd, removing from filesToAdd and fileUploaded.`);
     const indexInFilesToAdd = filesToAdd.value.findIndex(
       fileInAdd => fileInAdd.name === file.fileName
     );
@@ -339,8 +316,6 @@ const cancelSelectedOrDeleteFile = (file) => {
     console.log(`File ${file.fileName} not found in any list, no action taken.`);
   }
 
-  console.log('Updated filesToAdd:', filesToAdd.value);
-  console.log('Updated filesToDelete:', filesToDelete.value);
 };
 
 const computedFilesSize = computed(() => {
@@ -361,7 +336,6 @@ const getFile = async (fileName) => {
     "image/png",        // .png
     "application/pdf"   // .pdf
   ];
-  console.log(fileType)
   if (supportedTypes.includes(fileType)) {
     // Open in a new tab for supported types
     window.open(url, "_blank");
@@ -383,7 +357,6 @@ onBeforeMount(async () => {
   try {
     const fetchTask = await getTask(route.params.boardID, route.params.taskID)
     fetchTask.board.ownerId === userStore.userIdentity.oid ? utilityStore.isOwnerBoard = true : "false"
-    // utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
 
     if (!utilityStore.isOwnerBoard) {
       // router.push(`/board/${route.params.boardID}/task`).then(() => {
@@ -400,7 +373,6 @@ onBeforeMount(async () => {
 
       const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
       utilityStore.collabAccessRight = collabIdentity.accessRight
-      console.log(collabIdentity.accessRight)
       collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
       
       if(utilityStore.isOwnerBoard === false) {
@@ -410,7 +382,6 @@ onBeforeMount(async () => {
     }
 
     task.value = fetchTask
-    // console.log(task.value)
 
     task.value.createdOn = utilityStore.formatDateTime(task.value.createdOn)
     task.value.updatedOn = utilityStore.formatDateTime(task.value.updatedOn)
@@ -425,15 +396,12 @@ onBeforeMount(async () => {
     newStatus.description = task.value.statuses3.description
     newStatus.color = task.value.statuses3.color
 
-    // console.log(updateTask.status.length)
     const responseGetFileUploaded = await getUploadedFile(route.params.boardID, route.params.taskID)
     fileUploaded.value = responseGetFileUploaded.data
     originalfileUploaded = [...fileUploaded.value ]
-    // console.log(fileUploaded.value)
 
   } catch (error) {
     console.log(`Error fetching task ${route.params.boardID}: `, error)
-    // router.push('/error')
     return
   }
 })

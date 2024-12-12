@@ -35,7 +35,7 @@ const getAllTasks = async (boardID, sortBy = "createdOn", filterStatuses = "", d
     url += `?${params.toString()}`
 
   }
-  console.log(url)
+  // console.log(url)
   try {
     const response = await fetch(url, {
       method: "GET",

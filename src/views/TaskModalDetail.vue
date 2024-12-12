@@ -41,7 +41,6 @@ const statusAtt = reactive({
 
 const getFile = async (fileName) => {
   const responseDownloadFile = await downloadFile(route.params.boardID, route.params.taskID, fileName)
-  // console.log(responseDownloadFile.data)
   // Create a URL for the Blob and trigger the download
   const url = window.URL.createObjectURL(responseDownloadFile.blob)
   const fileType = responseDownloadFile.headers.get("Content-Type")
@@ -52,7 +51,6 @@ const getFile = async (fileName) => {
     "image/png",        // .png
     "application/pdf"  // .pdf
   ];
-  console.log(fileType)
   if (supportedTypes.includes(fileType)) {
     // Open in a new tab for supported types
     window.open(url, "_blank");
@@ -95,7 +93,6 @@ onBeforeMount(async () => {
   }
   const responseGetFileUploaded = await getUploadedFile(route.params.boardID, route.params.taskID)
   fileUploaded.value = responseGetFileUploaded.data
-  console.log(fileUploaded.value)
 })
 </script>
 

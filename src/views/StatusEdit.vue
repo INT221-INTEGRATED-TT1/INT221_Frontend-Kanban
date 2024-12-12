@@ -23,7 +23,6 @@ const updateStatus = reactive({
 })
 
 const updateColor = (index) => {
-  // console.log(updateStatus.color)
   updateStatus.color = statusStyleStore.presetColors[index]
   utilityStore.selectedColor = index
 }
@@ -70,26 +69,13 @@ const isButtonDisabled = computed(() => {
   )
 })
 
-onBeforeMount(async () => {
+onMounted(async () => {
   try {
     const fetchData = await getStatus(route.params.boardID, route.params.statusID)
 
-    utilityStore.isOwnerBoard ? console.log("owner") : console.log("not owner")
     if (!utilityStore.isOwnerBoard) {
-      // router.push(`/board/${route.params.boardID}/status`).then(() => {
-      //   toast(
-      //     `You don't have permission to edit this board`,
-      //     {
-      //       type: "error",
-      //       timeout: 2000,
-      //       theme: "dark",
-      //       transition: "flip",
-      //       position: "bottom-right",
-      //     })
-      // })
       const collabIdentity = await findCollabById(route.params.boardID, userStore.userIdentity.oid)
       utilityStore.collabAccessRight = collabIdentity.accessRight
-      console.log(collabIdentity.accessRight)
       collabIdentity.accessRight === 'WRITE' ? utilityStore.isOwnerBoard = true : utilityStore.isOwnerBoard = false
       if(utilityStore.isOwnerBoard === false) {
           router.push('/error')
@@ -98,13 +84,10 @@ onBeforeMount(async () => {
     }
     
     status.value = fetchData
-    // console.log(status.value);
-    // console.log(fetchData);
-    // console.log(typeof status.value.id)
-
     updateStatus.name = status.value.name
     updateStatus.description = status.value.description
     updateStatus.color = status.value.color
+
   } catch (error) {
     console.log(error)
     router.push('/error')

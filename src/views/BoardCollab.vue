@@ -43,71 +43,54 @@ let oldCollaboratorModel = reactive({
 })
 
 const addNewCollaborator = async () => {
-    utilityStore.transactionDisable = true
-    oldCollaboratorModel = {...newCollaboratorModel}
-    if(emailPattern.test(newCollaboratorModel.email)){
-      isEmailValid.value = true
-      console.log(newCollaboratorModel)
-
-     
-        isSendingEmail.value = true
-        const newCollaborator = await addCollaborator(route.params.boardID, newCollaboratorModel)
-        isSendingEmail.value = false
-
-        
-        
-    
-      
-      
-
-      const newFetchCollaboratorsForCollaboratorId = await getCollaborators(route.params.boardID)
-      // console.log(fetchCollaborators.data)
-      // userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
-
-      if(newCollaborator.status === 201) {
-        userStore.collaboratorManager.addCollaborator(newCollaborator.data, newFetchCollaboratorsForCollaboratorId.data)
-        addCollaboratorModal.value = false
-        newCollaboratorModel.email = ""
-        newCollaboratorModel.accessRight = "READ"
-        toast("Successfully sent invitation", {
-              type: "success",
-              timeout: 2000,
-              theme: "dark",
-              transition: "flip",
-              position: "bottom-right",
-            })
-            utilityStore.transactionDisable = false
-
-
-      }
-      else if (newCollaborator.status === 404) {
-        emailFieldErrorMassage.value = 'The user does not exists.'
-        isEmailValid.value = false
-      }
-      else if (newCollaborator.status === 409) {
-        emailFieldErrorMassage.value = 'The user is already the collaborator of this board.'
-        isEmailValid.value = false
-      }
-    } else{
-      console.log("can't add new collab")
-      emailFieldErrorMassage.value = 'something went wrong ! try againlater.'
-      isEmailValid.value = false
-      utilityStore.transactionDisable = true
-
+  utilityStore.transactionDisable = true
+  oldCollaboratorModel = { ...newCollaboratorModel }
+  if (emailPattern.test(newCollaboratorModel.email)) {
+    isEmailValid.value = true
+    isSendingEmail.value = true
+    const newCollaborator = await addCollaborator(route.params.boardID, newCollaboratorModel)
+    const newFetchCollaboratorsForCollaboratorId = await getCollaborators(route.params.boardID)
+    if (newCollaborator.status === 201) {
+      userStore.collaboratorManager.addCollaborator(newCollaborator.data, newFetchCollaboratorsForCollaboratorId.data)
+      addCollaboratorModal.value = false
+      newCollaboratorModel.email = ""
+      newCollaboratorModel.accessRight = "READ"
+      toast("Successfully sent invitation", {
+        type: "success",
+        timeout: 2000,
+        theme: "dark",
+        transition: "flip",
+        position: "bottom-right",
+      })
+      utilityStore.transactionDisable = false
+      isSendingEmail.value = false
     }
-    
-    // console.log('old : ' , oldCollaboratorModel)
-    // return emailPattern.test(email);
+    else if (newCollaborator.status === 404) {
+      emailFieldErrorMassage.value = 'The user does not exists.'
+      isEmailValid.value = false
+      isSendingEmail.value = false
+    }
+    else if (newCollaborator.status === 409) {
+      emailFieldErrorMassage.value = 'The user is already the collaborator of this board.'
+      isEmailValid.value = false
+      isSendingEmail.value = false
+    }
+  } else {
+    emailFieldErrorMassage.value = 'something went wrong ! try againlater.'
+    isEmailValid.value = false
+    utilityStore.transactionDisable = true
+    isSendingEmail.value = false
+  }
 }
-
 const removeCollaborator = async (removeCollaboratorId) => {
-      console.log(removeCollaboratorId)
-      const collaboratorRemoved = await deleteCollaborator(route.params.boardID, removeCollaboratorId)
-      collaboratorRemoved.status === 200 ? userStore.collaboratorManager.deleteCollaborator(removeCollaboratorId) : ''
-      oldCollaboratorModel.email = ""
-      oldCollaboratorModel.accessRight = "READ"
-      utilityStore.showDeleteConfirmation = false
-}
+  const collaboratorRemoved = await deleteCollaborator(route.params.boardID, removeCollaboratorId)
+  if (collaboratorRemoved.status === 200) {
+    userStore.collaboratorManager.deleteCollaborator(removeCollaboratorId)
+    oldCollaboratorModel.email = ""
+    oldCollaboratorModel.accessRight = "READ"
+    utilityStore.showDeleteConfirmation = false
+  }
+} 
 
 const cancelAddCollaboratorModal = () => {
   addCollaboratorModal.value = false
@@ -119,19 +102,14 @@ const cancelAddCollaboratorModal = () => {
 
 const isButtonDisabled = computed(() => {
   oldCollaboratorModel.email !== newCollaboratorModel.email ? utilityStore.transactionDisable = false : oldCollaboratorModel.accessRight !== newCollaboratorModel.accessRight ? utilityStore.transactionDisable = false : utilityStore.transactionDisable = true
-  
-  // console.log('new : ' , newCollaboratorModel)
-  // console.log('old : ' , oldCollaboratorModel)
   return !newCollaboratorModel.email || utilityStore.transactionDisable || (userStore.userIdentity.email === newCollaboratorModel.email) || watchButtonDisable.value
 })
 
 
 watch(newCollaboratorModel, (newValue, oldValue) => {
-  // console.log(newValue)
   if (!emailPattern.test(newValue.email)) {
     watchButtonDisable.value = true
   }
-
   else if(userStore.userIdentity.email === newValue.email) {
     emailFieldErrorMassage.value = 'Board owner cannot be collaborator of his/her own board'
     isEmailValid.value = false
@@ -150,9 +128,10 @@ const changeAccessRightModal = (collaborator, changeAccesright) => {
 
 const changeAccessRight = async () => {
   const changeAccessRightResponse =  await changeCollaboratorAccessRisght(route.params.boardID, collaboratorSelected.oid, newAccesRight.value)
-  console.log(changeAccessRightResponse)
-  userStore.collaboratorManager.changeCollaboratorAccessRight(collaboratorSelected.oid, newAccesRight.value)
-  confirmChangeAccessRight.value = false
+  if(changeAccessRightResponse.status = 200){
+    userStore.collaboratorManager.changeCollaboratorAccessRight(collaboratorSelected.oid, newAccesRight.value)
+    confirmChangeAccessRight.value = false
+  }
 }
 
 onBeforeMount(async () => {
@@ -170,11 +149,9 @@ onBeforeMount(async () => {
     utilityStore.boardManager.getBoards()?.personalBoards.forEach(board => board.id === route.params.boardID ? utilityStore.isOwnerBoard = true : "false")
     utilityStore.isOwnerBoard ? utilityStore.selectedBoard = {...utilityStore.boardManager.getBoards()?.personalBoards.filter(board => board.id === route.params.boardID)[0]} : 
     utilityStore.invitationBoardInformation = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.find(board => board.id === route.params.boardID)}
-    console.log("Owner Board : ", utilityStore.isOwnerBoard)
-    // utilityStore.invitationBoardInformation = {...utilityStore.boardManager.getBoards()?.collaboratorBoards.find(board => board.id === route.params.boardID)}
+
   }
   else {
-    console.log(route.fullPath)
     if(route.fullPath.includes("/collab/invitations")){
       localStorage.setItem("REDIRECT_FULLPATH", route.fullPath)
       router.push('/login')
@@ -185,15 +162,11 @@ onBeforeMount(async () => {
   try {
     const fetchCollaborators = await getCollaborators(route.params.boardID)
     userStore.collaboratorManager.addCollaborators(fetchCollaborators.data)
-    console.log(userStore.collaboratorManager.getCollaborators())
-    console.log(utilityStore.invitationBoardInformation)
     if(userStore.collaboratorManager.getCollaborators()?.some(collabUser => collabUser.oid === userStore.userIdentity.oid && collabUser.invitationStatus !== 'PENDING')){
       utilityStore.isInvitationActive = false
-      console.log(utilityStore.isInvitationActive)
     }
   }
   catch (error) {
-    // console.log("Error fetching Collaborators : ", error.status === 404)
     utilityStore.isInvitationActive = false
     error.status === 404 ? router.push({name: "not-found"})  : "router.push('/error')"
   }
